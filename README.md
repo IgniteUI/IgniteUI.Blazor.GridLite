@@ -1,6 +1,6 @@
 # Ignite UI GridLite Blazor Wrapper
 
-A Blazor wrapper for the [Ignite UI GridLite](https://www.npmjs.com/package/igc-grid-lite) web component, providing a lightweight and performant data grid for Blazor applications.
+A Blazor wrapper for the [Ignite UI GridLite](https://www.npmjs.com/package/igniteui-grid-lite) web component, providing a lightweight and performant data grid for Blazor applications.
 
 ## Features
 

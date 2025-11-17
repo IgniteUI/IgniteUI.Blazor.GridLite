@@ -1,4 +1,4 @@
-import { IgcGridLite } from 'igc-grid-lite';
+import { IgcGridLite } from 'igniteui-grid-lite';
 
 // Register the component
 IgcGridLite.register();
