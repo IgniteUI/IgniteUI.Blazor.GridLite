@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Update="Components/Pages/Home.razor.css" CssScope="home-scope" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\IgniteUI.Blazor.GridLite\IgniteUI.Blazor.GridLite.csproj" />
   </ItemGroup>
 

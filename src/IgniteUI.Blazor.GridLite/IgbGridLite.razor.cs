@@ -60,6 +60,13 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     public IEnumerable<FilterExpression<TItem>>? FilterExpressions { get; set; }
 
     /// <summary>
+    /// Additional attributes for the component's HTML element
+    /// element.
+    /// </summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    /// <summary>
     /// Fires when sorting is initiated through the UI.
     /// Returns the sort expression which will be used for the operation.
     /// </summary>
