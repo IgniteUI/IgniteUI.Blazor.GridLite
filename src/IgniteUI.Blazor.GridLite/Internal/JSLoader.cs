@@ -2,7 +2,7 @@
 
 namespace IgniteUI.Blazor.Controls.Internal;
 
-public static class JSLoader
+internal static class JSLoader
 {
     public static async Task<IJSObjectReference> LoadAsync(
         IJSRuntime jsRuntime,

@@ -31,8 +31,8 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// <remarks>
     /// Each instance of this component should have its own options object
     /// </remarks>
-    [Parameter]
-    public IgbGridLiteOptions Options { get; set; } = new();
+    //[Parameter]
+    internal IgbGridLiteOptions Options { get; set; } = new();
 
     /// <summary>
     /// Whether the grid will try to "resolve" its column configuration based on the passed data source.

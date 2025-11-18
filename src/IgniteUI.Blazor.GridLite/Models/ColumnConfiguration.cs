@@ -37,10 +37,10 @@ public class ColumnConfiguration<TItem> where TItem : class
     public object Filter { get; set; }
 
     [JsonIgnore]
-    public Func<IgbGridLiteHeaderContext<TItem>, object> HeaderTemplate { get; set; }
+    internal Func<IgbGridLiteHeaderContext<TItem>, object> HeaderTemplate { get; set; }
 
     [JsonIgnore]
-    public Func<IgbGridLiteCellContext<TItem>, object> CellTemplate { get; set; }
+    internal Func<IgbGridLiteCellContext<TItem>, object> CellTemplate { get; set; }
 
     /// <summary>
     /// Converts the column configuration to a JavaScript-compatible format.

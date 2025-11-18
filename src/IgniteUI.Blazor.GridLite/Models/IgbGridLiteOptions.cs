@@ -5,7 +5,7 @@ namespace IgniteUI.Blazor.Controls;
 /// <summary>
 /// Options for the Blazor IgbGridLite component.
 /// </summary>
-public class IgbGridLiteOptions
+internal class IgbGridLiteOptions
 {
     /// <summary>
     /// Alternative file path to the Blazor JavaScript file, blazor-igc-grid-lite.js.

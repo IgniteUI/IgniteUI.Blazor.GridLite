@@ -5,7 +5,7 @@ namespace IgniteUI.Blazor.Controls;
 /// <summary>
 /// Configuration for customizing the various data operations of the grid.
 /// </summary>
-public class DataPipelineConfiguration
+internal class DataPipelineConfiguration
 {
     /// <summary>
     /// Hook for customizing sort operations.
@@ -23,7 +23,7 @@ public class DataPipelineConfiguration
 /// <summary>
 /// The parameters passed to a DataPipelineHook callback.
 /// </summary>
-public class DataPipelineParams
+internal class DataPipelineParams
 {
     /// <summary>
     /// The current data state of the grid.

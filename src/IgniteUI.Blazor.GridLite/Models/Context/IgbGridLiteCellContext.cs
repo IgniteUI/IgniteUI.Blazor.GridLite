@@ -4,7 +4,7 @@
 /// Context object for the row cell template callback.
 /// </summary>
 /// <typeparam name="TItem">The data type for grid rows</typeparam>
-public class IgbGridLiteCellContext<TItem> where TItem : class
+internal class IgbGridLiteCellContext<TItem> where TItem : class
 {
     /// <summary>
     /// The current configuration for the column.
