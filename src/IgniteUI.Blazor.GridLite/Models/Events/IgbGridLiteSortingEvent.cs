@@ -17,5 +17,5 @@ public class IgbGridLiteSortingEvent
     /// Set to true to cancel the operation.
     /// </summary>
     [JsonPropertyName("cancel")]
-    public bool Cancel { get; set; }
+    internal bool Cancel { get; set; }
 }

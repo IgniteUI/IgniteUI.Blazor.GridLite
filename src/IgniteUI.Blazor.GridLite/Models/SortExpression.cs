@@ -33,7 +33,7 @@ public class SortExpression
     /// Note: This is not directly supported in Blazor and would need JavaScript interop.
     /// </summary>
     [JsonIgnore]
-    public Func<object, object, int> Comparer { get; set; }
+    internal Func<object, object, int> Comparer { get; set; }
 }
 
 /// <summary>
