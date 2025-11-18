@@ -29,13 +29,13 @@
         {
             new FilterExpression
             {
-                Key = "ProductName",
+                Key = nameof(NwindDataItem.ProductName),
                 Condition = "contains",
                 SearchTerm = "a"
             },
             new FilterExpression
             {
-                Key = "ProductName",
+                Key = nameof(NwindDataItem.ProductName),
                 Condition = "contains",
                 SearchTerm = "b"
             }
@@ -45,7 +45,7 @@
         {
             new SortExpression
             {
-                Key = "ProductName",
+                Key = nameof(NwindDataItem.ProductName),
                 Direction = GridLiteSortingDirection.Ascending
             }
         };
@@ -55,7 +55,7 @@
     {
         await this.grid.SortAsync(new List<SortExpression>
             {
-                new SortExpression() { Key = "ProductName", Direction = GridLiteSortingDirection.Descending }
+                new SortExpression() { Key = nameof(NwindDataItem.ProductName), Direction = GridLiteSortingDirection.Descending }
             }
         );
     }
@@ -96,7 +96,7 @@
 
     public List<ColumnConfiguration<NwindDataItem>> cols = new List<ColumnConfiguration<NwindDataItem>>() {
      new ColumnConfiguration<NwindDataItem>(){
-        Key = "ProductID",
+        Key = nameof(NwindDataItem.ProductID),
         Type = DataType.Number,
         Sort = new ColumnSortConfiguration(){
          CaseSensitive = false
@@ -105,7 +105,7 @@
         Resizable = true
      },
         new ColumnConfiguration<NwindDataItem>(){
-        Key = "ProductName",
+        Key = nameof(NwindDataItem.ProductName),
         Type = DataType.String,
          Sort = true,
         Filter = true,
