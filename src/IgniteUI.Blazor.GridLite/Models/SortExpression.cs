@@ -6,8 +6,7 @@ namespace IgniteUI.Blazor.Controls;
 /// <summary>
 /// Represents a sort operation for a given column.
 /// </summary>
-/// <typeparam name="TItem">The data type for grid rows</typeparam>
-public class SortExpression<TItem> where TItem : class
+public class SortExpression
 {
     /// <summary>
     /// The target column.

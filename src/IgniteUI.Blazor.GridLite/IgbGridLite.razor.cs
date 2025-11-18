@@ -51,7 +51,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// Initial sort expressions to apply when the grid is rendered
     /// </summary>
     [Parameter]
-    public IEnumerable<SortExpression<TItem>>? SortExpressions { get; set; }
+    public IEnumerable<SortExpression>? SortExpressions { get; set; }
 
     /// <summary>
     /// Initial filter expressions to apply when the grid is rendered
@@ -75,14 +75,14 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// The expression can be modified prior to the operation running.
     /// </remarks>
     [Parameter]
-    public EventCallback<IgbGridLiteSortingEvent<TItem>> OnSorting { get; set; }
+    public EventCallback<IgbGridLiteSortingEvent> OnSorting { get; set; }
 
     /// <summary>
     /// Fires when a sort operation initiated through the UI has completed.
     /// Returns the sort expression used for the operation.
     /// </summary>
     [Parameter]
-    public EventCallback<IgbGridLiteSortedEvent<TItem>> OnSorted { get; set; }
+    public EventCallback<IgbGridLiteSortedEvent> OnSorted { get; set; }
 
     /// <summary>
     /// Fires when filtering is initiated through the UI.
@@ -252,7 +252,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// Performs a sort operation in the grid based on the passed expression(s).
     /// </summary>
     /// <param name="expressions">The sort expression(s) to apply</param>
-    public virtual async Task SortAsync(SortExpression<TItem> expressions)
+    public virtual async Task SortAsync(SortExpression expressions)
     {
         var json = JsonSerializer.Serialize(expressions, GridJsonSerializerOptions);
         await InvokeVoidJsAsync("blazor_igc_grid_lite.sort", gridId, json);
@@ -262,7 +262,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// Performs a sort operation in the grid based on the passed expression(s).
     /// </summary>
     /// <param name="expressions">The sort expression(s) to apply</param>
-    public virtual async Task SortAsync(List<SortExpression<TItem>> expressions)
+    public virtual async Task SortAsync(List<SortExpression> expressions)
     {
         var json = JsonSerializer.Serialize(expressions, GridJsonSerializerOptions);
         await InvokeVoidJsAsync("blazor_igc_grid_lite.sort", gridId, json);
