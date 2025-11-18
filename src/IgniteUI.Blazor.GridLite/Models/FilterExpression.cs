@@ -5,8 +5,7 @@ namespace IgniteUI.Blazor.Controls;
 /// <summary>
 /// Represents a filter operation for a given column.
 /// </summary>
-/// <typeparam name="TItem">The data type for grid rows</typeparam>
-public class FilterExpression<TItem> where TItem : class
+public class FilterExpression
 {
     /// <summary>
     /// The target column for the filter operation.
@@ -15,7 +14,7 @@ public class FilterExpression<TItem> where TItem : class
     public string Key { get; set; }
 
     /// <summary>
-    /// The filter condition to apply. Can be a condition name (string) or a FilterOperation.
+    /// The filter condition to apply. Can be a condition name (string) or a FilterOperation // TODO
     /// </summary>
     [JsonPropertyName("condition")]
     public object Condition { get; set; }

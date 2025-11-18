@@ -21,19 +21,19 @@
     };
 
     private List<SortExpression> initialSort;
-    private List<FilterExpression<NwindDataItem>> initialFilter;
+    private List<FilterExpression> initialFilter;
 
     protected override void OnInitialized()
     {
-        initialFilter = new List<FilterExpression<NwindDataItem>>
+        initialFilter = new List<FilterExpression>
         {
-            new FilterExpression<NwindDataItem>
+            new FilterExpression
             {
                 Key = "ProductName",
                 Condition = "contains",
                 SearchTerm = "a"
             },
-            new FilterExpression<NwindDataItem>
+            new FilterExpression
             {
                 Key = "ProductName",
                 Condition = "contains",
@@ -84,12 +84,12 @@
 
     }
 
-    private void HandleFiltering(IgbGridLiteFilteringEvent<NwindDataItem> e)
+    private void HandleFiltering(IgbGridLiteFilteringEvent e)
     {
 
     }
 
-    private void HandleFiltered(IgbGridLiteFilteredEvent<NwindDataItem> e)
+    private void HandleFiltered(IgbGridLiteFilteredEvent e)
     {
 
     }

@@ -105,7 +105,7 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
 
         try
         {
-            var eventData = JsonSerializer.Deserialize<IgbGridLiteFilteringEvent<TItem>>(
+            var eventData = JsonSerializer.Deserialize<IgbGridLiteFilteringEvent>(
                 filteringEvent.GetRawText());
 
             await GridReference.OnFiltering.InvokeAsync(eventData);
@@ -135,7 +135,7 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
 
         try
         {
-            var eventData = JsonSerializer.Deserialize<IgbGridLiteFilteredEvent<TItem>>(
+            var eventData = JsonSerializer.Deserialize<IgbGridLiteFilteredEvent>(
                 filteredEvent.GetRawText());
 
             GridReference.OnFiltered.InvokeAsync(eventData);

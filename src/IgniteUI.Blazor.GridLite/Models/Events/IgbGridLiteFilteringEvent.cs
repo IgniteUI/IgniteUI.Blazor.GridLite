@@ -5,8 +5,7 @@ namespace IgniteUI.Blazor.Controls;
 /// <summary>
 /// Event object for the filtering event of the grid.
 /// </summary>
-/// <typeparam name="TItem">The data type for grid rows</typeparam>
-public class IgbGridLiteFilteringEvent<TItem> where TItem : class
+public class IgbGridLiteFilteringEvent
 {
     /// <summary>
     /// The target column for the filter operation.
@@ -18,7 +17,7 @@ public class IgbGridLiteFilteringEvent<TItem> where TItem : class
     /// The filter expression(s) to apply.
     /// </summary>
     [JsonPropertyName("expressions")]
-    public List<FilterExpression<TItem>> Expressions { get; set; }
+    public List<FilterExpression> Expressions { get; set; }
 
     /// <summary>
     /// The type of modification which will be applied to the filter state of the column.
