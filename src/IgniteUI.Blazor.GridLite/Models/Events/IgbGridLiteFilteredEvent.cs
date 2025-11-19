@@ -17,5 +17,5 @@ public class IgbGridLiteFilteredEvent
     /// The filter state of the column after the operation.
     /// </summary>
     [JsonPropertyName("state")]
-    public List<FilterExpression> State { get; set; }
+    public List<IgbGridLiteFilterExpression> State { get; set; }
 }

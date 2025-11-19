@@ -5,7 +5,7 @@ namespace IgniteUI.Blazor.Controls;
 /// <summary>
 /// Represents a filter operation for a given column.
 /// </summary>
-public class FilterExpression
+public class IgbGridLiteFilterExpression
 {
     /// <summary>
     /// The target column for the filter operation.

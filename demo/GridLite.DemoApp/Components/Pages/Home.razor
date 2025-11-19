@@ -21,19 +21,19 @@
     };
 
     private List<IgbGridLiteSortExpression> initialSort;
-    private List<FilterExpression> initialFilter;
+    private List<IgbGridLiteFilterExpression> initialFilter;
 
     protected override void OnInitialized()
     {
-        initialFilter = new List<FilterExpression>
+        initialFilter = new List<IgbGridLiteFilterExpression>
         {
-            new FilterExpression
+            new IgbGridLiteFilterExpression
             {
                 Key = nameof(NwindDataItem.ProductName),
                 Condition = "contains",
                 SearchTerm = "a"
             },
-            new FilterExpression
+            new IgbGridLiteFilterExpression
             {
                 Key = nameof(NwindDataItem.ProductName),
                 Condition = "contains",

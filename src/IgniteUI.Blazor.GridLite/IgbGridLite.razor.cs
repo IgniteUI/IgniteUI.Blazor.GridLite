@@ -57,7 +57,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// Initial filter expressions to apply when the grid is rendered
     /// </summary>
     [Parameter]
-    public IEnumerable<FilterExpression>? FilterExpressions { get; set; }
+    public IEnumerable<IgbGridLiteFilterExpression>? FilterExpressions { get; set; }
 
     /// <summary>
     /// Additional attributes for the component's HTML element
@@ -282,7 +282,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// Performs a filter operation in the grid based on the passed expression(s).
     /// </summary>
     /// <param name="expressions">The filter expression(s) to apply</param>
-    public virtual async Task FilterAsync(FilterExpression expression)
+    public virtual async Task FilterAsync(IgbGridLiteFilterExpression expression)
     {
         var json = JsonSerializer.Serialize(expression, GridJsonSerializerOptions);
         await InvokeVoidJsAsync("blazor_igc_grid_lite.filter", gridId, json);
@@ -292,7 +292,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// Performs a filter operation in the grid based on the passed expression(s).
     /// </summary>
     /// <param name="expressions">The filter expression(s) to apply</param>
-    public virtual async Task FilterAsync(List<FilterExpression> expressions)
+    public virtual async Task FilterAsync(List<IgbGridLiteFilterExpression> expressions)
     {
         var json = JsonSerializer.Serialize(expressions, GridJsonSerializerOptions);
         await InvokeVoidJsAsync("blazor_igc_grid_lite.filter", gridId, json);

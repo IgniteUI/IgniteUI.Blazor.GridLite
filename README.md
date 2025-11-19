@@ -87,7 +87,7 @@ In your `App.razor` or layout file, include one of the available themes:
         new() { Key = nameof(Employee.Name), Direction = GridLiteSortingDirection.Ascending }
     };
     
-    private List<FilterExpression> initialFilter = new()
+    private List<IgbGridLiteFilterExpression> initialFilter = new()
     {
         new() { Key = nameof(Employee.Department), Condition = "contains", SearchTerm = "Sales" }
     };
