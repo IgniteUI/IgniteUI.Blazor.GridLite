@@ -65,7 +65,7 @@ public class IgbColumnConfiguration
     {
         if (sort == null) return null;
         if (sort is bool b) return b;
-        if (sort is ColumnSortConfiguration config)
+        if (sort is IgbColumnSortConfiguration config)
         {
             return new
             {

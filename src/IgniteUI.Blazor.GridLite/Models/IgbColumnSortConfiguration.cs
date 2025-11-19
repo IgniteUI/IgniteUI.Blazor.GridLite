@@ -5,7 +5,7 @@ namespace IgniteUI.Blazor.Controls;
 /// <summary>
 /// Extended sort configuration for a column.
 /// </summary>
-public class ColumnSortConfiguration
+public class IgbColumnSortConfiguration
 {
     /// <summary>
     /// Whether the sort operations will be case sensitive.
