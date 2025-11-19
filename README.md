@@ -133,10 +133,10 @@ Handle sorting and filtering events:
 ```razor
 <IgbGridLite Data="@employees" 
              Columns="@columns"
-             OnSorting="@HandleSorting"
-             OnSorted="@HandleSorted"
-             OnFiltering="@HandleFiltering"
-             OnFiltered="@HandleFiltered" />
+             Sorting="@HandleSorting"
+             Sorted="@HandleSorted"
+             Filtering="@HandleFiltering"
+             Filtered="@HandleFiltered" />
 
 @code {
     private void HandleSorting(IgbGridLiteSortingEventArgs e)

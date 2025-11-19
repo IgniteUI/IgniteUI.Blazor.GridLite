@@ -29,12 +29,12 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
     /// </summary>
     /// <param name="sortExpression">The sort expression from JavaScript</param>
     /// <remarks>
-    /// Will execute <see cref="IgbGridLite{TItem}.OnSorting"/>
+    /// Will execute <see cref="IgbGridLite{TItem}.Sorting"/>
     /// </remarks>
     [JSInvokable]
     public async Task<bool> JSSorting(JsonElement sortExpression)
     {
-        if (!GridReference.OnSorting.HasDelegate)
+        if (!GridReference.Sorting.HasDelegate)
             return false; // Don't cancel
 
         try
@@ -48,7 +48,7 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
                 Cancel = false
             };
 
-            await GridReference.OnSorting.InvokeAsync(eventArgs);
+            await GridReference.Sorting.InvokeAsync(eventArgs);
 
             // Return true to cancel the operation
             return eventArgs.Cancel;
@@ -64,12 +64,12 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
     /// </summary>
     /// <param name="sortExpression">The sort expression from JavaScript</param>
     /// <remarks>
-    /// Will execute <see cref="IgbGridLite{TItem}.OnSorted"/>
+    /// Will execute <see cref="IgbGridLite{TItem}.Sorted"/>
     /// </remarks>
     [JSInvokable]
     public void JSSorted(JsonElement sortExpression)
     {
-        if (!GridReference.OnSorted.HasDelegate)
+        if (!GridReference.Sorted.HasDelegate)
             return;
 
         try
@@ -82,7 +82,7 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
                 Expression = expression
             };
 
-            GridReference.OnSorted.InvokeAsync(eventArgs);
+            GridReference.Sorted.InvokeAsync(eventArgs);
         }
         catch
         {
@@ -95,12 +95,12 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
     /// </summary>
     /// <param name="filteringEvent">The filtering event details from JavaScript</param>
     /// <remarks>
-    /// Will execute <see cref="IgbGridLite{TItem}.OnFiltering"/>
+    /// Will execute <see cref="IgbGridLite{TItem}.Filtering"/>
     /// </remarks>
     [JSInvokable]
     public async Task<bool> JSFiltering(JsonElement filteringEvent)
     {
-        if (!GridReference.OnFiltering.HasDelegate)
+        if (!GridReference.Filtering.HasDelegate)
             return false; // Don't cancel
 
         try
@@ -108,7 +108,7 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
             var eventData = JsonSerializer.Deserialize<IgbGridLiteFilteringEventArgs>(
                 filteringEvent.GetRawText());
 
-            await GridReference.OnFiltering.InvokeAsync(eventData);
+            await GridReference.Filtering.InvokeAsync(eventData);
 
             // IgbGridLiteFilteringEventArgs doesn't have a Cancel property in the TypeScript definition
             // but you could add it if needed
@@ -125,12 +125,12 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
     /// </summary>
     /// <param name="filteredEvent">The filtered event details from JavaScript</param>
     /// <remarks>
-    /// Will execute <see cref="IgbGridLite{TItem}.OnFiltered"/>
+    /// Will execute <see cref="IgbGridLite{TItem}.Filtered"/>
     /// </remarks>
     [JSInvokable]
     public void JSFiltered(JsonElement filteredEvent)
     {
-        if (!GridReference.OnFiltered.HasDelegate)
+        if (!GridReference.Filtered.HasDelegate)
             return;
 
         try
@@ -138,7 +138,7 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
             var eventData = JsonSerializer.Deserialize<IgbGridLiteFilteredEventArgs>(
                 filteredEvent.GetRawText());
 
-            GridReference.OnFiltered.InvokeAsync(eventData);
+            GridReference.Filtered.InvokeAsync(eventData);
         }
         catch
         {

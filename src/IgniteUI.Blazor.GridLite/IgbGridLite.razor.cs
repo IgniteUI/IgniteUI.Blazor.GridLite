@@ -75,14 +75,14 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// The expression can be modified prior to the operation running.
     /// </remarks>
     [Parameter]
-    public EventCallback<IgbGridLiteSortingEventArgs> OnSorting { get; set; }
+    public EventCallback<IgbGridLiteSortingEventArgs> Sorting { get; set; }
 
     /// <summary>
     /// Fires when a sort operation initiated through the UI has completed.
     /// Returns the sort expression used for the operation.
     /// </summary>
     [Parameter]
-    public EventCallback<IgbGridLiteSortedEventArgs> OnSorted { get; set; }
+    public EventCallback<IgbGridLiteSortedEventArgs> Sorted { get; set; }
 
     /// <summary>
     /// Fires when filtering is initiated through the UI.
@@ -92,14 +92,14 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// The expression can be modified prior to the operation running.
     /// </remarks>
     [Parameter]
-    public EventCallback<IgbGridLiteFilteringEventArgs> OnFiltering { get; set; }
+    public EventCallback<IgbGridLiteFilteringEventArgs> Filtering { get; set; }
 
     /// <summary>
     /// Fires when a filter operation initiated through the UI has completed.
     /// Returns the filter state for the affected column.
     /// </summary>
     [Parameter]
-    public EventCallback<IgbGridLiteFilteredEventArgs> OnFiltered { get; set; }
+    public EventCallback<IgbGridLiteFilteredEventArgs> Filtered { get; set; }
 
     /// <summary>
     /// Fires when <see cref="RenderAsync"/> completes
@@ -210,10 +210,10 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     {
         return new
         {
-            hasSorting = OnSorting.HasDelegate,
-            hasSorted = OnSorted.HasDelegate,
-            hasFiltering = OnFiltering.HasDelegate,
-            hasFiltered = OnFiltered.HasDelegate
+            hasSorting = Sorting.HasDelegate,
+            hasSorted = Sorted.HasDelegate,
+            hasFiltering = Filtering.HasDelegate,
+            hasFiltered = Filtered.HasDelegate
         };
     }
 
