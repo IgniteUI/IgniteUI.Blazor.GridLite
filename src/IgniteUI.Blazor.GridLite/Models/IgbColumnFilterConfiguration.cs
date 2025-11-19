@@ -5,7 +5,7 @@ namespace IgniteUI.Blazor.Controls;
 /// <summary>
 /// Extended filter configuration for a column.
 /// </summary>
-public class ColumnFilterConfiguration
+public class IgbColumnFilterConfiguration
 {
     /// <summary>
     /// Whether the filter operations will be case sensitive.

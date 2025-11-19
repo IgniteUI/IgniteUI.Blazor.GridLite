@@ -80,7 +80,7 @@ public class IgbColumnConfiguration
     {
         if (filter == null) return null;
         if (filter is bool b) return b;
-        if (filter is ColumnFilterConfiguration config)
+        if (filter is IgbColumnFilterConfiguration config)
         {
             return new
             {

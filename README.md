@@ -119,7 +119,7 @@ new IgbColumnConfiguration
 { 
     Key = nameof(Employee.Department), 
     HeaderText = "Department",
-    Filter = new ColumnFilterConfiguration 
+    Filter = new IgbColumnFilterConfiguration 
     { 
         CaseSensitive = false 
     }
