@@ -11,7 +11,7 @@ public class IgbGridLiteSortingEvent
     /// The sort expression which will be used for the operation.
     /// </summary>
     [JsonPropertyName("expression")]
-    public SortExpression Expression { get; set; }
+    public IgbGridLiteSortExpression Expression { get; set; }
 
     /// <summary>
     /// Set to true to cancel the operation.

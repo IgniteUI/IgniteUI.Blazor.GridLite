@@ -6,7 +6,7 @@ namespace IgniteUI.Blazor.Controls;
 /// <summary>
 /// Represents a sort operation for a given column.
 /// </summary>
-public class SortExpression
+public class IgbGridLiteSortExpression
 {
     /// <summary>
     /// The target column.

@@ -82,7 +82,7 @@ In your `App.razor` or layout file, include one of the available themes:
              FilterExpressions="@initialFilter" />
 
 @code {
-    private List<SortExpression> initialSort = new()
+    private List<IgbGridLiteSortExpression> initialSort = new()
     {
         new() { Key = nameof(Employee.Name), Direction = GridLiteSortingDirection.Ascending }
     };

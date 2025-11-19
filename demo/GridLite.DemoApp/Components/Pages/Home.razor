@@ -20,7 +20,7 @@
         TriState = false
     };
 
-    private List<SortExpression> initialSort;
+    private List<IgbGridLiteSortExpression> initialSort;
     private List<FilterExpression> initialFilter;
 
     protected override void OnInitialized()
@@ -41,9 +41,9 @@
             }
         };
 
-        initialSort = new List<SortExpression>
+        initialSort = new List<IgbGridLiteSortExpression>
         {
-            new SortExpression
+            new IgbGridLiteSortExpression
             {
                 Key = nameof(NwindDataItem.ProductName),
                 Direction = GridLiteSortingDirection.Ascending
@@ -53,9 +53,9 @@
 
     public async void BtnClick()
     {
-        await this.grid.SortAsync(new List<SortExpression>
+        await this.grid.SortAsync(new List<IgbGridLiteSortExpression>
             {
-                new SortExpression() { Key = nameof(NwindDataItem.ProductName), Direction = GridLiteSortingDirection.Descending }
+                new IgbGridLiteSortExpression() { Key = nameof(NwindDataItem.ProductName), Direction = GridLiteSortingDirection.Descending }
             }
         );
     }
