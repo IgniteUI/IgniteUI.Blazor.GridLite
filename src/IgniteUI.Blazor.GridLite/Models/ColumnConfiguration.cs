@@ -3,7 +3,7 @@ using IgniteUI.Blazor.Controls.Internal;
 
 namespace IgniteUI.Blazor.Controls;
 
-public class ColumnConfiguration<TItem> where TItem : class
+public class ColumnConfiguration
 {
     [JsonPropertyName("key")]
     public string Key { get; set; }
@@ -37,10 +37,10 @@ public class ColumnConfiguration<TItem> where TItem : class
     public object Filter { get; set; }
 
     [JsonIgnore]
-    internal Func<IgbGridLiteHeaderContext<TItem>, object> HeaderTemplate { get; set; }
+    internal Func<IgbGridLiteHeaderContext<object>, object> HeaderTemplate { get; set; }
 
     [JsonIgnore]
-    internal Func<IgbGridLiteCellContext<TItem>, object> CellTemplate { get; set; }
+    internal Func<IgbGridLiteCellContext<object>, object> CellTemplate { get; set; }
 
     /// <summary>
     /// Converts the column configuration to a JavaScript-compatible format.

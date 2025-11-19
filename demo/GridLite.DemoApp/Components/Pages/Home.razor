@@ -94,22 +94,22 @@
 
     }
 
-    public List<ColumnConfiguration<NwindDataItem>> cols = new List<ColumnConfiguration<NwindDataItem>>() {
-     new ColumnConfiguration<NwindDataItem>(){
-        Key = nameof(NwindDataItem.ProductID),
-        Type = DataType.Number,
-        Sort = new ColumnSortConfiguration(){
-         CaseSensitive = false
+    public List<ColumnConfiguration> cols = new List<ColumnConfiguration> {
+        new ColumnConfiguration {
+            Key = nameof(NwindDataItem.ProductID),
+            Type = DataType.Number,
+            Sort = new ColumnSortConfiguration(){
+                CaseSensitive = false
+            },
+            Filter = true,
+            Resizable = true
         },
-        Filter = true,
-        Resizable = true
-     },
-        new ColumnConfiguration<NwindDataItem>(){
-        Key = nameof(NwindDataItem.ProductName),
-        Type = DataType.String,
-         Sort = true,
-        Filter = true,
-        Resizable = true
-     },
+        new ColumnConfiguration {
+            Key = nameof(NwindDataItem.ProductName),
+            Type = DataType.String,
+            Sort = true,
+            Filter = true,
+            Resizable = true
+        },
     };
 }
