@@ -113,6 +113,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     private string gridId;
     private bool isInitialized;
     private bool forceRender = true;
+    private IEnumerable<TItem>? _previousData;
 
     // Caching the JsonSerializerOptions instance as a static readonly field improves performance
     // by avoiding repeated allocations and configuration. Reusing serializer options is recommended
@@ -168,6 +169,13 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     protected override void OnParametersSet()
     {
         Options ??= new IgbGridLiteOptions();
+        
+        // Check if Data reference has changed
+        if (!ReferenceEquals(_previousData, Data))
+        {
+            _previousData = Data;
+            forceRender = true;
+        }
     }
 
     /// <summary>

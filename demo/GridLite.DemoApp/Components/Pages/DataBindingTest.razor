@@ -1,0 +1,62 @@
+@page "/databinding-test"
+@using IgniteUI.Blazor.Controls
+
+<h3>Data Binding Test</h3>
+
+<p>Current Data Type: @currentDataType</p>
+
+<button @onclick="SwitchData">Switch Data</button>
+
+<IgbGridLite @ref="grid" TItem="DataItem" Data="data" AutoGenerate="true" />
+
+@code {
+    private IgbGridLite<DataItem> grid;
+    private List<DataItem> productData;
+    private List<DataItem> userData;
+    private List<DataItem> data;
+    private string currentDataType = "Products";
+
+    protected override void OnInitialized()
+    {
+        // Create mock product data
+        productData = new List<DataItem>
+        {
+            new DataItem { Id = 1, Name = "Product 1", Category = "Electronics", Price = 100 },
+            new DataItem { Id = 2, Name = "Product 2", Category = "Books", Price = 20 },
+            new DataItem { Id = 3, Name = "Product 3", Category = "Clothing", Price = 50 }
+        };
+
+        // Create mock user data
+        userData = new List<DataItem>
+        {
+            new DataItem { Id = 101, Name = "User 1", Category = "Admin", Price = 0 },
+            new DataItem { Id = 102, Name = "User 2", Category = "Member", Price = 0 },
+            new DataItem { Id = 103, Name = "User 3", Category = "Guest", Price = 0 }
+        };
+
+        // Start with product data
+        data = productData;
+    }
+
+    private void SwitchData()
+    {
+        if (currentDataType == "Products")
+        {
+            data = userData;
+            currentDataType = "Users";
+        }
+        else
+        {
+            data = productData;
+            currentDataType = "Products";
+        }
+    }
+
+    public class DataItem
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Category { get; set; }
+        public decimal Price { get; set; }
+    }
+}
