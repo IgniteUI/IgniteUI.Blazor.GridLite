@@ -164,10 +164,57 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
         }
     }
 
-    /// <inheritdoc/>
-    protected override void OnParametersSet()
+    public override async Task SetParametersAsync(ParameterView parameters)
     {
-        Options ??= new IgbGridLiteOptions();
+        var updateConfig = new Dictionary<string, object>();
+
+        if (isInitialized)
+        {
+            // Check if each parameter changed:
+            if (parameters.TryGetValue<List<IgbColumnConfiguration>?>(nameof(Columns), out var newColumns) 
+                && !ReferenceEquals(Columns, newColumns))
+            {
+                updateConfig["columns"] = newColumns?.Select(c => c.ToJsConfig()).ToList() ?? new List<object>();
+            }
+            
+            if (parameters.TryGetValue<IEnumerable<TItem>?>(nameof(Data), out var newData) 
+                && !ReferenceEquals(Data, newData))
+            {
+                updateConfig["data"] = newData;
+            }
+            
+            if (parameters.TryGetValue<bool>(nameof(AutoGenerate), out var newAutoGenerate)
+                && AutoGenerate != newAutoGenerate)
+            {
+                updateConfig["autoGenerate"] = newAutoGenerate;
+            }
+            
+            if (parameters.TryGetValue<IgbGridLiteSortConfiguration?>(nameof(SortConfiguration), out var newSortConfig)
+                && !ReferenceEquals(SortConfiguration, newSortConfig))
+            {
+                updateConfig["sortConfiguration"] = newSortConfig;
+            }
+            
+            if (parameters.TryGetValue<IEnumerable<IgbGridLiteSortExpression>?>(nameof(SortExpressions), out var newSortExpressions)
+                && !ReferenceEquals(SortExpressions, newSortExpressions))
+            {
+                updateConfig["sortExpressions"] = newSortExpressions;
+            }
+            
+            if (parameters.TryGetValue<IEnumerable<IgbGridLiteFilterExpression>?>(nameof(FilterExpressions), out var newFilterExpressions)
+                && !ReferenceEquals(FilterExpressions, newFilterExpressions))
+            {
+                updateConfig["filterExpressions"] = newFilterExpressions;
+            }
+        }
+
+        await base.SetParametersAsync(parameters);
+
+        if (updateConfig.Count > 0)
+        {
+            var json = JsonSerializer.Serialize(updateConfig, GridJsonSerializerOptions);
+            await InvokeVoidJsAsync("blazor_igc_grid_lite.updateGrid", gridId, json);
+        }
     }
 
     /// <summary>

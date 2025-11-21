@@ -10,6 +10,7 @@
 </IgbGridLite>
 
 <button @onclick="BtnClick">Sort</button>
+<button @onclick="ToggleUnitColumns">Toggle Unit columns</button>
 
 @code {
     public IgbGridLite<NwindDataItem> grid;
@@ -22,6 +23,7 @@
 
     private List<IgbGridLiteSortExpression> initialSort;
     private List<IgbGridLiteFilterExpression> initialFilter;
+    private bool showUnitColumns = false;
 
     protected override void OnInitialized()
     {
@@ -60,6 +62,43 @@
         );
     }
 
+    public async void ToggleUnitColumns()
+    {
+        showUnitColumns = !showUnitColumns;
+        if (showUnitColumns)
+        {
+            cols = [
+                .. cols,
+                new IgbColumnConfiguration {
+                    Key = nameof(NwindDataItem.QuantityPerUnit),
+                    Type = GridLiteColumnDataType.String,
+                    Sort = true,
+                    Filter = true,
+                    Resizable = true
+                },
+                new IgbColumnConfiguration {
+                    Key = nameof(NwindDataItem.UnitPrice),
+                    Type = GridLiteColumnDataType.Number,
+                    Sort = true,
+                    Filter = true,
+                    Resizable = true
+                }
+            ];
+            initialSort = [
+                .. initialSort,
+                new IgbGridLiteSortExpression
+                {
+                    Key = nameof(NwindDataItem.QuantityPerUnit),
+                    Direction = GridLiteSortingDirection.Ascending
+                }
+            ];
+        }
+        else
+        {
+            cols = cols.SkipLast(2).ToList();
+            initialSort = initialSort.SkipLast(1).ToList();
+        }
+    }
 
     private NwindData _nwindData = null;
     public NwindData NwindData

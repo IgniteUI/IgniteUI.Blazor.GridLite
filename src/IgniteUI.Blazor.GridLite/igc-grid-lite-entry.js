@@ -80,6 +80,41 @@ window.blazor_igc_grid_lite = {
         }
     },
 
+    updateGrid(id, options) {
+        const grid = this.grids.get(id);
+        if (!grid) return;
+
+        const config = JSON.parse(options);
+
+        if (config.data !== undefined) {
+            grid.data = config.data;
+        }
+
+        if (config.columns !== undefined) {
+            grid.columns = config.columns;
+        }
+
+        if (config.autoGenerate !== undefined) {
+            grid.autoGenerate = config.autoGenerate;
+        }
+
+        if (config.sortConfiguration !== undefined) {
+            grid.sortConfiguration = config.sortConfiguration;
+        }
+
+        if (config.sortExpressions !== undefined) {
+            grid.sortExpressions = config.sortExpressions;
+        }
+
+        if (config.filterExpressions !== undefined) {
+            grid.filterExpressions = config.filterExpressions;
+        }
+
+        if (config.debug) {
+            console.log('IgcGridLite updated:', config);
+        }
+    },
+
     updateData(id, data) {
         const grid = this.grids.get(id);
         if (grid) {
