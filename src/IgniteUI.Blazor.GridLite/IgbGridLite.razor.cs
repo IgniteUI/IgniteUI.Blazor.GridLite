@@ -171,10 +171,11 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
         Options ??= new IgbGridLiteOptions();
         
         // Check if Data reference has changed
-        if (!ReferenceEquals(_previousData, Data))
+        // Avoid triggering re-render if both previous and current are null
+        if (!ReferenceEquals(_previousData, Data) && (_previousData != null || Data != null))
         {
-            _previousData = Data;
             forceRender = true;
+            _previousData = Data;
         }
     }
 
