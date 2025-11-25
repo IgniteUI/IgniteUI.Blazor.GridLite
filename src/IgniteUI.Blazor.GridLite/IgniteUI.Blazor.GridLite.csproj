@@ -10,6 +10,11 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>IgniteUI.Blazor.Controls</RootNamespace>
+
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>Infragistics</Copyright>
+    <PackageProjectUrl>https://www.infragistics.com/products/ignite-ui-blazor</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +22,15 @@
     <Content Remove="wwwroot\js\.gitkeep" />
     <None Include="wwwroot\css\themes\.gitkeep" />
     <None Include="wwwroot\js\.gitkeep" />
+
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 
