@@ -9,7 +9,7 @@ All notable changes to this project will be documented in this file.
 This release updates the Blazor wrapper to match the API changes from `igniteui-grid-lite` version `0.3.1`.
 
 #### From igniteui-grid-lite 0.3.1
-- **Removed `UpdateColumnsAsync` method** - Columns can now be updated directly through property setters. Use parameter binding or `updateGrid` instead.
+- **Removed `updateColumns` JavaScript function** - Columns can now be updated directly through property setters. The Blazor `UpdateColumnsAsync` method now uses the `updateGrid` function internally instead.
 
 #### From igniteui-grid-lite 0.3.0 - Column Property Renames
 - `IgbColumnConfiguration.Key` → `Field` - The field from the data that the column references
@@ -137,7 +137,9 @@ await grid.SortAsync(new IgbGridLiteSortExpression { ... });
 
 **After:**
 ```csharp
-// Columns can be updated via parameter binding or updateGrid
+// UpdateColumnsAsync still exists but now uses updateGrid internally
+await grid.UpdateColumnsAsync(newColumns);
+// Or use parameter binding directly
 grid.Columns = newColumns;
 await grid.SortAsync(new IgbGridLiteSortingExpression { ... });
 ```
