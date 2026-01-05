@@ -3,7 +3,6 @@
 <IgbGridLite @ref=grid TItem="NwindDataItem" Data="NwindData" class="grid" home-scope
           SortingOptions="@sortingOptions"
           SortingExpressions="@initialSort"
-          FilterExpressions="@initialFilter"
           Sorting="HandleSorting" Sorted="HandleSorted"
           Filtering="HandleFiltering" Filtered="HandleFiltered">
     <IgbGridLiteColumn Field="@nameof(NwindDataItem.ProductID)" Header="Product ID" DataType="GridLiteColumnDataType.Number" Sortable Filterable Resizable />

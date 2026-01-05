@@ -39,7 +39,7 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
 
         try
         {
-            var expression = JsonSerializer.Deserialize<IgbGridLiteSortExpression>(
+            var expression = JsonSerializer.Deserialize<IgbGridLiteSortingExpression>(
                 sortExpression.GetRawText());
 
             var eventArgs = new IgbGridLiteSortingEventArgs
@@ -74,7 +74,7 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
 
         try
         {
-            var expression = JsonSerializer.Deserialize<IgbGridLiteSortExpression>(
+            var expression = JsonSerializer.Deserialize<IgbGridLiteSortingExpression>(
                 sortExpression.GetRawText());
 
             var eventArgs = new IgbGridLiteSortedEventArgs
