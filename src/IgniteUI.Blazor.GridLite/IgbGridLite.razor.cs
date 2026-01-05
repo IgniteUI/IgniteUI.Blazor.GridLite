@@ -45,13 +45,13 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// Sort configuration property for the grid.
     /// </summary>
     [Parameter]
-    public IgbGridLiteSortConfiguration? SortConfiguration { get; set; }
+    public IgbGridLiteSortingOptions? SortingOptions { get; set; }
 
     /// <summary>
     /// Initial sort expressions to apply when the grid is rendered
     /// </summary>
     [Parameter]
-    public IEnumerable<IgbGridLiteSortExpression>? SortExpressions { get; set; }
+    public IEnumerable<IgbGridLiteSortingExpression>? SortingExpressions { get; set; }
 
     /// <summary>
     /// Initial filter expressions to apply when the grid is rendered
@@ -189,16 +189,16 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
                 updateConfig["autoGenerate"] = newAutoGenerate;
             }
             
-            if (parameters.TryGetValue<IgbGridLiteSortConfiguration?>(nameof(SortConfiguration), out var newSortConfig)
-                && !ReferenceEquals(SortConfiguration, newSortConfig))
+            if (parameters.TryGetValue<IgbGridLiteSortingOptions?>(nameof(SortingOptions), out var newSortConfig)
+                && !ReferenceEquals(SortingOptions, newSortConfig))
             {
-                updateConfig["sortConfiguration"] = newSortConfig;
+                updateConfig["sortingOptions"] = newSortConfig;
             }
             
-            if (parameters.TryGetValue<IEnumerable<IgbGridLiteSortExpression>?>(nameof(SortExpressions), out var newSortExpressions)
-                && !ReferenceEquals(SortExpressions, newSortExpressions))
+            if (parameters.TryGetValue<IEnumerable<IgbGridLiteSortingExpression>?>(nameof(SortingExpressions), out var newSortExpressions)
+                && !ReferenceEquals(SortingExpressions, newSortExpressions))
             {
-                updateConfig["sortExpressions"] = newSortExpressions;
+                updateConfig["sortingExpressions"] = newSortExpressions;
             }
             
             if (parameters.TryGetValue<IEnumerable<IgbGridLiteFilterExpression>?>(nameof(FilterExpressions), out var newFilterExpressions)
@@ -240,8 +240,8 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
             data = Data,
             columns = Columns?.Select(c => c.ToJsConfig()).ToList() ?? [],
             autoGenerate = AutoGenerate,
-            sortConfiguration = SortConfiguration,
-            sortExpressions = SortExpressions,
+            sortingOptions = SortingOptions,
+            sortingExpressions = SortingExpressions,
             filterExpressions = FilterExpressions
         };
 
@@ -291,15 +291,19 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     public virtual async Task UpdateColumnsAsync(List<IgbColumnConfiguration> newColumns)
     {
         Columns = newColumns;
-        var json = JsonSerializer.Serialize(newColumns.Select(c => c.ToJsConfig()), GridJsonSerializerOptions);
-        await InvokeVoidJsAsync("blazor_igc_grid_lite.updateColumns", gridId, json);
+        var updateConfig = new Dictionary<string, object>
+        {
+            ["columns"] = newColumns.Select(c => c.ToJsConfig()).ToList()
+        };
+        var json = JsonSerializer.Serialize(updateConfig, GridJsonSerializerOptions);
+        await InvokeVoidJsAsync("blazor_igc_grid_lite.updateGrid", gridId, json);
     }
 
     /// <summary>
     /// Performs a sort operation in the grid based on the passed expression(s).
     /// </summary>
     /// <param name="expressions">The sort expression(s) to apply</param>
-    public virtual async Task SortAsync(IgbGridLiteSortExpression expressions)
+    public virtual async Task SortAsync(IgbGridLiteSortingExpression expressions)
     {
         var json = JsonSerializer.Serialize(expressions, GridJsonSerializerOptions);
         await InvokeVoidJsAsync("blazor_igc_grid_lite.sort", gridId, json);
@@ -309,7 +313,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// Performs a sort operation in the grid based on the passed expression(s).
     /// </summary>
     /// <param name="expressions">The sort expression(s) to apply</param>
-    public virtual async Task SortAsync(List<IgbGridLiteSortExpression> expressions)
+    public virtual async Task SortAsync(List<IgbGridLiteSortingExpression> expressions)
     {
         var json = JsonSerializer.Serialize(expressions, GridJsonSerializerOptions);
         await InvokeVoidJsAsync("blazor_igc_grid_lite.sort", gridId, json);
@@ -358,11 +362,11 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// <summary>
     /// Returns a column configuration for a given column.
     /// </summary>
-    /// <param name="key">The column key to retrieve</param>
+    /// <param name="field">The column field to retrieve</param>
     /// <returns>The column configuration if found, otherwise null</returns>
-    public virtual IgbColumnConfiguration GetColumn(string key)
+    public virtual IgbColumnConfiguration GetColumn(string field)
     {
-        return Columns?.FirstOrDefault(c => c.Key == key);
+        return Columns?.FirstOrDefault(c => c.Field == field);
     }
 
     /// <summary>

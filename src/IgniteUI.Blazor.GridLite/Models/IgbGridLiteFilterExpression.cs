@@ -10,8 +10,8 @@ public class IgbGridLiteFilterExpression
     /// <summary>
     /// The target column for the filter operation.
     /// </summary>
-    [JsonPropertyName("key")]
-    public string Key { get; set; }
+    [JsonPropertyName("field")]
+    public string Field { get; set; }
 
     /// <summary>
     /// The filter condition to apply. Can be a condition name (string) or a FilterOperation // TODO

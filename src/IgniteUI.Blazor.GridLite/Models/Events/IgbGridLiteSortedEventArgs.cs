@@ -11,5 +11,5 @@ public class IgbGridLiteSortedEventArgs
     /// The sort expression used for the operation.
     /// </summary>
     [JsonPropertyName("expression")]
-    public IgbGridLiteSortExpression Expression { get; set; }
+    public IgbGridLiteSortingExpression Expression { get; set; }
 }

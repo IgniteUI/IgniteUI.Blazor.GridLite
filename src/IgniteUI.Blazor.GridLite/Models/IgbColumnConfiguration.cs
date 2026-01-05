@@ -5,16 +5,16 @@ namespace IgniteUI.Blazor.Controls;
 
 public class IgbColumnConfiguration
 {
-    [JsonPropertyName("key")]
-    public string Key { get; set; }
+    [JsonPropertyName("field")]
+    public string Field { get; set; }
 
-    [JsonPropertyName("type")]
+    [JsonPropertyName("dataType")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public GridLiteColumnDataType? Type { get; set; }
+    public GridLiteColumnDataType? DataType { get; set; }
 
-    [JsonPropertyName("headerText")]
+    [JsonPropertyName("header")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string HeaderText { get; set; }
+    public string Header { get; set; }
 
     [JsonPropertyName("width")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -28,13 +28,21 @@ public class IgbColumnConfiguration
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool Resizable { get; set; }
 
-    [JsonPropertyName("sort")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public object Sort { get; set; }
+    [JsonPropertyName("sortable")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool Sortable { get; set; }
 
-    [JsonPropertyName("filter")]
+    [JsonPropertyName("sortingCaseSensitive")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public object Filter { get; set; }
+    public bool? SortingCaseSensitive { get; set; }
+
+    [JsonPropertyName("filterable")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool Filterable { get; set; }
+
+    [JsonPropertyName("filteringCaseSensitive")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? FilteringCaseSensitive { get; set; }
 
     [JsonIgnore]
     internal Func<IgbGridLiteHeaderContext<object>, object> HeaderTemplate { get; set; }
@@ -50,44 +58,17 @@ public class IgbColumnConfiguration
     {
         return new
         {
-            key = Key,
-            type = Type?.ToString().ToLower(),
-            headerText = HeaderText,
+            field = Field,
+            dataType = DataType?.ToString().ToLower(),
+            header = Header,
             width = Width,
             hidden = Hidden,
             resizable = Resizable,
-            sort = ConvertSortConfig(Sort),
-            filter = ConvertFilterConfig(Filter)
+            sortable = Sortable,
+            sortingCaseSensitive = SortingCaseSensitive,
+            filterable = Filterable,
+            filteringCaseSensitive = FilteringCaseSensitive
         };
-    }
-
-    private static object ConvertSortConfig(object sort)
-    {
-        if (sort == null) return null;
-        if (sort is bool b) return b;
-        if (sort is IgbColumnSortConfiguration config)
-        {
-            return new
-            {
-                caseSensitive = config.CaseSensitive
-                // Note: Comparer functions cannot be serialized
-            };
-        }
-        return sort;
-    }
-
-    private static object ConvertFilterConfig(object filter)
-    {
-        if (filter == null) return null;
-        if (filter is bool b) return b;
-        if (filter is IgbColumnFilterConfiguration config)
-        {
-            return new
-            {
-                caseSensitive = config.CaseSensitive
-            };
-        }
-        return filter;
     }
 }
 
