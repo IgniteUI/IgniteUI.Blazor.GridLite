@@ -1,12 +1,18 @@
 ﻿@page "/"
 
 <IgbGridLite @ref=grid TItem="NwindDataItem" Data="NwindData" class="grid" home-scope
-          SortConfiguration="@sortConfiguration" Columns="cols"
-          SortExpressions="@initialSort"
+          SortingOptions="@sortingOptions"
+          SortingExpressions="@initialSort"
           FilterExpressions="@initialFilter"
           Sorting="HandleSorting" Sorted="HandleSorted"
           Filtering="HandleFiltering" Filtered="HandleFiltered">
-
+    <IgbGridLiteColumn Field="@nameof(NwindDataItem.ProductID)" Header="Product ID" DataType="GridLiteColumnDataType.Number" Sortable Filterable Resizable />
+    <IgbGridLiteColumn Field="@nameof(NwindDataItem.ProductName)" Header="Product Name" DataType="GridLiteColumnDataType.String" Sortable Filterable Resizable />
+    @if (showUnitColumns)
+    {
+        <IgbGridLiteColumn Field="@nameof(NwindDataItem.QuantityPerUnit)" Header="Quantity Per Unit" DataType="GridLiteColumnDataType.String" Sortable Filterable Resizable />
+        <IgbGridLiteColumn Field="@nameof(NwindDataItem.UnitPrice)" Header="Unit Price" DataType="GridLiteColumnDataType.Number" Sortable Filterable Resizable />
+    }
 </IgbGridLite>
 
 <button @onclick="BtnClick">Sort</button>
@@ -15,13 +21,12 @@
 @code {
     public IgbGridLite<NwindDataItem> grid;
 
-    private IgbGridLiteSortConfiguration sortConfiguration = new IgbGridLiteSortConfiguration()
+    private IgbGridLiteSortingOptions sortingOptions = new IgbGridLiteSortingOptions()
     {
-        Multiple = true,
-        TriState = false
+        Mode = "multiple"
     };
 
-    private List<IgbGridLiteSortExpression> initialSort;
+    private List<IgbGridLiteSortingExpression> initialSort;
     private List<IgbGridLiteFilterExpression> initialFilter;
     private bool showUnitColumns = false;
 
@@ -31,23 +36,23 @@
         {
             new IgbGridLiteFilterExpression
             {
-                Key = nameof(NwindDataItem.ProductName),
+                Field = nameof(NwindDataItem.ProductName),
                 Condition = "contains",
                 SearchTerm = "a"
             },
             new IgbGridLiteFilterExpression
             {
-                Key = nameof(NwindDataItem.ProductName),
+                Field = nameof(NwindDataItem.ProductName),
                 Condition = "contains",
                 SearchTerm = "b"
             }
         };
 
-        initialSort = new List<IgbGridLiteSortExpression>
+        initialSort = new List<IgbGridLiteSortingExpression>
         {
-            new IgbGridLiteSortExpression
+            new IgbGridLiteSortingExpression
             {
-                Key = nameof(NwindDataItem.ProductName),
+                Field = nameof(NwindDataItem.ProductName),
                 Direction = GridLiteSortingDirection.Ascending
             }
         };
@@ -55,9 +60,9 @@
 
     public async Task BtnClick()
     {
-        await this.grid.SortAsync(new List<IgbGridLiteSortExpression>
+        await this.grid.SortAsync(new List<IgbGridLiteSortingExpression>
             {
-                new IgbGridLiteSortExpression() { Key = nameof(NwindDataItem.ProductName), Direction = GridLiteSortingDirection.Descending }
+                new IgbGridLiteSortingExpression() { Field = nameof(NwindDataItem.ProductName), Direction = GridLiteSortingDirection.Descending }
             }
         );
     }
@@ -67,35 +72,17 @@
         showUnitColumns = !showUnitColumns;
         if (showUnitColumns)
         {
-            cols = [
-                .. cols,
-                new IgbColumnConfiguration {
-                    Key = nameof(NwindDataItem.QuantityPerUnit),
-                    Type = GridLiteColumnDataType.String,
-                    Sort = true,
-                    Filter = true,
-                    Resizable = true
-                },
-                new IgbColumnConfiguration {
-                    Key = nameof(NwindDataItem.UnitPrice),
-                    Type = GridLiteColumnDataType.Number,
-                    Sort = true,
-                    Filter = true,
-                    Resizable = true
-                }
-            ];
             initialSort = [
                 .. initialSort,
-                new IgbGridLiteSortExpression
+                new IgbGridLiteSortingExpression
                 {
-                    Key = nameof(NwindDataItem.QuantityPerUnit),
+                    Field = nameof(NwindDataItem.QuantityPerUnit),
                     Direction = GridLiteSortingDirection.Ascending
                 }
             ];
         }
         else
         {
-            cols = cols.SkipLast(2).ToList();
             initialSort = initialSort.SkipLast(1).ToList();
         }
     }
@@ -132,23 +119,4 @@
     {
 
     }
-
-    public List<IgbColumnConfiguration> cols = new List<IgbColumnConfiguration> {
-        new IgbColumnConfiguration {
-            Key = nameof(NwindDataItem.ProductID),
-            Type = GridLiteColumnDataType.Number,
-            Sort = new IgbColumnSortConfiguration {
-                CaseSensitive = false
-            },
-            Filter = true,
-            Resizable = true
-        },
-        new IgbColumnConfiguration {
-            Key = nameof(NwindDataItem.ProductName),
-            Type = GridLiteColumnDataType.String,
-            Sort = true,
-            Filter = true,
-            Resizable = true
-        },
-    };
 }

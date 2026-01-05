@@ -6,13 +6,13 @@ namespace IgniteUI.Blazor.Controls;
 /// <summary>
 /// Represents a sort operation for a given column.
 /// </summary>
-public class IgbGridLiteSortExpression
+public class IgbGridLiteSortingExpression
 {
     /// <summary>
-    /// The target column.
+    /// The target column field.
     /// </summary>
-    [JsonPropertyName("key")]
-    public string Key { get; set; }
+    [JsonPropertyName("field")]
+    public string Field { get; set; }
 
     /// <summary>
     /// Sort direction for this operation.

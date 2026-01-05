@@ -24,18 +24,22 @@ window.blazor_igc_grid_lite = {
         this.destroyGrid(config.id);
 
         gridElement.data = config.data;
-        gridElement.columns = config.columns;
+        
+        // Only set columns if using the old API (backwards compatibility)
+        if (config.columns && config.columns.length > 0) {
+            gridElement.columns = config.columns;
+        }
 
         if (config.autoGenerate !== undefined) {
             gridElement.autoGenerate = config.autoGenerate;
         }
 
-        if (config.sortConfiguration) {
-            gridElement.sortConfiguration = config.sortConfiguration;
+        if (config.sortingOptions) {
+            gridElement.sortingOptions = config.sortingOptions;
         }
 
-        if (config.sortExpressions) {
-            gridElement.sortExpressions = config.sortExpressions;
+        if (config.sortingExpressions) {
+            gridElement.sortingExpressions = config.sortingExpressions;
         }
 
         if (config.filterExpressions) {
@@ -98,12 +102,12 @@ window.blazor_igc_grid_lite = {
             grid.autoGenerate = config.autoGenerate;
         }
 
-        if (config.sortConfiguration !== undefined) {
-            grid.sortConfiguration = config.sortConfiguration;
+        if (config.sortingOptions !== undefined) {
+            grid.sortingOptions = config.sortingOptions;
         }
 
-        if (config.sortExpressions !== undefined) {
-            grid.sortExpressions = config.sortExpressions;
+        if (config.sortingExpressions !== undefined) {
+            grid.sortingExpressions = config.sortingExpressions;
         }
 
         if (config.filterExpressions !== undefined) {
@@ -119,13 +123,6 @@ window.blazor_igc_grid_lite = {
         const grid = this.grids.get(id);
         if (grid) {
             grid.data = JSON.parse(data);
-        }
-    },
-
-    updateColumns(id, columns) {
-        const grid = this.grids.get(id);
-        if (grid) {
-            grid.columns = JSON.parse(columns);
         }
     },
 

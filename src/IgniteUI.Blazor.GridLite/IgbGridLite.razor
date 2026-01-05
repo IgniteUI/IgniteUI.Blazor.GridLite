@@ -1,4 +1,6 @@
 ﻿@typeparam TItem
 @namespace IgniteUI.Blazor.Controls
 
-<igc-grid-lite @ref="grid" id="@gridId" @attributes="AdditionalAttributes"></igc-grid-lite>
+<igc-grid-lite @ref="grid" id="@gridId" @attributes="AdditionalAttributes">
+    @ChildContent
+</igc-grid-lite>

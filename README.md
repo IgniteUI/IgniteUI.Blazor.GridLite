@@ -51,24 +51,19 @@ In your `App.razor` or layout file, include one of the available themes:
 ```razor
 @using IgniteUI.Blazor.Controls
 
-<IgbGridLite Data="@employees" 
-             Columns="@columns" />
+<IgbGridLite Data="@employees">
+    <IgbGridLiteColumn Field="Id" Header="ID" DataType="GridLiteColumnDataType.Number" Width="100px" />
+    <IgbGridLiteColumn Field="Name" Header="Employee Name" DataType="GridLiteColumnDataType.String" />
+    <IgbGridLiteColumn Field="Department" Header="Department" DataType="GridLiteColumnDataType.String" />
+    <IgbGridLiteColumn Field="Salary" Header="Salary" DataType="GridLiteColumnDataType.Number" Width="150px" />
+</IgbGridLite>
 
 @code {
     private List<Employee> employees = new();
-    private List<IgbColumnConfiguration> columns = new();
 
     protected override void OnInitialized()
     {
         employees = GetEmployees();
-        
-        columns = new List<IgbColumnConfiguration>
-        {
-            new() { Key = nameof(Employee.Id), HeaderText = "ID", Width = "100px", Type = GridLiteColumnDataType.Number },
-            new() { Key = nameof(Employee.Name), HeaderText = "Employee Name", Type = GridLiteColumnDataType.String },
-            new() { Key = nameof(Employee.Department), HeaderText = "Department", Type = GridLiteColumnDataType.String },
-            new() { Key = nameof(Employee.Salary), HeaderText = "Salary", Width = "150px", Type = GridLiteColumnDataType.Number }
-        };
     }
 }
 ```
@@ -76,20 +71,23 @@ In your `App.razor` or layout file, include one of the available themes:
 ### With Initial Sort and Filter
 
 ```razor
-<IgbGridLite Data="@employees" 
-             Columns="@columns"
-             SortExpressions="@initialSort"
-             FilterExpressions="@initialFilter" />
+<IgbGridLite Data="@employees"
+             SortingExpressions="@initialSort"
+             FilterExpressions="@initialFilter">
+    <IgbGridLiteColumn Field="Id" Header="ID" DataType="GridLiteColumnDataType.Number" />
+    <IgbGridLiteColumn Field="Name" Header="Name" Sortable Filterable />
+    <IgbGridLiteColumn Field="Department" Header="Department" Sortable Filterable />
+</IgbGridLite>
 
 @code {
-    private List<IgbGridLiteSortExpression> initialSort = new()
+    private List<IgbGridLiteSortingExpression> initialSort = new()
     {
-        new() { Key = nameof(Employee.Name), Direction = GridLiteSortingDirection.Ascending }
+        new() { Field = "Name", Direction = GridLiteSortingDirection.Ascending }
     };
     
     private List<IgbGridLiteFilterExpression> initialFilter = new()
     {
-        new() { Key = nameof(Employee.Department), Condition = "contains", SearchTerm = "Sales" }
+        new() { Field = "Department", Condition = "contains", SearchTerm = "Sales" }
     };
 }
 ```
@@ -100,30 +98,22 @@ In your `App.razor` or layout file, include one of the available themes:
 
 Enable sorting on specific columns:
 
-```csharp
-new IgbColumnConfiguration
-{ 
-    Key = nameof(Employee.Name), 
-    HeaderText = "Name",
-    Resizable = true,
-    Sort = true // Enable sorting
-}
+```razor
+<IgbGridLiteColumn Field="Name" 
+                   Header="Name"
+                   Sortable
+                   Resizable />
 ```
 
 ### Filtering
 
 Enable filtering on columns:
 
-```csharp
-new IgbColumnConfiguration
-{ 
-    Key = nameof(Employee.Department), 
-    HeaderText = "Department",
-    Filter = new IgbColumnFilterConfiguration 
-    { 
-        CaseSensitive = false 
-    }
-}
+```razor
+<IgbGridLiteColumn Field="Department" 
+                   Header="Department"
+                   Filterable
+                   FilteringCaseSensitive="@false" />
 ```
 
 ### Event Handling
@@ -131,12 +121,14 @@ new IgbColumnConfiguration
 Handle sorting and filtering events:
 
 ```razor
-<IgbGridLite Data="@employees" 
-             Columns="@columns"
+<IgbGridLite Data="@employees"
              Sorting="@HandleSorting"
              Sorted="@HandleSorted"
              Filtering="@HandleFiltering"
-             Filtered="@HandleFiltered" />
+             Filtered="@HandleFiltered">
+    <IgbGridLiteColumn Field="Name" Sortable Filterable />
+    <IgbGridLiteColumn Field="Department" Sortable Filterable />
+</IgbGridLite>
 
 @code {
     private void HandleSorting(IgbGridLiteSortingEventArgs e)
@@ -163,16 +155,18 @@ Handle sorting and filtering events:
 
 ## Column Configuration
 
-The `IgbColumnConfiguration` class supports:
+The `IgbGridLiteColumn` component supports:
 
-- `Key`: Property name to bind to (use `nameof()` for type safety)
-- `HeaderText`: Column header display text
+- `Field`: Property name to bind to (use `nameof()` for type safety)
+- `Header`: Column header display text
 - `Width`: Column width (CSS value)
-- `Type`: Data type (String, Number, Boolean, Date)
+- `DataType`: Data type (String, Number, Boolean, Date)
 - `Hidden`: Hide column
 - `Resizable`: Allow column resizing
-- `Sort`: Enable/configure sorting
-- `Filter`: Enable/configure filtering
+- `Sortable`: Enable sorting
+- `SortingCaseSensitive`: Make sorting case sensitive
+- `Filterable`: Enable filtering
+- `FilteringCaseSensitive`: Make filtering case sensitive
 
 ## Building from Source
 

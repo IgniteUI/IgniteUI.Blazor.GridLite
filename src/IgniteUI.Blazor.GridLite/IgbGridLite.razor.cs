@@ -22,8 +22,18 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// <summary>
     /// Column configurations for the grid
     /// </summary>
+    /// <remarks>
+    /// This parameter is obsolete. Use declarative columns with IgbGridLiteColumn instead.
+    /// </remarks>
     [Parameter]
+    [Obsolete("Use declarative columns with IgbGridLiteColumn instead. This property will be removed in a future version.")]
     public List<IgbColumnConfiguration>? Columns { get; set; }
+
+    /// <summary>
+    /// Child content for declarative column definitions
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
 
     /// <summary>
     /// The options to customize the grid with
@@ -42,16 +52,16 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     public bool AutoGenerate { get; set; } = false;
 
     /// <summary>
-    /// Sort configuration property for the grid.
+    /// Sort options property for the grid.
     /// </summary>
     [Parameter]
-    public IgbGridLiteSortConfiguration? SortConfiguration { get; set; }
+    public IgbGridLiteSortingOptions? SortingOptions { get; set; }
 
     /// <summary>
     /// Initial sort expressions to apply when the grid is rendered
     /// </summary>
     [Parameter]
-    public IEnumerable<IgbGridLiteSortExpression>? SortExpressions { get; set; }
+    public IEnumerable<IgbGridLiteSortingExpression>? SortingExpressions { get; set; }
 
     /// <summary>
     /// Initial filter expressions to apply when the grid is rendered
@@ -189,16 +199,16 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
                 updateConfig["autoGenerate"] = newAutoGenerate;
             }
             
-            if (parameters.TryGetValue<IgbGridLiteSortConfiguration?>(nameof(SortConfiguration), out var newSortConfig)
-                && !ReferenceEquals(SortConfiguration, newSortConfig))
+            if (parameters.TryGetValue<IgbGridLiteSortingOptions?>(nameof(SortingOptions), out var newSortOptions)
+                && !ReferenceEquals(SortingOptions, newSortOptions))
             {
-                updateConfig["sortConfiguration"] = newSortConfig;
+                updateConfig["sortingOptions"] = newSortOptions;
             }
             
-            if (parameters.TryGetValue<IEnumerable<IgbGridLiteSortExpression>?>(nameof(SortExpressions), out var newSortExpressions)
-                && !ReferenceEquals(SortExpressions, newSortExpressions))
+            if (parameters.TryGetValue<IEnumerable<IgbGridLiteSortingExpression>?>(nameof(SortingExpressions), out var newSortingExpressions)
+                && !ReferenceEquals(SortingExpressions, newSortingExpressions))
             {
-                updateConfig["sortExpressions"] = newSortExpressions;
+                updateConfig["sortingExpressions"] = newSortingExpressions;
             }
             
             if (parameters.TryGetValue<IEnumerable<IgbGridLiteFilterExpression>?>(nameof(FilterExpressions), out var newFilterExpressions)
@@ -240,8 +250,8 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
             data = Data,
             columns = Columns?.Select(c => c.ToJsConfig()).ToList() ?? [],
             autoGenerate = AutoGenerate,
-            sortConfiguration = SortConfiguration,
-            sortExpressions = SortExpressions,
+            sortingOptions = SortingOptions,
+            sortingExpressions = SortingExpressions,
             filterExpressions = FilterExpressions
         };
 
@@ -285,21 +295,10 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     }
 
     /// <summary>
-    /// Updates the column configurations for the grid.
-    /// </summary>
-    /// <param name="newColumns">The new column configurations</param>
-    public virtual async Task UpdateColumnsAsync(List<IgbColumnConfiguration> newColumns)
-    {
-        Columns = newColumns;
-        var json = JsonSerializer.Serialize(newColumns.Select(c => c.ToJsConfig()), GridJsonSerializerOptions);
-        await InvokeVoidJsAsync("blazor_igc_grid_lite.updateColumns", gridId, json);
-    }
-
-    /// <summary>
     /// Performs a sort operation in the grid based on the passed expression(s).
     /// </summary>
     /// <param name="expressions">The sort expression(s) to apply</param>
-    public virtual async Task SortAsync(IgbGridLiteSortExpression expressions)
+    public virtual async Task SortAsync(IgbGridLiteSortingExpression expressions)
     {
         var json = JsonSerializer.Serialize(expressions, GridJsonSerializerOptions);
         await InvokeVoidJsAsync("blazor_igc_grid_lite.sort", gridId, json);
@@ -309,7 +308,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// Performs a sort operation in the grid based on the passed expression(s).
     /// </summary>
     /// <param name="expressions">The sort expression(s) to apply</param>
-    public virtual async Task SortAsync(List<IgbGridLiteSortExpression> expressions)
+    public virtual async Task SortAsync(List<IgbGridLiteSortingExpression> expressions)
     {
         var json = JsonSerializer.Serialize(expressions, GridJsonSerializerOptions);
         await InvokeVoidJsAsync("blazor_igc_grid_lite.sort", gridId, json);
@@ -356,13 +355,13 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     }
 
     /// <summary>
-    /// Returns a column configuration for a given column.
+    /// Returns a column configuration for a given column field.
     /// </summary>
-    /// <param name="key">The column key to retrieve</param>
+    /// <param name="field">The column field to retrieve</param>
     /// <returns>The column configuration if found, otherwise null</returns>
-    public virtual IgbColumnConfiguration GetColumn(string key)
+    public virtual IgbColumnConfiguration GetColumn(string field)
     {
-        return Columns?.FirstOrDefault(c => c.Key == key);
+        return Columns?.FirstOrDefault(c => c.Field == field);
     }
 
     /// <summary>
