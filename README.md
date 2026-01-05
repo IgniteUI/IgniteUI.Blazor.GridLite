@@ -64,10 +64,10 @@ In your `App.razor` or layout file, include one of the available themes:
         
         columns = new List<IgbColumnConfiguration>
         {
-            new() { Key = nameof(Employee.Id), HeaderText = "ID", Width = "100px", Type = GridLiteColumnDataType.Number },
-            new() { Key = nameof(Employee.Name), HeaderText = "Employee Name", Type = GridLiteColumnDataType.String },
-            new() { Key = nameof(Employee.Department), HeaderText = "Department", Type = GridLiteColumnDataType.String },
-            new() { Key = nameof(Employee.Salary), HeaderText = "Salary", Width = "150px", Type = GridLiteColumnDataType.Number }
+            new() { Field = nameof(Employee.Id), Header = "ID", Width = "100px", DataType = GridLiteColumnDataType.Number },
+            new() { Field = nameof(Employee.Name), Header = "Employee Name", DataType = GridLiteColumnDataType.String },
+            new() { Field = nameof(Employee.Department), Header = "Department", DataType = GridLiteColumnDataType.String },
+            new() { Field = nameof(Employee.Salary), Header = "Salary", Width = "150px", DataType = GridLiteColumnDataType.Number }
         };
     }
 }
@@ -78,18 +78,18 @@ In your `App.razor` or layout file, include one of the available themes:
 ```razor
 <IgbGridLite Data="@employees" 
              Columns="@columns"
-             SortExpressions="@initialSort"
+             SortingExpressions="@initialSort"
              FilterExpressions="@initialFilter" />
 
 @code {
-    private List<IgbGridLiteSortExpression> initialSort = new()
+    private List<IgbGridLiteSortingExpression> initialSort = new()
     {
-        new() { Key = nameof(Employee.Name), Direction = GridLiteSortingDirection.Ascending }
+        new() { Field = nameof(Employee.Name), Direction = GridLiteSortingDirection.Ascending }
     };
     
     private List<IgbGridLiteFilterExpression> initialFilter = new()
     {
-        new() { Key = nameof(Employee.Department), Condition = "contains", SearchTerm = "Sales" }
+        new() { Field = nameof(Employee.Department), Condition = "contains", SearchTerm = "Sales" }
     };
 }
 ```
@@ -103,10 +103,22 @@ Enable sorting on specific columns:
 ```csharp
 new IgbColumnConfiguration
 { 
-    Key = nameof(Employee.Name), 
-    HeaderText = "Name",
+    Field = nameof(Employee.Name), 
+    Header = "Name",
     Resizable = true,
-    Sort = true // Enable sorting
+    Sortable = true // Enable sorting
+}
+```
+
+Configure sorting case sensitivity:
+
+```csharp
+new IgbColumnConfiguration
+{ 
+    Field = nameof(Employee.Name), 
+    Header = "Name",
+    Sortable = true,
+    SortingCaseSensitive = false // Case-insensitive sorting
 }
 ```
 
@@ -117,12 +129,21 @@ Enable filtering on columns:
 ```csharp
 new IgbColumnConfiguration
 { 
-    Key = nameof(Employee.Department), 
-    HeaderText = "Department",
-    Filter = new IgbColumnFilterConfiguration 
-    { 
-        CaseSensitive = false 
-    }
+    Field = nameof(Employee.Department), 
+    Header = "Department",
+    Filterable = true
+}
+```
+
+Configure filtering case sensitivity:
+
+```csharp
+new IgbColumnConfiguration
+{ 
+    Field = nameof(Employee.Department), 
+    Header = "Department",
+    Filterable = true,
+    FilteringCaseSensitive = false // Case-insensitive filtering
 }
 ```
 
@@ -165,14 +186,16 @@ Handle sorting and filtering events:
 
 The `IgbColumnConfiguration` class supports:
 
-- `Key`: Property name to bind to (use `nameof()` for type safety)
-- `HeaderText`: Column header display text
+- `Field`: Property name to bind to (use `nameof()` for type safety)
+- `Header`: Column header display text
 - `Width`: Column width (CSS value)
-- `Type`: Data type (String, Number, Boolean, Date)
+- `DataType`: Data type (String, Number, Boolean, Date)
 - `Hidden`: Hide column
 - `Resizable`: Allow column resizing
-- `Sort`: Enable/configure sorting
-- `Filter`: Enable/configure filtering
+- `Sortable`: Enable sorting (boolean)
+- `SortingCaseSensitive`: Configure case-sensitive sorting (nullable boolean)
+- `Filterable`: Enable filtering (boolean)
+- `FilteringCaseSensitive`: Configure case-sensitive filtering (nullable boolean)
 
 ## Building from Source
 
