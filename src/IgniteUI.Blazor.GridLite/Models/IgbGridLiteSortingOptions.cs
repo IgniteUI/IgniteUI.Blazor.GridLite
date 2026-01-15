@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using IgniteUI.Blazor.Controls.Internal;
 
 namespace IgniteUI.Blazor.Controls;
 
@@ -11,5 +12,15 @@ public class IgbGridLiteSortingOptions
     /// The sorting mode. Can be "single" or "multiple".
     /// </summary>
     [JsonPropertyName("mode")]
-    public string Mode { get; set; } = "multiple";
+    public GridLiteSortingMode Mode { get; set; } = GridLiteSortingMode.Multiple;
+}
+
+/// <summary>
+/// The data type for a column.
+/// </summary>
+[JsonConverter(typeof(CamelCaseEnumConverter<GridLiteSortingMode>))]
+public enum GridLiteSortingMode
+{
+    Multiple,
+    Single,
 }

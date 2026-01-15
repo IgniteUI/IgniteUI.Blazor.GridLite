@@ -83,7 +83,7 @@ new IgbColumnConfiguration {
 | `IgbGridLiteSortExpression` | `IgbGridLiteSortingExpression` | Class renamed |
 | `SortConfiguration` parameter | `SortingOptions` parameter | Grid parameter renamed |
 | `SortExpressions` parameter | `SortingExpressions` parameter | Grid parameter renamed |
-| `Multiple` property (bool) | `Mode` property (string) | Use "single" or "multiple" |
+| `Multiple` property (bool) | `Mode` property | Use `GridLiteSortingMode.Single` or `GridLiteSortingMode.Multiple` |
 | `TriState` property | *Removed* | Tri-state sorting is always enabled |
 
 **Before:**
@@ -102,7 +102,7 @@ var expression = new IgbGridLiteSortExpression {
 **After:**
 ```csharp
 var sortingOptions = new IgbGridLiteSortingOptions {
-    Mode = "multiple"
+    Mode = GridLiteSortingMode.Multiple
 };
 
 var expression = new IgbGridLiteSortingExpression {
@@ -139,7 +139,7 @@ The following types have been removed as they are no longer needed:
    - Rename `IgbGridLiteSortExpression` to `IgbGridLiteSortingExpression`
    - Change `SortConfiguration` parameter to `SortingOptions`
    - Change `SortExpressions` parameter to `SortingExpressions`
-   - Replace `Multiple = true` with `Mode = "multiple"`
+   - Replace `Multiple = true` with `Mode = GridLiteSortingMode.Multiple`
    - Remove `TriState` property usage
 
 4. **Dynamic columns:**
@@ -158,7 +158,7 @@ The following types have been removed as they are no longer needed:
 - `IgbColumnConfiguration`: Replaced `Filter` object with `Filterable` (bool) and `FilteringCaseSensitive` (bool?)
 - Renamed `IgbGridLiteSortConfiguration` to `IgbGridLiteSortingOptions`
 - Renamed `IgbGridLiteSortExpression` to `IgbGridLiteSortingExpression`
-- `IgbGridLiteSortingOptions`: Replaced `Multiple` (bool) with `Mode` (string - "single" or "multiple")
+- `IgbGridLiteSortingOptions`: Replaced `Multiple` (bool) with `Mode` (enum `GridLiteSortingMode.Single` or `GridLiteSortingMode.Multiple`)
 - Grid parameters: `SortConfiguration`→`SortingOptions`, `SortExpressions`→`SortingExpressions`
 - Event args: Updated to use new `IgbGridLiteSortingExpression` type
 
