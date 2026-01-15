@@ -85,7 +85,6 @@ new IgbColumnConfiguration {
 | `SortExpressions` parameter | `SortingExpressions` parameter | Grid parameter renamed |
 | `Multiple` property (bool) | `Mode` property (string) | Use "single" or "multiple" |
 | `TriState` property | *Removed* | Tri-state sorting is always enabled |
-| Expression `Key` property | Expression `Field` property | Property renamed |
 
 **Before:**
 ```csharp
@@ -107,42 +106,18 @@ var sortingOptions = new IgbGridLiteSortingOptions {
 };
 
 var expression = new IgbGridLiteSortingExpression {
-    Field = "Name",
+    Key = "Name",
     Direction = GridLiteSortingDirection.Ascending
 };
 ```
 
-#### 5. Filter Expression Changes
-
-| Old Property | New Property |
-|--------------|--------------|
-| `Key` | `Field` |
-
-**Before:**
-```csharp
-new IgbGridLiteFilterExpression {
-    Key = "Name",
-    Condition = "contains",
-    SearchTerm = "value"
-}
-```
-
-**After:**
-```csharp
-new IgbGridLiteFilterExpression {
-    Field = "Name",
-    Condition = "contains",
-    SearchTerm = "value"
-}
-```
-
-#### 6. Removed Types
+#### 5. Removed Types
 
 The following types have been removed as they are no longer needed:
 - `IgbColumnSortConfiguration` - replaced by boolean properties on column
 - `IgbColumnFilterConfiguration` - replaced by boolean properties on column
 
-#### 7. Removed Methods
+#### 6. Removed Methods
 
 - `UpdateColumnsAsync()` - columns are now declarative and can be updated using conditional rendering
 
@@ -167,10 +142,7 @@ The following types have been removed as they are no longer needed:
    - Replace `Multiple = true` with `Mode = "multiple"`
    - Remove `TriState` property usage
 
-4. **Update expression field names:**
-   - In all sort/filter expressions, rename `Key` property to `Field`
-
-5. **Dynamic columns:**
+4. **Dynamic columns:**
    - Instead of calling `UpdateColumnsAsync()`, use conditional rendering with `@if` statements around `<IgbGridLiteColumn>` elements
 
 ### Added
@@ -187,8 +159,6 @@ The following types have been removed as they are no longer needed:
 - Renamed `IgbGridLiteSortConfiguration` to `IgbGridLiteSortingOptions`
 - Renamed `IgbGridLiteSortExpression` to `IgbGridLiteSortingExpression`
 - `IgbGridLiteSortingOptions`: Replaced `Multiple` (bool) with `Mode` (string - "single" or "multiple")
-- `IgbGridLiteSortingExpression`: Renamed `Key` to `Field`
-- `IgbGridLiteFilterExpression`: Renamed `Key` to `Field`
 - Grid parameters: `SortConfiguration`→`SortingOptions`, `SortExpressions`→`SortingExpressions`
 - Event args: Updated to use new `IgbGridLiteSortingExpression` type
 

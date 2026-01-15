@@ -82,12 +82,12 @@ In your `App.razor` or layout file, include one of the available themes:
 @code {
     private List<IgbGridLiteSortingExpression> initialSort = new()
     {
-        new() { Field = "Name", Direction = GridLiteSortingDirection.Ascending }
+        new() { Key = nameof(Employee.Name), Direction = GridLiteSortingDirection.Ascending }
     };
     
     private List<IgbGridLiteFilterExpression> initialFilter = new()
     {
-        new() { Field = "Department", Condition = "contains", SearchTerm = "Sales" }
+        new() { Key = nameof(Employee.Department), Condition = "contains", SearchTerm = "Sales" }
     };
 }
 ```

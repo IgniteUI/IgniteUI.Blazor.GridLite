@@ -9,10 +9,10 @@ namespace IgniteUI.Blazor.Controls;
 public class IgbGridLiteSortingExpression
 {
     /// <summary>
-    /// The target column field.
+    /// The target column.
     /// </summary>
-    [JsonPropertyName("field")]
-    public string Field { get; set; }
+    [JsonPropertyName("key")]
+    public string Key { get; set; }
 
     /// <summary>
     /// Sort direction for this operation.

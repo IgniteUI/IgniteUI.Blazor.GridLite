@@ -3,6 +3,7 @@
 <IgbGridLite @ref=grid TItem="NwindDataItem" Data="NwindData" class="grid" home-scope
           SortingOptions="@sortingOptions"
           SortingExpressions="@initialSort"
+          FilterExpressions="@initialFilter"
           Sorting="HandleSorting" Sorted="HandleSorted"
           Filtering="HandleFiltering" Filtered="HandleFiltered">
     <IgbGridLiteColumn Field="@nameof(NwindDataItem.ProductID)" Header="Product ID" DataType="GridLiteColumnDataType.Number" Sortable Filterable Resizable />
@@ -35,13 +36,13 @@
         {
             new IgbGridLiteFilterExpression
             {
-                Field = nameof(NwindDataItem.ProductName),
+                Key = nameof(NwindDataItem.ProductName),
                 Condition = "contains",
                 SearchTerm = "a"
             },
             new IgbGridLiteFilterExpression
             {
-                Field = nameof(NwindDataItem.ProductName),
+                Key = nameof(NwindDataItem.ProductName),
                 Condition = "contains",
                 SearchTerm = "b"
             }
@@ -51,7 +52,7 @@
         {
             new IgbGridLiteSortingExpression
             {
-                Field = nameof(NwindDataItem.ProductName),
+                Key = nameof(NwindDataItem.ProductName),
                 Direction = GridLiteSortingDirection.Ascending
             }
         };
@@ -61,7 +62,7 @@
     {
         await this.grid.SortAsync(new List<IgbGridLiteSortingExpression>
             {
-                new IgbGridLiteSortingExpression() { Field = nameof(NwindDataItem.ProductName), Direction = GridLiteSortingDirection.Descending }
+                new IgbGridLiteSortingExpression() { Key = nameof(NwindDataItem.ProductName), Direction = GridLiteSortingDirection.Descending }
             }
         );
     }
@@ -75,7 +76,7 @@
                 .. initialSort,
                 new IgbGridLiteSortingExpression
                 {
-                    Field = nameof(NwindDataItem.QuantityPerUnit),
+                    Key = nameof(NwindDataItem.QuantityPerUnit),
                     Direction = GridLiteSortingDirection.Ascending
                 }
             ];
