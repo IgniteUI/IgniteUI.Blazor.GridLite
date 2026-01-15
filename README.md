@@ -52,10 +52,10 @@ In your `App.razor` or layout file, include one of the available themes:
 @using IgniteUI.Blazor.Controls
 
 <IgbGridLite Data="@employees">
-    <IgbGridLiteColumn Field="Id" Header="ID" DataType="GridLiteColumnDataType.Number" Width="100px" />
-    <IgbGridLiteColumn Field="Name" Header="Employee Name" DataType="GridLiteColumnDataType.String" />
-    <IgbGridLiteColumn Field="Department" Header="Department" DataType="GridLiteColumnDataType.String" />
-    <IgbGridLiteColumn Field="Salary" Header="Salary" DataType="GridLiteColumnDataType.Number" Width="150px" />
+    <IgbGridLiteColumn Field="@nameof(Employee.Id)" Header="ID" DataType="GridLiteColumnDataType.Number" Width="100px" />
+    <IgbGridLiteColumn Field="@nameof(Employee.Name)" Header="Employee Name" DataType="GridLiteColumnDataType.String" />
+    <IgbGridLiteColumn Field="@nameof(Employee.Department)" Header="Department" DataType="GridLiteColumnDataType.String" />
+    <IgbGridLiteColumn Field="@nameof(Employee.Salary)" Header="Salary" DataType="GridLiteColumnDataType.Number" Width="150px" />
 </IgbGridLite>
 
 @code {
@@ -74,9 +74,9 @@ In your `App.razor` or layout file, include one of the available themes:
 <IgbGridLite Data="@employees"
              SortingExpressions="@initialSort"
              FilterExpressions="@initialFilter">
-    <IgbGridLiteColumn Field="Id" Header="ID" DataType="GridLiteColumnDataType.Number" />
-    <IgbGridLiteColumn Field="Name" Header="Name" Sortable Filterable />
-    <IgbGridLiteColumn Field="Department" Header="Department" Sortable Filterable />
+    <IgbGridLiteColumn Field="@nameof(Employee.Id)" Header="ID" DataType="GridLiteColumnDataType.Number" />
+    <IgbGridLiteColumn Field="@nameof(Employee.Name)" Header="Name" Sortable Filterable />
+    <IgbGridLiteColumn Field="@nameof(Employee.Department)" Header="Department" Sortable Filterable />
 </IgbGridLite>
 
 @code {
@@ -99,7 +99,7 @@ In your `App.razor` or layout file, include one of the available themes:
 Enable sorting on specific columns:
 
 ```razor
-<IgbGridLiteColumn Field="Name" 
+<IgbGridLiteColumn Field="@nameof(Employee.Name)" 
                    Header="Name"
                    Sortable
                    Resizable />
