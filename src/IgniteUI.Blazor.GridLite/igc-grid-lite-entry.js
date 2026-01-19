@@ -24,18 +24,17 @@ window.blazor_igc_grid_lite = {
         this.destroyGrid(config.id);
 
         gridElement.data = config.data;
-        gridElement.columns = config.columns;
 
         if (config.autoGenerate !== undefined) {
             gridElement.autoGenerate = config.autoGenerate;
         }
 
-        if (config.sortConfiguration) {
-            gridElement.sortConfiguration = config.sortConfiguration;
+        if (config.sortingOptions) {
+            gridElement.sortingOptions = config.sortingOptions;
         }
 
-        if (config.sortExpressions) {
-            gridElement.sortExpressions = config.sortExpressions;
+        if (config.sortingExpressions) {
+            gridElement.sortingExpressions = config.sortingExpressions;
         }
 
         if (config.filterExpressions) {
@@ -90,20 +89,16 @@ window.blazor_igc_grid_lite = {
             grid.data = config.data;
         }
 
-        if (config.columns !== undefined) {
-            grid.columns = config.columns;
-        }
-
         if (config.autoGenerate !== undefined) {
             grid.autoGenerate = config.autoGenerate;
         }
 
-        if (config.sortConfiguration !== undefined) {
-            grid.sortConfiguration = config.sortConfiguration;
+        if (config.sortingOptions !== undefined) {
+            grid.sortingOptions = config.sortingOptions;
         }
 
-        if (config.sortExpressions !== undefined) {
-            grid.sortExpressions = config.sortExpressions;
+        if (config.sortingExpressions !== undefined) {
+            grid.sortingExpressions = config.sortingExpressions;
         }
 
         if (config.filterExpressions !== undefined) {
@@ -119,13 +114,6 @@ window.blazor_igc_grid_lite = {
         const grid = this.grids.get(id);
         if (grid) {
             grid.data = JSON.parse(data);
-        }
-    },
-
-    updateColumns(id, columns) {
-        const grid = this.grids.get(id);
-        if (grid) {
-            grid.columns = JSON.parse(columns);
         }
     },
 
@@ -159,9 +147,9 @@ window.blazor_igc_grid_lite = {
         }
     },
 
-    getColumn(id, keyOrIndex) {
+    getColumns(id) {
         const grid = this.grids.get(id);
-        return grid ? grid.getColumn(keyOrIndex) : null;
+        return grid ? grid.columns : null;
     },
 
     destroyGrid(id) {

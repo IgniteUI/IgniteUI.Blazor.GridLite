@@ -1,12 +1,30 @@
 ﻿@page "/"
 
 <IgbGridLite @ref=grid TItem="NwindDataItem" Data="NwindData" class="grid" home-scope
-          SortConfiguration="@sortConfiguration" Columns="cols"
-          SortExpressions="@initialSort"
+          SortingOptions="@sortingOptions"
+          SortingExpressions="@initialSort"
           FilterExpressions="@initialFilter"
           Sorting="HandleSorting" Sorted="HandleSorted"
           Filtering="HandleFiltering" Filtered="HandleFiltered">
-
+    @foreach (var col in cols)
+    {
+        <IgbGridLiteColumn
+            Field="@col.Field"
+            Header="@col.Header"
+            DataType="@col.DataType"
+            Sortable="@col.Sortable"
+            SortingCaseSensitive="@col.SortingCaseSensitive"
+            Filterable="@col.Filterable"
+            Resizable="@col.Resizable" />
+    }
+    @if (showUnitColumns)
+    {
+        <IgbGridLiteColumn
+            Field="@nameof(NwindDataItem.UnitsOnOrder)"
+            Header="Units On Order"
+            DataType="GridLiteColumnDataType.Number"
+            Sortable Filterable Resizable />
+    }
 </IgbGridLite>
 
 <button @onclick="BtnClick">Sort</button>
@@ -15,13 +33,12 @@
 @code {
     public IgbGridLite<NwindDataItem> grid;
 
-    private IgbGridLiteSortConfiguration sortConfiguration = new IgbGridLiteSortConfiguration()
+    private IgbGridLiteSortingOptions sortingOptions = new IgbGridLiteSortingOptions()
     {
-        Multiple = true,
-        TriState = false
+        Mode = GridLiteSortingMode.Multiple
     };
 
-    private List<IgbGridLiteSortExpression> initialSort;
+    private List<IgbGridLiteSortingExpression> initialSort;
     private List<IgbGridLiteFilterExpression> initialFilter;
     private bool showUnitColumns = false;
 
@@ -43,9 +60,9 @@
             }
         };
 
-        initialSort = new List<IgbGridLiteSortExpression>
+        initialSort = new List<IgbGridLiteSortingExpression>
         {
-            new IgbGridLiteSortExpression
+            new IgbGridLiteSortingExpression
             {
                 Key = nameof(NwindDataItem.ProductName),
                 Direction = GridLiteSortingDirection.Ascending
@@ -55,9 +72,9 @@
 
     public async Task BtnClick()
     {
-        await this.grid.SortAsync(new List<IgbGridLiteSortExpression>
+        await this.grid.SortAsync(new List<IgbGridLiteSortingExpression>
             {
-                new IgbGridLiteSortExpression() { Key = nameof(NwindDataItem.ProductName), Direction = GridLiteSortingDirection.Descending }
+                new IgbGridLiteSortingExpression() { Key = nameof(NwindDataItem.ProductName), Direction = GridLiteSortingDirection.Descending }
             }
         );
     }
@@ -70,23 +87,25 @@
             cols = [
                 .. cols,
                 new IgbColumnConfiguration {
-                    Key = nameof(NwindDataItem.QuantityPerUnit),
-                    Type = GridLiteColumnDataType.String,
-                    Sort = true,
-                    Filter = true,
+                    Field = nameof(NwindDataItem.QuantityPerUnit),
+                    Header="Quantity Per Unit",
+                    DataType = GridLiteColumnDataType.String,
+                    Sortable = true,
+                    Filterable = true,
                     Resizable = true
                 },
                 new IgbColumnConfiguration {
-                    Key = nameof(NwindDataItem.UnitPrice),
-                    Type = GridLiteColumnDataType.Number,
-                    Sort = true,
-                    Filter = true,
+                    Field = nameof(NwindDataItem.UnitPrice),
+                    Header="Unit Price",
+                    DataType = GridLiteColumnDataType.Number,
+                    Sortable = true,
+                    Filterable = true,
                     Resizable = true
                 }
             ];
             initialSort = [
                 .. initialSort,
-                new IgbGridLiteSortExpression
+                new IgbGridLiteSortingExpression
                 {
                     Key = nameof(NwindDataItem.QuantityPerUnit),
                     Direction = GridLiteSortingDirection.Ascending
@@ -135,19 +154,20 @@
 
     public List<IgbColumnConfiguration> cols = new List<IgbColumnConfiguration> {
         new IgbColumnConfiguration {
-            Key = nameof(NwindDataItem.ProductID),
-            Type = GridLiteColumnDataType.Number,
-            Sort = new IgbColumnSortConfiguration {
-                CaseSensitive = false
-            },
-            Filter = true,
-            Resizable = true
+            Field = nameof(NwindDataItem.ProductID),
+            Header="Product ID",
+            DataType = GridLiteColumnDataType.Number,
+            Sortable = true,
+            SortingCaseSensitive = false,
+            Filterable = true,
+            Resizable = false
         },
         new IgbColumnConfiguration {
-            Key = nameof(NwindDataItem.ProductName),
-            Type = GridLiteColumnDataType.String,
-            Sort = true,
-            Filter = true,
+            Field = nameof(NwindDataItem.ProductName),
+            Header="Product Name",
+            DataType = GridLiteColumnDataType.String,
+            Sortable = true,
+            Filterable = true,
             Resizable = true
         },
     };

@@ -5,42 +5,50 @@ namespace IgniteUI.Blazor.Controls;
 
 public class IgbColumnConfiguration
 {
-    [JsonPropertyName("key")]
-    public string Key { get; set; }
+    [JsonPropertyName("field")]
+    public string? Field { get; init; }
 
-    [JsonPropertyName("type")]
+    [JsonPropertyName("dataType")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public GridLiteColumnDataType? Type { get; set; }
+    public GridLiteColumnDataType? DataType { get; init; }
 
-    [JsonPropertyName("headerText")]
+    [JsonPropertyName("header")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string HeaderText { get; set; }
+    public string? Header { get; init; }
 
     [JsonPropertyName("width")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string Width { get; set; }
+    public string? Width { get; init; }
 
     [JsonPropertyName("hidden")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public bool Hidden { get; set; }
+    public bool Hidden { get; init; }
 
     [JsonPropertyName("resizable")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public bool Resizable { get; set; }
+    public bool Resizable { get; init; }
 
-    [JsonPropertyName("sort")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public object Sort { get; set; }
+    [JsonPropertyName("sortable")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool Sortable { get; init; }
 
-    [JsonPropertyName("filter")]
+    [JsonPropertyName("sortingCaseSensitive")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public object Filter { get; set; }
+    public bool SortingCaseSensitive { get; init; }
+
+    [JsonPropertyName("filterable")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool Filterable { get; init; }
+
+    [JsonPropertyName("filteringCaseSensitive")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool FilteringCaseSensitive { get; init; }
 
     [JsonIgnore]
-    internal Func<IgbGridLiteHeaderContext<object>, object> HeaderTemplate { get; set; }
+    internal Func<IgbGridLiteHeaderContext<object>, object> HeaderTemplate { get; init; }
 
     [JsonIgnore]
-    internal Func<IgbGridLiteCellContext<object>, object> CellTemplate { get; set; }
+    internal Func<IgbGridLiteCellContext<object>, object> CellTemplate { get; init; }
 
     /// <summary>
     /// Converts the column configuration to a JavaScript-compatible format.
@@ -50,44 +58,17 @@ public class IgbColumnConfiguration
     {
         return new
         {
-            key = Key,
-            type = Type?.ToString().ToLower(),
-            headerText = HeaderText,
+            field = Field,
+            dataType = DataType?.ToString().ToLower(),
+            header = Header,
             width = Width,
             hidden = Hidden,
             resizable = Resizable,
-            sort = ConvertSortConfig(Sort),
-            filter = ConvertFilterConfig(Filter)
+            sortable = Sortable,
+            sortingCaseSensitive = SortingCaseSensitive,
+            filterable = Filterable,
+            filteringCaseSensitive = FilteringCaseSensitive
         };
-    }
-
-    private static object ConvertSortConfig(object sort)
-    {
-        if (sort == null) return null;
-        if (sort is bool b) return b;
-        if (sort is IgbColumnSortConfiguration config)
-        {
-            return new
-            {
-                caseSensitive = config.CaseSensitive
-                // Note: Comparer functions cannot be serialized
-            };
-        }
-        return sort;
-    }
-
-    private static object ConvertFilterConfig(object filter)
-    {
-        if (filter == null) return null;
-        if (filter is bool b) return b;
-        if (filter is IgbColumnFilterConfiguration config)
-        {
-            return new
-            {
-                caseSensitive = config.CaseSensitive
-            };
-        }
-        return filter;
     }
 }
 

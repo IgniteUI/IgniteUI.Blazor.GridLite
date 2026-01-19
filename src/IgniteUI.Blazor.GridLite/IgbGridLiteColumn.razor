@@ -1,0 +1,14 @@
+@namespace IgniteUI.Blazor.Controls
+
+<igc-grid-lite-column 
+    field="@Field"
+    header="@Header"
+    dataType="@(DataType?.ToString().ToLower())"
+    width="@Width"
+    hidden="@(Hidden ? "true" : null)"
+    resizable="@(Resizable ? "true" : null)"
+    sortable="@(Sortable ? "true" : null)"
+    sorting-case-sensitive="@(SortingCaseSensitive == true ? "true" : null)"
+    filterable="@(Filterable ? "true" : null)"
+    filtering-case-sensitive="@(FilteringCaseSensitive == true ? "true" : null)">
+</igc-grid-lite-column>
