@@ -30,8 +30,7 @@ This release updates the wrapper to use `igniteui-grid-lite` version `0.3.1`, wh
 ```
 
 - Column configuration is now **declarative** using `<IgbGridLiteColumn>` child elements
-- The `Columns` parameter is now **obsolete** (marked with `[Obsolete]` attribute)
-- `UpdateColumnsAsync()` method has been **removed** - columns can be updated declaratively using conditional rendering
+- The `Columns` parameter and `UpdateColumnsAsync()` method have been **removed** - columns can be updated declaratively using conditional rendering
 
 #### 2. Column Property Renames
 
@@ -167,8 +166,4 @@ The following types have been removed as they are no longer needed:
 - `IgbGridLiteSortingOptions.TriState` property
 - `IgbColumnSortConfiguration` class
 - `IgbColumnFilterConfiguration` class
-- `UpdateColumnsAsync()` method from `IgbGridLite`
-
-### Deprecated
-
-- `Columns` parameter on `IgbGridLite` is now obsolete - use declarative `<IgbGridLiteColumn>` elements instead
+- `Columns` parameter and `UpdateColumnsAsync()` method from `IgbGridLite` - use declarative `<IgbGridLiteColumn>` elements instead

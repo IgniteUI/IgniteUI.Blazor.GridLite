@@ -53,7 +53,7 @@ public partial class IgbGridLiteColumn : ComponentBase
     /// Whether sorting should be case sensitive for this column.
     /// </summary>
     [Parameter]
-    public bool? SortingCaseSensitive { get; set; }
+    public bool SortingCaseSensitive { get; set; }
 
     /// <summary>
     /// Whether the column is filterable.
@@ -65,5 +65,5 @@ public partial class IgbGridLiteColumn : ComponentBase
     /// Whether filtering should be case sensitive for this column.
     /// </summary>
     [Parameter]
-    public bool? FilteringCaseSensitive { get; set; }
+    public bool FilteringCaseSensitive { get; set; }
 }

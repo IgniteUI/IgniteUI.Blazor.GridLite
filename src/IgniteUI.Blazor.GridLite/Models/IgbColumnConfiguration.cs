@@ -6,49 +6,49 @@ namespace IgniteUI.Blazor.Controls;
 public class IgbColumnConfiguration
 {
     [JsonPropertyName("field")]
-    public string Field { get; set; }
+    public string? Field { get; init; }
 
     [JsonPropertyName("dataType")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public GridLiteColumnDataType? DataType { get; set; }
+    public GridLiteColumnDataType? DataType { get; init; }
 
     [JsonPropertyName("header")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string Header { get; set; }
+    public string? Header { get; init; }
 
     [JsonPropertyName("width")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string Width { get; set; }
+    public string? Width { get; init; }
 
     [JsonPropertyName("hidden")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public bool Hidden { get; set; }
+    public bool Hidden { get; init; }
 
     [JsonPropertyName("resizable")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public bool Resizable { get; set; }
+    public bool Resizable { get; init; }
 
     [JsonPropertyName("sortable")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public bool Sortable { get; set; }
+    public bool Sortable { get; init; }
 
     [JsonPropertyName("sortingCaseSensitive")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public bool? SortingCaseSensitive { get; set; }
+    public bool SortingCaseSensitive { get; init; }
 
     [JsonPropertyName("filterable")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public bool Filterable { get; set; }
+    public bool Filterable { get; init; }
 
     [JsonPropertyName("filteringCaseSensitive")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public bool? FilteringCaseSensitive { get; set; }
+    public bool FilteringCaseSensitive { get; init; }
 
     [JsonIgnore]
-    internal Func<IgbGridLiteHeaderContext<object>, object> HeaderTemplate { get; set; }
+    internal Func<IgbGridLiteHeaderContext<object>, object> HeaderTemplate { get; init; }
 
     [JsonIgnore]
-    internal Func<IgbGridLiteCellContext<object>, object> CellTemplate { get; set; }
+    internal Func<IgbGridLiteCellContext<object>, object> CellTemplate { get; init; }
 
     /// <summary>
     /// Converts the column configuration to a JavaScript-compatible format.

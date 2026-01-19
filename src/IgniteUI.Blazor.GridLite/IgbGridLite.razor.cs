@@ -20,16 +20,6 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     public IEnumerable<TItem>? Data { get; set; }
 
     /// <summary>
-    /// Column configurations for the grid
-    /// </summary>
-    /// <remarks>
-    /// This parameter is obsolete. Use declarative columns with IgbGridLiteColumn instead.
-    /// </remarks>
-    [Parameter]
-    [Obsolete("Use declarative columns with IgbGridLiteColumn instead. This property will be removed in a future version.")]
-    public List<IgbColumnConfiguration>? Columns { get; set; }
-
-    /// <summary>
     /// Child content for declarative column definitions
     /// </summary>
     [Parameter]
@@ -180,13 +170,6 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
 
         if (isInitialized)
         {
-            // Check if each parameter changed:
-            if (parameters.TryGetValue<List<IgbColumnConfiguration>?>(nameof(Columns), out var newColumns) 
-                && !ReferenceEquals(Columns, newColumns))
-            {
-                updateConfig["columns"] = newColumns?.Select(c => c.ToJsConfig()).ToList() ?? new List<object>();
-            }
-            
             if (parameters.TryGetValue<IEnumerable<TItem>?>(nameof(Data), out var newData) 
                 && !ReferenceEquals(Data, newData))
             {
@@ -248,7 +231,6 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
         {
             id = gridId,
             data = Data,
-            columns = Columns?.Select(c => c.ToJsConfig()).ToList() ?? [],
             autoGenerate = AutoGenerate,
             sortingOptions = SortingOptions,
             sortingExpressions = SortingExpressions,
@@ -355,23 +337,13 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     }
 
     /// <summary>
-    /// Returns a column configuration for a given column field.
-    /// </summary>
-    /// <param name="field">The column field to retrieve</param>
-    /// <returns>The column configuration if found, otherwise null</returns>
-    public virtual IgbColumnConfiguration GetColumn(string field)
-    {
-        return Columns?.FirstOrDefault(c => c.Field == field);
-    }
-
-    /// <summary>
-    /// Returns a column configuration for a given column index.
+    /// Returns the current column configuration list.
     /// </summary>
     /// <param name="index">The zero-based column index</param>
     /// <returns>The column configuration if found, otherwise null</returns>
-    public virtual IgbColumnConfiguration GetColumn(int index)
+    public ValueTask<IgbColumnConfiguration[]> GetColumnsAsync()
     {
-        return Columns?.ElementAtOrDefault(index);
+        return this.InvokeJsAsync<IgbColumnConfiguration[]>("getColumns");
     }
 
     private async ValueTask<TValue> InvokeJsAsync<TValue>(string identifier, params object[] args)
