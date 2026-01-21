@@ -39,7 +39,7 @@ jobs:
         run: dotnet restore src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj
 
       - name: Build
-        run: dotnet build src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj --configuration Release -p:RunNodeBuild=false -p:GeneratePackageOnBuild=false
+        run: dotnet build src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj --configuration Release -p:Version=${VERSION} -p:RunNodeBuild=false -p:GeneratePackageOnBuild=false
 
       - name: Pack NuGet package
         run: dotnet pack src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj --configuration Release --no-build --no-restore -p:PackageVersion=${VERSION} -o ./artifacts
