@@ -4,6 +4,9 @@ on:
   release:
     types: [created]
 
+env:
+  VERSION: ${{ github.ref_name }}
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -24,11 +27,6 @@ jobs:
           cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Set version from release tag
-      - run: |
-          echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
-          echo ${VERSION}
-
       - run: npm ci
         working-directory: src/IgniteUI.Blazor.GridLite
 
@@ -46,8 +44,10 @@ jobs:
 
       # sign package:
       - name: Restore signing certificate
+        env:
+            SIGNING_CERTIFICATE_2023_2026: ${{ secrets.SIGNING_CERTIFICATE_2023_2026 }}
         run: |
-          echo "${{ env.SIGNING_CERTIFICATE_2023_2026 }}" | base64 --decode > signingcert.pfx
+          echo $SIGNING_CERTIFICATE_2023_2026 | base64 --decode > signingcert.pfx
 
       - name: Sign NuGet package
         run: dotnet nuget sign "./artifacts/*.nupkg" \
