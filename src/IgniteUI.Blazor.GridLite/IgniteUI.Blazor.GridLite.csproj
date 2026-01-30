@@ -1,6 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
+    <!-- Custom props -->
+    <RunNodeBuild>true</RunNodeBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <PackageId>IgniteUI.Blazor.GridLite</PackageId>
@@ -57,7 +62,7 @@
     <Exec Command="npm install" WorkingDirectory="$(MSBuildProjectDirectory)" Condition="!Exists('$(NodeModulesPath)')" />
   </Target>
 
-  <Target Name="BuildJavaScriptBundle" BeforeTargets="BeforeBuild">
+  <Target Name="BuildJavaScriptBundle" BeforeTargets="BeforeBuild" Condition="'$(RunNodeBuild)' == 'true'">
     <Exec Command="npm run build" WorkingDirectory="$(MSBuildProjectDirectory)" />
   </Target>
 
