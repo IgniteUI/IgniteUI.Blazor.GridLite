@@ -50,10 +50,13 @@ jobs:
           echo $SIGNING_CERTIFICATE_2023_2026 | base64 --decode > signingcert.pfx
 
       - name: Sign NuGet package
+        env:
+            SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.SIGNING_CERTIFICATE_PASSWORD }}
+            SIGNING_CERTIFICATE_TIMESTAMP_URL: ${{ vars.SIGNING_CERTIFICATE_TIMESTAMP_URL }}
         run: dotnet nuget sign "./artifacts/*.nupkg" \
               --certificate-path signingcert.pfx \
-              --certificate-password "${{ env.SIGNING_CERTIFICATE_PASSWORD }}" \
-              --timestamper "${{ env.SIGNING_CERTIFICATE_TIMESTAMP_URL }}"
+              --certificate-password "$SIGNING_CERTIFICATE_PASSWORD" \
+              --timestamper "$SIGNING_CERTIFICATE_TIMESTAMP_URL"
 
       # Get a short-lived NuGet API key
       - name: NuGet login (OIDC → temp API key)
@@ -64,4 +67,4 @@ jobs:
 
       # Push the package
       - name: NuGet push
-        run: dotnet nuget push artifacts/IgniteUI.Blazor.GridLite.${VERSION}.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push artifacts/IgniteUI.Blazor.GridLite.${VERSION}.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source "https://api.nuget.org/v3/index.json"
