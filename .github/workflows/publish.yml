@@ -1,0 +1,71 @@
+name: Publish NuGet Package
+
+on:
+  release:
+    types: [created]
+
+env:
+  VERSION: ${{ github.ref_name }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: NuGet Deploy
+    permissions:
+      id-token: write  # enable GitHub OIDC token issuance for this job
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: npm ci
+        working-directory: src/IgniteUI.Blazor.GridLite
+
+      - run: npm run build
+        working-directory: src/IgniteUI.Blazor.GridLite
+
+      - name: Restore dependencies
+        run: dotnet restore src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj
+
+      - name: Build
+        run: dotnet build src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj --configuration Release -p:Version=${VERSION} -p:RunNodeBuild=false -p:GeneratePackageOnBuild=false
+
+      - name: Pack NuGet package
+        run: dotnet pack src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj --configuration Release --no-build --no-restore -p:PackageVersion=${VERSION} -o ./artifacts
+
+      # sign package:
+      - name: Restore signing certificate
+        env:
+            SIGNING_CERTIFICATE_2023_2026: ${{ secrets.SIGNING_CERTIFICATE_2023_2026 }}
+        run: |
+          echo $SIGNING_CERTIFICATE_2023_2026 | base64 --decode > signingcert.pfx
+
+      - name: Sign NuGet package
+        env:
+            SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.SIGNING_CERTIFICATE_PASSWORD }}
+            SIGNING_CERTIFICATE_TIMESTAMP_URL: ${{ vars.SIGNING_CERTIFICATE_TIMESTAMP_URL }}
+        run: |
+            dotnet nuget sign "./artifacts/*.nupkg" \
+              --certificate-path signingcert.pfx \
+              --certificate-password "${SIGNING_CERTIFICATE_PASSWORD}" \
+              --timestamper "${SIGNING_CERTIFICATE_TIMESTAMP_URL}"
+
+      # Get a short-lived NuGet API key
+      - name: NuGet login (OIDC → temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.INFRAGISTICS_NUGET_ORG_USER }}
+
+      # Push the package
+      - name: NuGet push
+        run: dotnet nuget push artifacts/IgniteUI.Blazor.GridLite.${VERSION}.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source "https://api.nuget.org/v3/index.json"
