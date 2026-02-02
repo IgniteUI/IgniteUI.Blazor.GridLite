@@ -21,8 +21,6 @@ window.blazor_igc_grid_lite = {
             IgcGridLite.register();
         }
 
-        this.destroyGrid(config.id);
-
         gridElement.data = config.data;
 
         if (config.autoGenerate !== undefined) {
@@ -162,10 +160,6 @@ window.blazor_igc_grid_lite = {
     destroyGrid(id) {
         const grid = this.grids.get(id);
         if (grid) {
-            const parent = grid.parentNode;
-            if (parent) {
-                parent.removeChild(grid);
-            }
             this.grids.delete(id);
             this.dotNetRefs.delete(id);
         }
