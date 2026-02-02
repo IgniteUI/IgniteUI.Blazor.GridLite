@@ -10,6 +10,7 @@ env:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    environment: NuGet Deploy
     permissions:
       id-token: write  # enable GitHub OIDC token issuance for this job
 
