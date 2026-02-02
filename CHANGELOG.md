@@ -5,7 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## Unreleased
+
+
+## 0.4.0 - 2026-02-02
 
 This release updates to `igniteui-grid-lite` version `0.4.0` with a new declarative column API.
 
@@ -52,6 +55,3 @@ This release updates to `igniteui-grid-lite` version `0.4.0` with a new declarat
 - **BREAKING**: `Columns` parameter and `UpdateColumnsAsync()` method - use declarative `<IgbGridLiteColumn>` elements with conditional rendering instead
 - **BREAKING**: `IgbColumnSortConfiguration` and `IgbColumnFilterConfiguration` classes
 - **BREAKING**: `IgbGridLiteSortingOptions.TriState` property. Tri-state sorting is always enabled
-
-[Unreleased]: https://github.com/IgniteUI/IgniteUI.Blazor.GridLite/compare/v0.3.1...HEAD
-[0.3.1]: https://github.com/IgniteUI/IgniteUI.Blazor.GridLite/releases/tag/v0.3.1
