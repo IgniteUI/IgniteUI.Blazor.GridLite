@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.6.0 - 2026-03-04
+
+This release updates to `igniteui-grid-lite` version `0.6.0` ([see changelog](https://github.com/IgniteUI/igniteui-grid-lite/blob/master/CHANGELOG.md)) with significant wrapper changes listed below:
+
+### Added
+
+- New `AdoptRootStyles` parameter for  property for adopting document-level styles into shadow DOM when using cell and header templates.
+- Updated theming and component size handling across grid styles - now supports sizing via the `--ig-size` CSS variable.
 
 ## 0.4.0 - 2026-02-02
 

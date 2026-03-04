@@ -42,6 +42,13 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     public bool AutoGenerate { get; set; } = false;
 
     /// <summary>
+    /// Whether the grid will adopt document-level styles into its shadow DOM.
+    /// Useful when using cell and header templates that rely on styles defined at the document level.
+    /// </summary>
+    [Parameter]
+    public bool AdoptRootStyles { get; set; } = false;
+
+    /// <summary>
     /// Sort options property for the grid.
     /// </summary>
     [Parameter]
@@ -181,6 +188,12 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
             {
                 updateConfig["autoGenerate"] = newAutoGenerate;
             }
+
+            if (parameters.TryGetValue<bool>(nameof(AdoptRootStyles), out var newAdoptRootStyles)
+                && AdoptRootStyles != newAdoptRootStyles)
+            {
+                updateConfig["adoptRootStyles"] = newAdoptRootStyles;
+            }
             
             if (parameters.TryGetValue<IgbGridLiteSortingOptions?>(nameof(SortingOptions), out var newSortOptions)
                 && !ReferenceEquals(SortingOptions, newSortOptions))
@@ -232,9 +245,10 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
             id = gridId,
             data = Data,
             autoGenerate = AutoGenerate,
+            adoptRootStyles = AdoptRootStyles,
             sortingOptions = SortingOptions,
             sortingExpressions = SortingExpressions,
-            filterExpressions = FilterExpressions
+            filterExpressions = FilterExpressions,
         };
 
         var json = JsonSerializer.Serialize(config, GridJsonSerializerOptions);

@@ -27,6 +27,10 @@ window.blazor_igc_grid_lite = {
             gridElement.autoGenerate = config.autoGenerate;
         }
 
+        if (config.adoptRootStyles !== undefined) {
+            gridElement.adoptRootStyles = config.adoptRootStyles;
+        }
+
         if (config.sortingOptions) {
             gridElement.sortingOptions = config.sortingOptions;
         }
@@ -89,6 +93,10 @@ window.blazor_igc_grid_lite = {
 
         if (config.autoGenerate !== undefined) {
             grid.autoGenerate = config.autoGenerate;
+        }
+
+        if (config.adoptRootStyles !== undefined) {
+            grid.adoptRootStyles = config.adoptRootStyles;
         }
 
         if (config.sortingOptions !== undefined) {
