@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-## 0.7.1 - 2026-04-28
+## 0.7.1 - 2026-04-29
 
 This release updates to `igniteui-grid-lite` version `0.7.1` ([see changelog](https://github.com/IgniteUI/igniteui-grid-lite/blob/master/CHANGELOG.md)) with the following bug fixes:
 
