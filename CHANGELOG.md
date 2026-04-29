@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.7.1 - 2026-04-29
+
+This release updates to `igniteui-grid-lite` version `0.7.1` ([see changelog](https://github.com/IgniteUI/igniteui-grid-lite/blob/master/CHANGELOG.md)) with the following bug fixes:
+
+### Fixed
+
+- `filterExpressions` and `sortingExpressions` property setters now replace the existing state instead of being additive.
+- Setting initial filter/sort state without column configuration no longer crashes.
+- Adopted styles are now correctly applied on connected callback.
+
 ## 0.6.0 - 2026-03-04
 
 This release updates to `igniteui-grid-lite` version `0.6.0` ([see changelog](https://github.com/IgniteUI/igniteui-grid-lite/blob/master/CHANGELOG.md)) with significant wrapper changes listed below:
