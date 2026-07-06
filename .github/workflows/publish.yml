@@ -74,7 +74,7 @@ jobs:
       - name: Validate DLL signatures
         shell: pwsh
         run: |
-          $dlls = Get-ChildItem -Path "${{ github.workspace }}\bin\${{ env.BUILD_CONFIGURATION }}" -Filter "*.dll" -Recurse
+          $dlls = Get-ChildItem -Path "${{ github.workspace }}/src/IgniteUI.Blazor.GridLite/bin/${{ env.BUILD_CONFIGURATION }}" -Filter "*.dll" -Recurse
           $failed = @()
           foreach ($dll in $dlls) {
             $sig = Get-AuthenticodeSignature $dll.FullName
