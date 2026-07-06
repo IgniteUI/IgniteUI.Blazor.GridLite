@@ -66,8 +66,8 @@ jobs:
       - name: Sign DLLs
         shell: pwsh
         run: >
-          ./sign/sign code azure-key-vault "src/IgniteUI.Blazor.GridLite/**/*.dll"
-          --base-directory "${{ github.workspace }}/bin/${{ env.BUILD_CONFIGURATION }}"
+          ./sign/sign code azure-key-vault "**/*.dll"
+          --base-directory "${{ github.workspace }}/src/IgniteUI.Blazor.GridLite/bin/${{ env.BUILD_CONFIGURATION }}"
           --azure-key-vault-url "${{ secrets.AZURE_KEYVAULT_URL }}"
           --azure-key-vault-certificate "${{ secrets.AZURE_KEYVAULT_CERTIFICATE }}"
 
