@@ -51,7 +51,7 @@ jobs:
         run: dotnet restore src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj
 
       - name: Build
-        run: dotnet build src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj --configuration ${BUILD_CONFIGURATION} -p:Version=${VERSION} -p:RunNodeBuild=false -p:GeneratePackageOnBuild=false
+        run: dotnet build src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj --configuration ${{ env.BUILD_CONFIGURATION }} -p:Version=${{ env.VERSION }} -p:RunNodeBuild=false -p:GeneratePackageOnBuild=false
 
       - name: Install Sign CLI
         run: dotnet tool install --tool-path ./sign --prerelease sign
@@ -89,7 +89,7 @@ jobs:
           Write-Host "All DLLs signed successfully."
 
       - name: Pack NuGet package
-        run: dotnet pack src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj --configuration {{ env.BUILD_CONFIGURATION }} --no-build --no-restore -p:PackageVersion=${VERSION} -o ./artifacts
+        run: dotnet pack src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --no-restore -p:PackageVersion=${{ env.VERSION }} -o ./artifacts
 
       - name: Sign NuGet package
         shell: pwsh
@@ -136,4 +136,4 @@ jobs:
       # Push the package
       - name: NuGet push
         if: false # temp disable while working in the branch
-        run: dotnet nuget push artifacts/IgniteUI.Blazor.GridLite.${VERSION}.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source "https://api.nuget.org/v3/index.json"
+        run: dotnet nuget push artifacts/IgniteUI.Blazor.GridLite.${{ env.VERSION }}.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source "https://api.nuget.org/v3/index.json"
