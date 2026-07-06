@@ -3,9 +3,20 @@ name: Publish NuGet Package
 on:
   release:
     types: [created]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "default: 0.7.2-alpha.0"
+        required: false
+        default: ""
+      angular_regular_version:
+        description: "Angular regular version | default: 21.2.0 (leave empty to skip)"
+        required: false
+        default: ""
 
 env:
-  VERSION: ${{ github.ref_name }}
+  VERSION: ${{ inputs.version || github.ref_name }}
+  BUILD_CONFIGURATION: Release
 
 jobs:
   publish:
@@ -13,6 +24,9 @@ jobs:
     environment: NuGet Deploy
     permissions:
       id-token: write  # enable GitHub OIDC token issuance for this job
+      contents: read
+      attestations: write
+
 
     steps:
       - uses: actions/checkout@v4
@@ -37,35 +51,89 @@ jobs:
         run: dotnet restore src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj
 
       - name: Build
-        run: dotnet build src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj --configuration Release -p:Version=${VERSION} -p:RunNodeBuild=false -p:GeneratePackageOnBuild=false
+        run: dotnet build src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj --configuration {{ env.BUILD_CONFIGURATION }} -p:Version=${VERSION} -p:RunNodeBuild=false -p:GeneratePackageOnBuild=false
+
+      - name: Install Sign CLI
+        run: dotnet tool install --tool-path ./sign --prerelease sign
+
+      - name: Authenticate to Azure
+        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43  # v3.0.0
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Sign DLLs
+        shell: pwsh
+        run: >
+          ./sign/sign code azure-key-vault "src/IgniteUI.Blazor.GridLite/**/*.dll"
+          --base-directory "${{ github.workspace }}/bin/${{ env.BUILD_CONFIGURATION }}"
+          --azure-key-vault-url "${{ secrets.AZURE_KEYVAULT_URL }}"
+          --azure-key-vault-certificate "${{ secrets.AZURE_KEYVAULT_CERTIFICATE }}"
+
+      - name: Validate DLL signatures
+        shell: pwsh
+        run: |
+          $dlls = Get-ChildItem -Path "${{ github.workspace }}\bin\${{ env.BUILD_CONFIGURATION }}" -Filter "*.dll" -Recurse
+          $failed = @()
+          foreach ($dll in $dlls) {
+            $sig = Get-AuthenticodeSignature $dll.FullName
+            if ($sig.Status -ne 'Valid') {
+              $failed += $dll.FullName
+            }
+          }
+          if ($failed.Count -gt 0) {
+            Write-Error "Unsigned DLLs found:`n$($failed -join "`n")"
+            exit 1
+          }
+          Write-Host "All DLLs signed successfully."
 
       - name: Pack NuGet package
-        run: dotnet pack src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj --configuration Release --no-build --no-restore -p:PackageVersion=${VERSION} -o ./artifacts
-
-      # sign package:
-      - name: Restore signing certificate
-        env:
-            SIGNING_CERTIFICATE_2023_2026: ${{ secrets.SIGNING_CERTIFICATE_2023_2026 }}
-        run: |
-          echo $SIGNING_CERTIFICATE_2023_2026 | base64 --decode > signingcert.pfx
+        run: dotnet pack src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj --configuration {{ env.BUILD_CONFIGURATION }} --no-build --no-restore -p:PackageVersion=${VERSION} -o ./artifacts
 
       - name: Sign NuGet package
-        env:
-            SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.SIGNING_CERTIFICATE_PASSWORD }}
-            SIGNING_CERTIFICATE_TIMESTAMP_URL: ${{ vars.SIGNING_CERTIFICATE_TIMESTAMP_URL }}
-        run: |
-            dotnet nuget sign "./artifacts/*.nupkg" \
-              --certificate-path signingcert.pfx \
-              --certificate-password "${SIGNING_CERTIFICATE_PASSWORD}" \
-              --timestamper "${SIGNING_CERTIFICATE_TIMESTAMP_URL}"
+        shell: pwsh
+        run: >
+          ./sign/sign code azure-key-vault "*.nupkg"
+          --base-directory "${{ github.workspace }}/artifacts"
+          --azure-key-vault-url "${{ secrets.AZURE_KEYVAULT_URL }}"
+          --azure-key-vault-certificate "${{ secrets.AZURE_KEYVAULT_CERTIFICATE }}"
 
+      - name: Validate NuGet package signature
+        run: dotnet nuget verify "${{ github.workspace }}/artifacts/IgniteUI.Blazor.GridLite.${{ env.VERSION }}.nupkg"
+        
+      # sign package:
+#      - name: Restore signing certificate
+#        env:
+#            SIGNING_CERTIFICATE_2023_2026: ${{ secrets.SIGNING_CERTIFICATE_2023_2026 }}
+#        run: |
+#          echo $SIGNING_CERTIFICATE_2023_2026 | base64 --decode > signingcert.pfx
+
+#      - name: Sign NuGet package
+#        env:
+#            SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.SIGNING_CERTIFICATE_PASSWORD }}
+#            SIGNING_CERTIFICATE_TIMESTAMP_URL: ${{ vars.SIGNING_CERTIFICATE_TIMESTAMP_URL }}
+#        run: |
+#            dotnet nuget sign "./artifacts/*.nupkg" \
+#              --certificate-path signingcert.pfx \
+#              --certificate-password "${SIGNING_CERTIFICATE_PASSWORD}" \
+#              --timestamper "${SIGNING_CERTIFICATE_TIMESTAMP_URL}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: Generated NuGet Package 
+          path: ${{ github.workspace }}/artifacts
+          retention-days: 1
+          
       # Get a short-lived NuGet API key
       - name: NuGet login (OIDC → temp API key)
-        uses: NuGet/login@v1
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841   # v1
         id: login
         with:
           user: ${{ secrets.INFRAGISTICS_NUGET_ORG_USER }}
 
       # Push the package
       - name: NuGet push
+        if: false # temp disable while working in the branch
         run: dotnet nuget push artifacts/IgniteUI.Blazor.GridLite.${VERSION}.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source "https://api.nuget.org/v3/index.json"
