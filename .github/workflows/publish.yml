@@ -92,23 +92,6 @@ jobs:
       - name: Validate NuGet package signature
         run: dotnet nuget verify "${{ github.workspace }}/artifacts/IgniteUI.Blazor.GridLite.${{ env.VERSION }}.nupkg"
         
-      # sign package:
-#      - name: Restore signing certificate
-#        env:
-#            SIGNING_CERTIFICATE_2023_2026: ${{ secrets.SIGNING_CERTIFICATE_2023_2026 }}
-#        run: |
-#          echo $SIGNING_CERTIFICATE_2023_2026 | base64 --decode > signingcert.pfx
-
-#      - name: Sign NuGet package
-#        env:
-#            SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.SIGNING_CERTIFICATE_PASSWORD }}
-#            SIGNING_CERTIFICATE_TIMESTAMP_URL: ${{ vars.SIGNING_CERTIFICATE_TIMESTAMP_URL }}
-#        run: |
-#            dotnet nuget sign "./artifacts/*.nupkg" \
-#              --certificate-path signingcert.pfx \
-#              --certificate-password "${SIGNING_CERTIFICATE_PASSWORD}" \
-#              --timestamper "${SIGNING_CERTIFICATE_TIMESTAMP_URL}"
-
       - name: Upload artifact
         uses: actions/upload-artifact@v7.0.1
         with:
