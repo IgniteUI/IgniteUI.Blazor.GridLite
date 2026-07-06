@@ -3,19 +3,9 @@ name: Publish NuGet Package
 on:
   release:
     types: [created]
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "default: 0.7.2-alpha.0"
-        required: false
-        default: ""
-      angular_regular_version:
-        description: "Angular regular version | default: 21.2.0 (leave empty to skip)"
-        required: false
-        default: ""
 
 env:
-  VERSION: ${{ inputs.version || github.ref_name }}
+  VERSION: ${{ github.ref_name }}
   BUILD_CONFIGURATION: Release
 
 jobs:
