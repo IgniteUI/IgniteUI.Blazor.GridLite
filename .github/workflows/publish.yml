@@ -15,8 +15,6 @@ jobs:
     permissions:
       id-token: write  # enable GitHub OIDC token issuance for this job
       contents: read
-      attestations: write
-
 
     steps:
       - uses: actions/checkout@v4
@@ -91,14 +89,7 @@ jobs:
 
       - name: Validate NuGet package signature
         run: dotnet nuget verify "${{ github.workspace }}/artifacts/IgniteUI.Blazor.GridLite.${{ env.VERSION }}.nupkg"
-        
-      - name: Upload artifact
-        uses: actions/upload-artifact@v7.0.1
-        with:
-          name: Generated NuGet Package 
-          path: ${{ github.workspace }}/artifacts
-          retention-days: 1
-          
+                 
       # Get a short-lived NuGet API key
       - name: NuGet login (OIDC → temp API key)
         uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841   # v1
@@ -108,5 +99,4 @@ jobs:
 
       # Push the package
       - name: NuGet push
-        if: false # temp disable while working in the branch
         run: dotnet nuget push artifacts/IgniteUI.Blazor.GridLite.${{ env.VERSION }}.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source "https://api.nuget.org/v3/index.json"
