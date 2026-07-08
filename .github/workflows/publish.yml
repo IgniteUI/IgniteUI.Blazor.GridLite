@@ -63,6 +63,10 @@ jobs:
         shell: pwsh
         run: |
           $dlls = Get-ChildItem -Path "${{ github.workspace }}/src/IgniteUI.Blazor.GridLite/bin/${{ env.BUILD_CONFIGURATION }}" -Filter "*.dll" -Recurse
+          if (-not $dlls -or $dlls.Count -eq 0) {
+            Write-Error "No DLLs found under '${{ github.workspace }}/src/IgniteUI.Blazor.GridLite/bin/${{ env.BUILD_CONFIGURATION }}' to validate."
+            exit 1
+          }
           $failed = @()
           foreach ($dll in $dlls) {
             $sig = Get-AuthenticodeSignature $dll.FullName
