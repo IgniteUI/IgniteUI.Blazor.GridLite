@@ -44,9 +44,6 @@ jobs:
       - name: Build
         run: dotnet build src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj --configuration ${{ env.BUILD_CONFIGURATION }} -p:Version=${{ env.VERSION }} -p:RunNodeBuild=false -p:GeneratePackageOnBuild=false
 
-      - name: Install Sign CLI
-        run: dotnet tool install --tool-path ./sign --prerelease sign
-
       - name: Authenticate to Azure
         uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43  # v3.0.0
         with:
