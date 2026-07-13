@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.9.0 - 2026-07-13
+
+This release updates to `igniteui-grid-lite` version `0.9.0` ([see changelog](https://github.com/IgniteUI/igniteui-grid-lite/blob/master/CHANGELOG.md)) with the following changes:
+
+### Added
+
+- Filtering row input enhancements with updated styles and refactored common logic.
+
+### Changed
+
+- Improved sort and filter performance for large data sets by precomputing sort keys and filter expression trees.
+- Updated body cell and row theming to use the latest `igniteui-theming` variables.
+- Updated `igniteui-webcomponents` to 7.2.0 and other dependencies.
+
+### Fixed
+
+- Body cell and row border styles now use the correct theme variables across default, odd, even, hover, and active states.
+
 ## 0.7.1 - 2026-04-29
 
 This release updates to `igniteui-grid-lite` version `0.7.1` ([see changelog](https://github.com/IgniteUI/igniteui-grid-lite/blob/master/CHANGELOG.md)) with the following bug fixes:
@@ -19,7 +37,7 @@ This release updates to `igniteui-grid-lite` version `0.7.1` ([see changelog](ht
 
 ## 0.6.0 - 2026-03-04
 
-This release updates to `igniteui-grid-lite` version `0.6.0` ([see changelog](https://github.com/IgniteUI/igniteui-grid-lite/blob/master/CHANGELOG.md)) with significant wrapper changes listed below:
+This release updates to `igniteui-grid-lite` version `0.6.0` ([see changelog](https://github.com/IgniteUI/igniteui-grid-lite/blob/master/CHANGELOG.md)) with significant wrapper changes listed below.
 
 ### Added
 
