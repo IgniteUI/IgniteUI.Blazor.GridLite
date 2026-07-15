@@ -58,6 +58,8 @@ jobs:
           --base-directory "${{ github.workspace }}/src/IgniteUI.Blazor.GridLite/bin/${{ env.BUILD_CONFIGURATION }}"
           --azure-key-vault-url "${{ secrets.AZURE_KEYVAULT_URL }}"
           --azure-key-vault-certificate "${{ secrets.AZURE_KEYVAULT_CERTIFICATE }}"
+          --azure-credential-type azure-cli
+          --verbosity Warning
 
       - name: Validate DLL signatures
         shell: pwsh
@@ -90,6 +92,8 @@ jobs:
           --base-directory "${{ github.workspace }}/artifacts"
           --azure-key-vault-url "${{ secrets.AZURE_KEYVAULT_URL }}"
           --azure-key-vault-certificate "${{ secrets.AZURE_KEYVAULT_CERTIFICATE }}"
+          --azure-credential-type azure-cli
+          --verbosity Warning
 
       - name: Validate NuGet package signature
         run: dotnet nuget verify "${{ github.workspace }}/artifacts/IgniteUI.Blazor.GridLite.${{ env.VERSION }}.nupkg"
