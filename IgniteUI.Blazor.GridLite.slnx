@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="demo/GridLite.DemoApp/GridLite.DemoApp.csproj" />
+  <Project Path="src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj" />
+</Solution>
