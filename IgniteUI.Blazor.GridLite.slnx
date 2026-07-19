@@ -1,7 +1,12 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".runsettings" />
+  </Folder>
   <Project Path="demo/GridLite.DemoApp/GridLite.DemoApp.csproj" />
   <Project Path="src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj" />
   <Folder Name="/tests/">
+    <Project Path="tests/IgniteUI.Blazor.GridLite.IntegrationTests/IgniteUI.Blazor.GridLite.IntegrationTests.csproj" />
+    <Project Path="tests/IgniteUI.Blazor.GridLite.TestBed/IgniteUI.Blazor.GridLite.TestBed.csproj" />
     <Project Path="tests/IgniteUI.Blazor.GridLite.Tests/IgniteUI.Blazor.GridLite.Tests.csproj" />
   </Folder>
 </Solution>
