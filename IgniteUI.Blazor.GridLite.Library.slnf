@@ -2,7 +2,8 @@
   "solution": {
     "path": "IgniteUI.Blazor.GridLite.slnx",
     "projects": [
-      "src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj"
+      "src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj",
+      "tests/IgniteUI.Blazor.GridLite.Tests/IgniteUI.Blazor.GridLite.Tests.csproj"
     ]
   }
 }
