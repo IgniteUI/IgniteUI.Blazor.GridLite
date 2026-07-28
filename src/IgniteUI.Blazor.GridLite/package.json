@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "terser": "^5.44.1",
-    "vite": "^7.3.5"
+    "vite": "^7.3.6"
   },
   "dependencies": {
     "igniteui-grid-lite": "~0.9.0"
