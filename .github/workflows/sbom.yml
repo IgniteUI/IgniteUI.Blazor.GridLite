@@ -1,0 +1,77 @@
+name: Generate SBOM
+
+# Runs only when the 'generate sbom' label is added to a PR.
+on:
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sbom-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  BUILD_CONFIGURATION: Release
+  PACKAGE_VERSION: 0.0.0-pr.${{ github.event.pull_request.number }}
+
+jobs:
+  sbom:
+    if: github.event.label.name == 'generate sbom'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
+      - uses: actions/setup-node@v6.4.0
+        with:
+          node-version: '22'
+
+      - run: npm ci
+        working-directory: src/IgniteUI.Blazor.GridLite
+
+      - run: npm run build
+        working-directory: src/IgniteUI.Blazor.GridLite
+
+      # GenerateSBOM=true pulls in Microsoft.Sbom.Targets (conditional PackageReference)
+      # and embeds _manifest/spdx_2.2 into the nupkg after Pack.
+      - name: Pack with SBOM
+        run: >
+          dotnet pack src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj
+          --configuration ${{ env.BUILD_CONFIGURATION }}
+          -p:RunNodeBuild=false
+          -p:GeneratePackageOnBuild=false
+          -p:GenerateSBOM=true
+          -p:Version=${{ env.PACKAGE_VERSION }}
+          -o ./artifacts
+
+      - name: Extract and verify SBOM
+        run: |
+          set -euo pipefail
+          nupkg=(artifacts/*.nupkg)
+          unzip -q "${nupkg[0]}" "_manifest/*" -d extracted
+          test -s extracted/_manifest/spdx_2.2/manifest.spdx.json
+          test -s extracted/_manifest/spdx_2.2/manifest.spdx.json.sha256
+          echo "SBOM verified in ${nupkg[0]}"
+
+      - name: Upload NuGet package (with embedded SBOM)
+        uses: actions/upload-artifact@v7
+        with:
+          name: nupkg-with-sbom
+          path: artifacts/*.nupkg
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Upload SBOM files
+        uses: actions/upload-artifact@v7
+        with:
+          name: sbom-spdx_2.2
+          path: extracted/_manifest/spdx_2.2
+          retention-days: 1
+          if-no-files-found: error
