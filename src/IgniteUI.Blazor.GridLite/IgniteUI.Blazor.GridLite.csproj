@@ -53,11 +53,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.0" />
   </ItemGroup>
 
-  <!-- Opt-in SBOM generation: embeds _manifest/spdx_2.2 into the nupkg after Pack. Enable with -p:GenerateSBOM=true -->
-  <ItemGroup Condition="'$(GenerateSBOM)' == 'true'">
-    <PackageReference Include="Microsoft.Sbom.Targets" Version="4.1.5" PrivateAssets="All" />
-  </ItemGroup>
-
 
   <!-- Ensure JavaScript bundle is built before compilation -->
   <Target Name="EnsureNodeModules" BeforeTargets="BuildJavaScriptBundle">
