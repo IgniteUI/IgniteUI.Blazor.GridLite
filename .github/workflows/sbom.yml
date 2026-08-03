@@ -1,24 +1,28 @@
 name: Generate SBOM
 
-# Runs only when the 'generate sbom' label is added to a PR.
+# Runs when the 'generate sbom' label is added to a PR, or when a release is published.
+# Uses the sbom-tool CLI (version pinned in .config/sbom-tool/dotnet-tools.json)
+# so the NuGet package is never modified and no SBOM is embedded in it.
 on:
   pull_request:
     types: [labeled]
+  release:
+    types: [published]
 
 permissions:
   contents: read
 
 concurrency:
-  group: sbom-${{ github.event.pull_request.number }}
+  group: sbom-${{ github.event_name == 'release' && github.ref_name || github.event.pull_request.number }}
   cancel-in-progress: true
 
 env:
   BUILD_CONFIGURATION: Release
-  PACKAGE_VERSION: 0.0.0-pr.${{ github.event.pull_request.number }}
+  PACKAGE_VERSION: ${{ github.event_name == 'release' && github.ref_name || format('0.0.0-pr.{0}', github.event.pull_request.number) }}
 
 jobs:
   sbom:
-    if: github.event.label.name == 'generate sbom'
+    if: github.event_name == 'release' || github.event.label.name == 'generate sbom'
     runs-on: ubuntu-latest
 
     steps:
@@ -39,31 +43,44 @@ jobs:
       - run: npm run build
         working-directory: src/IgniteUI.Blazor.GridLite
 
-      # GenerateSBOM=true pulls in Microsoft.Sbom.Targets (conditional PackageReference)
-      # and embeds _manifest/spdx_2.2 into the nupkg after Pack.
-      - name: Pack with SBOM
+      - name: Pack NuGet package
         run: >
           dotnet pack src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj
           --configuration ${{ env.BUILD_CONFIGURATION }}
           -p:RunNodeBuild=false
           -p:GeneratePackageOnBuild=false
-          -p:GenerateSBOM=true
           -p:Version=${{ env.PACKAGE_VERSION }}
           -o ./artifacts
 
-      - name: Extract and verify SBOM
+      # Dedicated nested manifest keeps sbom-tool out of the root 'dotnet tool restore' used by publish.yml
+      - name: Restore sbom-tool (pinned)
+        run: dotnet tool restore --tool-manifest .config/sbom-tool/dotnet-tools.json
+
+      # -b: the shipped artifact (nupkg) gets listed with its hash in the SBOM's files section
+      # -bc: dependency detection scans the project dir (NuGet + npm)
+      - name: Generate SBOM
+        working-directory: .config/sbom-tool
+        run: >
+          dotnet tool run sbom-tool -- generate
+          -b ${{ github.workspace }}/artifacts
+          -bc ${{ github.workspace }}/src/IgniteUI.Blazor.GridLite
+          -pn IgniteUI.Blazor.GridLite
+          -pv ${{ env.PACKAGE_VERSION }}
+          -ps Infragistics
+          -nsb http://spdx.org/spdxdocs/IgniteUI.Blazor.GridLite
+          -V Information
+
+      - name: Verify SBOM
         run: |
           set -euo pipefail
-          nupkg=(artifacts/*.nupkg)
-          unzip -q "${nupkg[0]}" "_manifest/*" -d extracted
-          test -s extracted/_manifest/spdx_2.2/manifest.spdx.json
-          test -s extracted/_manifest/spdx_2.2/manifest.spdx.json.sha256
-          echo "SBOM verified in ${nupkg[0]}"
+          test -s artifacts/_manifest/spdx_2.2/manifest.spdx.json
+          test -s artifacts/_manifest/spdx_2.2/manifest.spdx.json.sha256
+          echo "SBOM generated successfully."
 
-      - name: Upload NuGet package (with embedded SBOM)
+      - name: Upload NuGet package
         uses: actions/upload-artifact@v7
         with:
-          name: nupkg-with-sbom
+          name: nupkg
           path: artifacts/*.nupkg
           retention-days: 1
           if-no-files-found: error
@@ -72,6 +89,30 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: sbom-spdx_2.2
-          path: extracted/_manifest/spdx_2.2
+          path: artifacts/_manifest/spdx_2.2
           retention-days: 1
           if-no-files-found: error
+
+  attach-to-release:
+    if: github.event_name == 'release'
+    needs: sbom
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # required to upload release assets
+
+    steps:
+      - name: Download SBOM artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: sbom-spdx_2.2
+          path: spdx_2.2
+
+      - name: Attach SBOM to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          asset="IgniteUI.Blazor.GridLite.${TAG}.spdx_2.2.zip"
+          (cd spdx_2.2 && zip -r "../${asset}" .)
+          gh release upload "$TAG" "$asset" --clobber -R "${{ github.repository }}"
