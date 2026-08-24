@@ -20,6 +20,8 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Copyright>Infragistics</Copyright>
     <PackageProjectUrl>https://www.infragistics.com/products/ignite-ui-blazor</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/IgniteUI/IgniteUI.Blazor.GridLite</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
