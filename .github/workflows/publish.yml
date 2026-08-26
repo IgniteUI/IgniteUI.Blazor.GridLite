@@ -377,15 +377,19 @@ jobs:
           )
 
           foreach ($format in $formats) {
+            $manifestDirectory = Join-Path $env:GITHUB_WORKSPACE "sbom\$($format.Output)"
+            # sbom-tool requires the manifest directory to exist before generation.
+            New-Item -ItemType Directory -Path $manifestDirectory -Force | Out-Null
+
             Write-Host "Generating $($format.Version) SBOM..."
             dotnet tool run sbom-tool -- generate `
-              -b "$env:GITHUB_WORKSPACE\artifacts" `
-              -bc "$env:GITHUB_WORKSPACE\src\IgniteUI.Blazor.GridLite" `
-              -m "$env:GITHUB_WORKSPACE\sbom\$($format.Output)" `
-              -pn IgniteUI.Blazor.GridLite `
+              -b "$env:GITHUB_WORKSPACE\nupkg" `
+              -bc $env:GITHUB_WORKSPACE `
+              -m $manifestDirectory `
+              -pn Infragistics.QueryBuilder.Executor `
               -pv $env:VERSION `
-              -ps Infragistics `
-              -nsb http://spdx.org/spdxdocs/IgniteUI.Blazor.GridLite `
+              -ps "Infragistics Inc." `
+              -nsb http://spdx.org/spdxdocs/Infragistics.QueryBuilder.Executor `
               -mi $format.Version `
               -li true `
               -lto $env:SBOM_LICENSE_TIMEOUT_SECONDS `
