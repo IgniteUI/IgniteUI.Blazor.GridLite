@@ -15,6 +15,8 @@ env:
   VERSION: ${{ github.ref_name }}
   # Public, deliberately pinned identity. The strong-name counterpart lives in eng/IG.publickey.hex.
   EXPECTED_CERT_SUBJECT_CN: 'Infragistics, Inc.'
+  # Bound sbom-tool's external license lookup.
+  SBOM_LICENSE_TIMEOUT_SECONDS: '180'
 
 jobs:
   # Holds the strong-name key, but no OIDC token, no Key Vault access and no publishing rights.
@@ -24,8 +26,6 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
-    outputs:
-      manifest-sha256: ${{ steps.checksums.outputs.manifest-sha256 }}
 
     steps:
       - name: Checkout
@@ -83,14 +83,6 @@ jobs:
         shell: pwsh
         run: Remove-Item "${{ runner.temp }}\IG.StrongName.snk" -Force -ErrorAction SilentlyContinue
 
-      - name: Record build output checksums
-        id: checksums
-        shell: pwsh
-        run: >
-          .github/scripts/artifact-checksums.ps1 -Mode Write -ManifestPath build-output.sha256
-          -Path src/IgniteUI.Blazor.GridLite/bin, src/IgniteUI.Blazor.GridLite/obj,
-          src/IgniteUI.Blazor.GridLite/wwwroot/js, src/IgniteUI.Blazor.GridLite/wwwroot/css/themes
-
       - name: Upload build output
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -100,7 +92,6 @@ jobs:
             src/IgniteUI.Blazor.GridLite/obj/**
             src/IgniteUI.Blazor.GridLite/wwwroot/js/**
             src/IgniteUI.Blazor.GridLite/wwwroot/css/themes/**
-            build-output.sha256
           include-hidden-files: true
           retention-days: 1
           if-no-files-found: error
@@ -114,8 +105,6 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    outputs:
-      manifest-sha256: ${{ steps.checksums.outputs.manifest-sha256 }}
 
     steps:
       - name: Checkout
@@ -133,16 +122,7 @@ jobs:
         with:
           name: build-output
           path: .
-
-      - name: Verify build output
-        shell: pwsh
-        env:
-          EXPECTED_MANIFEST_HASH: ${{ needs.build.outputs.manifest-sha256 }}
-        run: >
-          .github/scripts/artifact-checksums.ps1 -Mode Verify -ManifestPath build-output.sha256
-          -Path src/IgniteUI.Blazor.GridLite/bin, src/IgniteUI.Blazor.GridLite/obj,
-          src/IgniteUI.Blazor.GridLite/wwwroot/js, src/IgniteUI.Blazor.GridLite/wwwroot/css/themes
-          -ExpectedManifestHash $env:EXPECTED_MANIFEST_HASH
+          digest-mismatch: error
 
       - name: Restore .NET local tools
         run: dotnet tool restore
@@ -200,14 +180,6 @@ jobs:
             "- Thumbprint: $($thumbprints.Keys -join ', ')"
           ) | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
 
-      - name: Record signed assembly checksums
-        id: checksums
-        shell: pwsh
-        run: >
-          .github/scripts/artifact-checksums.ps1 -Mode Write -ManifestPath signed-assemblies.sha256
-          -Path src/IgniteUI.Blazor.GridLite/bin, src/IgniteUI.Blazor.GridLite/obj,
-          src/IgniteUI.Blazor.GridLite/wwwroot/js, src/IgniteUI.Blazor.GridLite/wwwroot/css/themes
-
       - name: Upload signed assemblies
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -217,7 +189,6 @@ jobs:
             src/IgniteUI.Blazor.GridLite/obj/**
             src/IgniteUI.Blazor.GridLite/wwwroot/js/**
             src/IgniteUI.Blazor.GridLite/wwwroot/css/themes/**
-            signed-assemblies.sha256
           include-hidden-files: true
           retention-days: 1
           if-no-files-found: error
@@ -250,16 +221,7 @@ jobs:
         with:
           name: signed-assemblies
           path: .
-
-      - name: Verify signed assemblies
-        shell: pwsh
-        env:
-          EXPECTED_MANIFEST_HASH: ${{ needs.sign-assemblies.outputs.manifest-sha256 }}
-        run: >
-          .github/scripts/artifact-checksums.ps1 -Mode Verify -ManifestPath signed-assemblies.sha256
-          -Path src/IgniteUI.Blazor.GridLite/bin, src/IgniteUI.Blazor.GridLite/obj,
-          src/IgniteUI.Blazor.GridLite/wwwroot/js, src/IgniteUI.Blazor.GridLite/wwwroot/css/themes
-          -ExpectedManifestHash $env:EXPECTED_MANIFEST_HASH
+          digest-mismatch: error
 
       - name: Pack NuGet package
         run: >
@@ -400,46 +362,36 @@ jobs:
       - name: Restore sbom-tool (pinned)
         run: dotnet tool restore --tool-manifest .config/sbom-tool/dotnet-tools.json
 
-      # sbom-tool fails unless the -m directory already exists.
-      - name: Create SBOM output directories
-        shell: pwsh
-        run: New-Item -ItemType Directory -Force -Path "${{ github.workspace }}\sbom\spdx-2.2", "${{ github.workspace }}\sbom\spdx-3.0" | Out-Null
-
       # -b is the signed package folder, so the shipped nupkg and its hash land in the SBOM's files section.
       # -bc scans the library project (NuGet + npm) for the dependency graph; -li/-pm resolve license and supplier metadata.
-      - name: Generate SBOM (SPDX 2.2)
+      - name: Generate SBOMs
         working-directory: .config/sbom-tool
-        run: >
-          dotnet tool run sbom-tool -- generate
-          -b ${{ github.workspace }}/artifacts
-          -bc ${{ github.workspace }}/src/IgniteUI.Blazor.GridLite
-          -m ${{ github.workspace }}/sbom/spdx-2.2
-          -pn IgniteUI.Blazor.GridLite
-          -pv $env:VERSION
-          -ps Infragistics
-          -nsb http://spdx.org/spdxdocs/IgniteUI.Blazor.GridLite
-          -mi SPDX:2.2
-          -li true
-          -lto 60
-          -pm true
-          -V Information
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
 
-      - name: Generate SBOM (SPDX 3.0)
-        working-directory: .config/sbom-tool
-        run: >
-          dotnet tool run sbom-tool -- generate
-          -b ${{ github.workspace }}/artifacts
-          -bc ${{ github.workspace }}/src/IgniteUI.Blazor.GridLite
-          -m ${{ github.workspace }}/sbom/spdx-3.0
-          -pn IgniteUI.Blazor.GridLite
-          -pv $env:VERSION
-          -ps Infragistics
-          -nsb http://spdx.org/spdxdocs/IgniteUI.Blazor.GridLite
-          -mi SPDX:3.0
-          -li true
-          -lto 60
-          -pm true
-          -V Information
+          $formats = @(
+            @{ Version = 'SPDX:2.2'; Output = 'spdx-2.2' },
+            @{ Version = 'SPDX:3.0'; Output = 'spdx-3.0' }
+          )
+
+          foreach ($format in $formats) {
+            Write-Host "Generating $($format.Version) SBOM..."
+            dotnet tool run sbom-tool -- generate `
+              -b "$env:GITHUB_WORKSPACE\artifacts" `
+              -bc "$env:GITHUB_WORKSPACE\src\IgniteUI.Blazor.GridLite" `
+              -m "$env:GITHUB_WORKSPACE\sbom\$($format.Output)" `
+              -pn IgniteUI.Blazor.GridLite `
+              -pv $env:VERSION `
+              -ps Infragistics `
+              -nsb http://spdx.org/spdxdocs/IgniteUI.Blazor.GridLite `
+              -mi $format.Version `
+              -li true `
+              -lto $env:SBOM_LICENSE_TIMEOUT_SECONDS `
+              -pm true `
+              -V Information
+          }
 
       - name: Verify SBOM output
         shell: pwsh
@@ -448,9 +400,9 @@ jobs:
           $spdx22 = "${{ github.workspace }}\sbom\spdx-2.2\_manifest\spdx_2.2\manifest.spdx.json"
           $spdx30 = "${{ github.workspace }}\sbom\spdx-3.0\_manifest\spdx_3.0\manifest.spdx.json"
 
-          foreach ($document in @($spdx22, $spdx30)) {
-            if (-not (Test-Path -LiteralPath $document) -or (Get-Item -LiteralPath $document).Length -eq 0) {
-              throw "SBOM document missing or empty: $document"
+          foreach ($manifestPath in @($spdx22, $spdx30)) {
+            if (-not (Test-Path -LiteralPath $manifestPath) -or (Get-Item -LiteralPath $manifestPath).Length -eq 0) {
+              throw "SBOM manifest missing or empty: $manifestPath"
             }
           }
 
