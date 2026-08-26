@@ -13,7 +13,9 @@ param(
     [string[]]$Path,
 
     [Parameter(Mandatory)]
-    [string]$ExpectedPublicKeyPath
+    [string]$ExpectedPublicKeyPath,
+
+    [string]$SnPath
 )
 
 $ErrorActionPreference = 'Stop'
@@ -55,14 +57,42 @@ $tokenBytes = $digest[-8..-1]
 [array]::Reverse($tokenBytes)
 $expectedToken = ConvertTo-HexString $tokenBytes
 
-$windowsSdkRoot = Join-Path ${env:ProgramFiles(x86)} 'Microsoft SDKs\Windows'
-$strongNameTool = Get-ChildItem -Path $windowsSdkRoot -Filter 'sn.exe' -Recurse -ErrorAction SilentlyContinue |
-    Sort-Object FullName -Descending |
-    Select-Object -First 1
+if ($SnPath) {
+    if (-not (Test-Path -LiteralPath $SnPath -PathType Leaf)) {
+        throw "The specified sn.exe path does not exist: $SnPath"
+    }
+
+    $strongNameTool = Get-Item -LiteralPath $SnPath
+}
+else {
+    $strongNameCommand = Get-Command sn.exe -CommandType Application -ErrorAction SilentlyContinue |
+        Select-Object -First 1
+
+    if ($null -ne $strongNameCommand) {
+        $strongNameTool = Get-Item -LiteralPath $strongNameCommand.Path
+    }
+    else {
+        $windowsSdkRoot = Join-Path ${env:ProgramFiles(x86)} 'Microsoft SDKs\Windows'
+        $strongNameTool = Get-ChildItem -Path $windowsSdkRoot -Filter 'sn.exe' -Recurse -ErrorAction SilentlyContinue |
+            Sort-Object -Property @{
+                Expression = {
+                    $match = [regex]::Match($_.FullName, '\\v(?<version>\d+(?:\.\d+)*)A?\\', 'IgnoreCase')
+                    if ($match.Success) { [version]$match.Groups['version'].Value } else { [version]'0.0' }
+                }
+                Descending = $true
+            }, @{
+                Expression = { $_.FullName }
+                Descending = $true
+            } |
+            Select-Object -First 1
+    }
+}
 
 if ($null -eq $strongNameTool) {
-    throw "Could not find sn.exe under $windowsSdkRoot."
+    throw 'Could not find sn.exe on PATH or under the Windows SDK directory. Pass -SnPath explicitly.'
 }
+
+Write-Verbose "Using sn.exe from '$($strongNameTool.FullName)'."
 
 $assemblies = @(Get-ChildItem -Path $Path -Filter '*.dll' -Recurse -File)
 if ($assemblies.Count -eq 0) {
