@@ -383,13 +383,13 @@ jobs:
 
             Write-Host "Generating $($format.Version) SBOM..."
             dotnet tool run sbom-tool -- generate `
-              -b "$env:GITHUB_WORKSPACE\nupkg" `
-              -bc $env:GITHUB_WORKSPACE `
+              -b "$env:GITHUB_WORKSPACE\artifacts" `
+              -bc "$env:GITHUB_WORKSPACE\src\IgniteUI.Blazor.GridLite" `
               -m $manifestDirectory `
-              -pn Infragistics.QueryBuilder.Executor `
+              -pn IgniteUI.Blazor.GridLite `
               -pv $env:VERSION `
-              -ps "Infragistics Inc." `
-              -nsb http://spdx.org/spdxdocs/Infragistics.QueryBuilder.Executor `
+              -ps Infragistics `
+              -nsb http://spdx.org/spdxdocs/IgniteUI.Blazor.GridLite `
               -mi $format.Version `
               -li true `
               -lto $env:SBOM_LICENSE_TIMEOUT_SECONDS `
