@@ -12,7 +12,9 @@
 
 ## 1. Why this document exists
 
-This document records the package's security boundaries, assumptions, threats, controls, and accepted risks. It is a **living document** and must be updated whenever the JS interop surface, serialization boundary, bundled JavaScript, or release process changes.
+This document records the package's security boundaries, assumptions, and controls. It is a **living document** and must be updated whenever the JS interop surface, serialization boundary, bundled JavaScript, or release process changes.
+
+Individual threat findings, their severities, and their remediation status are **not published**. They are tracked privately by the maintainers and are not included in this document.
 
 It is not a penetration test, not an audit, and not an attestation of security.
 
@@ -27,7 +29,7 @@ It is not a penetration test, not an audit, and not an attestation of security.
 **Out of scope**
 
 - The consuming application (its authentication, authorization, CSP, data access).
-- Internal implementation of the upstream `igniteui-grid-lite` npm package, except for its behavior at the rendering boundary (see TM-DOM-01).
+- Internal implementation of the upstream `igniteui-grid-lite` npm package, except for its behavior at the rendering boundary.
 - The ASP.NET Core Blazor framework itself. Framework-level behavior is treated as an assumption (§5).
 - The demo application under `demo/`.
 
@@ -76,37 +78,19 @@ The model is only valid if these assumptions hold. Consumer-facing responsibilit
 | A3 | The consuming app prevents untrusted script execution. The component must avoid introducing script execution and avoid unnecessarily widening access available to other scripts running in the same origin. |
 | A4 | Data bound to `Data` has already passed the app's own authorization filter. |
 | A5 | `IgbGridLiteOptions.JavascriptPath` is a compile-time constant controlled by the app, never derived from user input or untrusted configuration. |
-| A6 | Blazor Server hosts retain appropriate SignalR message-size and circuit resource limits. Applications that increase those limits must reassess TM-IX-03. |
+| A6 | Blazor Server hosts retain appropriate SignalR message-size and circuit resource limits. Applications that increase those limits must reassess the availability impact of client-driven interop callbacks. |
 
-## 6. Threats
+## 6. Threat analysis
 
-Severity is the residual severity **given** assumptions A1–A6. Status values are `Open`, `Mitigated`, `Proposed acceptance`, `Accepted`, and `Verified — no finding`. A proposed acceptance becomes accepted only after a completed review records its justification and approver.
+STRIDE analysis is performed against each trust boundary described in §3, covering:
 
-### TB2 — client → server (JS interop callbacks)
+- **TB2 — client → server**: the JS interop callback surface.
+- **TB1 — server → client**: the serialization and rendering surface.
+- **Supply chain, build and release**: dependency bundling and the publish pipeline.
 
-| ID | Threat | STRIDE | Sev | Status |
-|---|---|---|---|---|
-| **TM-IX-01** | The `DotNetObjectReference` for `JSHandler<TItem>` is stored in `window.blazor_igc_grid_lite.dotNetRefs`. Any other script running in the page can retrieve the reference and invoke its `[JSInvokable]` methods with arbitrary payloads. | S, T | Medium | **Open** |
-| **TM-IX-02** | Client-supplied sort and filter event details are deserialized into expressions containing keys, conditions, and search terms, then passed to consumer `Sorting` and `Filtering` handlers. Applications that translate those values into dynamic queries must validate them against an allowlist and use parameterized data access. | T, E | High *(consumer-facing)* | **Open** — needs documentation |
-| **TM-IX-03** | In Blazor Server applications, another page script can repeatedly invoke callbacks, causing repeated deserialization and consumer-handler dispatch on the circuit. Hosting limits can bound message size but do not provide component-specific rate limiting. | D | Low | **Proposed acceptance** |
-| **TM-IX-04** | `JSSorting`, `JSSorted`, `JSFiltering`, and `JSFiltered` catch all exceptions without logging or surfacing failure. Malformed callback data therefore fails silently, reducing detection and diagnosis. | R | Low | **Open** |
+Severity is assessed as residual severity **given** assumptions A1–A6.
 
-### TB1 — server → client (serialization and rendering)
-
-| ID | Threat | STRIDE | Sev | Status |
-|---|---|---|---|---|
-| **TM-SER-01** | `RenderGridAsync`, `SetParametersAsync`, and `UpdateDataAsync` serialize the supplied data objects, not only properties represented by `IgbGridLiteColumn`. Every property included by `System.Text.Json` in the reachable `TItem` object graph is sent to the browser, so binding domain or ORM entities can disclose properties that are not displayed as columns. | I | High *(consumer-facing)* | **Open** — needs documentation |
-| **TM-DOM-01** | The lockfile resolves `igniteui-grid-lite` 0.9.0. In that release, the default cell renderer places `${this.value}` in a Lit `html` template interpolation. Lit escapes text interpolations, and no `unsafeHTML`, `innerHTML`, or equivalent raw-markup sink is used on the default value path. Consumer-supplied cell templates remain consumer code. | — | — | **Verified — no finding** |
-| — | Dynamic-import path injection through `IgbGridLiteOptions.JavascriptPath`. Under A5, the path is controlled by the application rather than browser input. | — | — | **Verified — no finding** |
-| — | JS interop identifier injection. All identifiers passed to `InvokeVoidJsAsync` / `InvokeJsAsync` are hard-coded string literals. | — | — | **Verified — no finding** |
-| — | `MarkupString` / `AddMarkupContent` / `eval` in first-party code. None present. | — | — | **Verified — no finding** |
-
-### Supply chain, build and release
-
-| ID | Threat | STRIDE | Sev | Status |
-|---|---|---|---|---|
-| **TM-SC-01** | `igniteui-grid-lite` is bundled inside the NuGet package. Consumers cannot independently update the JavaScript dependency when an upstream security fix is released; remediation requires a new GridLite package. | T | Medium | **Proposed acceptance** — required by the package design |
-| **TM-BLD-01** | In `publish.yml`, `actions/checkout`, `actions/setup-dotnet` and `actions/setup-node` are pinned to **mutable tags**, not commit SHAs. Only `azure/login` and `NuGet/login` are SHA-pinned. A compromised tag executes in a job holding `id-token: write`. | T, E | Medium | **Open** |
+The resulting findings, severities, remediation status, and any accepted risks are maintained in a private maintainer-only record and are deliberately omitted here. Suspected vulnerabilities should be reported through [GitHub Private Vulnerability Reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability) on this repository rather than in a public issue.
 
 ## 7. Existing controls
 
@@ -122,28 +106,20 @@ Controls already in place, verified in the repository files, evaluated build pro
 - **Managed-code determinism** — the evaluated SDK property `Deterministic` is `true`, and portable PDBs are generated.
 - **No unsafe primitives** — no `eval`, `new Function`, `MarkupString`, `AddMarkupContent`, or `AllowUnsafeBlocks` in first-party code.
 
-## 8. Proposed risk acceptance
+## 8. Review and sign-off log
 
-| ID | Risk proposed for acceptance | Justification | Approver | Date |
+| Version | Commit | Reviewers | Date | Outcome |
 |---|---|---|---|---|
-| TM-IX-03 | Component-specific callback rate limiting is absent | Per-message and circuit resource limits belong to the Blazor Server host; the callbacks perform bounded deserialization and dispatch | <!-- TODO --> | |
-| TM-SC-01 | Bundled JavaScript cannot be patched independently | Bundling provides a single package and versioned compatibility boundary; upstream security fixes require a prompt GridLite package release | <!-- TODO --> | |
+| <!-- TODO --> | | | | |
 
-## 9. Review and sign-off log
+Release gate: **no open finding of severity High or above may ship.** Findings themselves are tracked privately (§6).
 
-| Version | Commit | Reviewers | Date | Open Critical/High | Outcome |
-|---|---|---|---|---|---|
-| <!-- TODO --> | | | | | |
-
-Release gate: **no `Open` finding of severity High or above may ship.**
-
-## 10. References
+## 9. References
 
 - [Threat mitigation guidance for ASP.NET Core Blazor interactive server-side rendering](https://learn.microsoft.com/en-us/aspnet/core/blazor/security/interactive-server-side-rendering)
 - [Call .NET methods from JavaScript functions in ASP.NET Core Blazor](https://learn.microsoft.com/en-us/aspnet/core/blazor/javascript-interoperability/call-dotnet-from-javascript)
 - [Call JavaScript functions from .NET methods in ASP.NET Core Blazor](https://learn.microsoft.com/en-us/aspnet/core/blazor/javascript-interoperability/call-javascript-from-dotnet)
 - [Enforce a Content Security Policy for ASP.NET Core Blazor](https://learn.microsoft.com/en-us/aspnet/core/blazor/security/content-security-policy)
-- [`igniteui-grid-lite` 0.9.0 default cell renderer](https://github.com/IgniteUI/igniteui-grid-lite/blob/0.9.0/src/components/cell.ts)
 - [Microsoft SDL — Threat Modeling](https://www.microsoft.com/en-us/securityengineering/sdl/threatmodeling)
 - [OWASP Threat Modeling Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Threat_Modeling_Cheat_Sheet.html)
 - [GitHub — About code scanning with CodeQL](https://docs.github.com/en/code-security/code-scanning/introduction-to-code-scanning/about-code-scanning-with-codeql)
