@@ -1,19 +1,17 @@
 <#
 .SYNOPSIS
-    Generates a CycloneDX SBOM for the project and reports its licence and author coverage.
+    Generates a CycloneDX SBOM for the project's .NET dependencies via dotnet-CycloneDX.
 
 .DESCRIPTION
-    Ships alongside the SPDX documents because the two derive their licence data from different places
-    and neither is complete on its own.
+    This is the .NET half of the CycloneDX picture only: dotnet-CycloneDX has no notion of npm packages,
+    so it cannot see the Vite-bundled JS or the igniteui-webcomponents theme CSS the .nupkg also ships.
+    New-NpmCycloneDxSbom.ps1 covers that half, and Merge-CycloneDxSbom.ps1 combines the two into the
+    single document that is actually checksummed and attested; this script's output is an intermediate.
 
-    sbom-tool resolves licences from ClearlyDefined, a network service that harvests package definitions
-    on demand and degrades to NOASSERTION whenever it is slow or unavailable. CycloneDX reads licence
-    expressions and authors from each package's nuspec; when GitHub licence resolution is enabled below,
-    unresolved file-based licences can additionally require authenticated GitHub API requests.
-
-    The two also disagree usefully. ClearlyDefined scans licence file text and can name a licence that a
-    nuspec only points at by filename; CycloneDX reports authors, which the SPDX documents leave as
-    NOASSERTION for every dependency. Publishing both is what makes the licence picture complete.
+    dotnet-CycloneDX reads licence expressions and authors from each package's nuspec; when GitHub licence
+    resolution is enabled below, unresolved file-based licences can additionally require authenticated
+    GitHub API requests. This is what fills in fields the ClearlyDefined-backed SPDX documents otherwise
+    leave as NOASSERTION whenever that service is degraded.
 #>
 [CmdletBinding()]
 param(
@@ -33,8 +31,9 @@ param(
     # In Actions, supply secrets.GITHUB_TOKEN; without it those packages are left unlicensed.
     [string]$GitHubBearerToken,
 
-    [ValidateRange(0, 1)]
-    [double]$MinimumLicenseCoverage = 0.9
+    # Pinned to match cyclonedx-npm's max supported version (1.6, vs this tool's own default of 1.7), so
+    # Merge-CycloneDxSbom.ps1 combines two documents of the same spec version rather than mismatched ones.
+    [string]$SpecVersion = '1.6'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -49,6 +48,7 @@ $arguments = @(
     '--set-name', $PackageId
     '--set-version', $PackageVersion
     '--set-type', 'Library'
+    '--spec-version', $SpecVersion
     '--exclude-dev'
     '--include-license-text'
 )
@@ -74,34 +74,11 @@ if (-not (Test-Path -LiteralPath $bomPath -PathType Leaf)) {
 }
 
 $bom = Get-Content -LiteralPath $bomPath -Raw | ConvertFrom-Json
-
-# actions/attest only recognises a CycloneDX document that carries all three of these.
-foreach ($required in 'bomFormat', 'specVersion', 'serialNumber') {
-    if (-not $bom.$required) {
-        throw "CycloneDX document is missing '$required', so it cannot be consumed as an SBOM predicate."
-    }
-}
-
 $components = @($bom.components)
+
 if ($components.Count -eq 0) {
-    throw 'CycloneDX document contains no components.'
+    throw '.NET CycloneDX document contains no components.'
 }
 
-$licensed = @($components | Where-Object { $_.licenses })
-# CycloneDX models 'authors' (people, from the nuspec author metadata) and 'supplier' (an organisation)
-# separately; cyclonedx-dotnet only ever populates the former, so this is reported as author coverage.
-$authored = @($components | Where-Object { $_.authors })
-$coverage = $licensed.Count / $components.Count
+Write-Host ".NET CycloneDX $($bom.specVersion): $($components.Count) components, $(@($bom.dependencies).Count) dependency edges."
 
-$renamedPath = Join-Path $OutputDirectory "$PackageId.$PackageVersion.cdx.json"
-Move-Item -LiteralPath $bomPath -Destination $renamedPath -Force
-
-$checksum = (Get-FileHash -LiteralPath $renamedPath -Algorithm SHA256).Hash.ToLowerInvariant()
-Set-Content -LiteralPath "$renamedPath.sha256" -Value $checksum -NoNewline
-
-Write-Host "CycloneDX $($bom.specVersion): $($components.Count) components, $($licensed.Count) licensed, $($authored.Count) with an author, $(@($bom.dependencies).Count) dependency edges."
-
-if ($coverage -lt $MinimumLicenseCoverage) {
-    $unlicensed = @($components | Where-Object { -not $_.licenses } | ForEach-Object { "$($_.name)@$($_.version)" })
-    Write-Warning "Only $([math]::Round($coverage * 100))% of components carry a licence (threshold $([math]::Round($MinimumLicenseCoverage * 100))%). Unresolved: $($unlicensed -join ', ')"
-}

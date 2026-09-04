@@ -394,7 +394,8 @@ jobs:
 
       # CycloneDX reads licences and authors from each package's own nuspec, so it fills the fields the
       # ClearlyDefined-backed SPDX documents leave as NOASSERTION whenever that service is degraded.
-      - name: Generate CycloneDX SBOM
+      # This is the .NET half only - dotnet-CycloneDX has no notion of npm packages.
+      - name: Generate .NET CycloneDX SBOM
         shell: pwsh
         env:
           GH_TOKEN_FOR_LICENSES: ${{ github.token }}
@@ -403,8 +404,37 @@ jobs:
           -ProjectPath "${{ env.PROJECT_PATH }}"
           -PackageId "${{ env.PACKAGE_ID }}"
           -PackageVersion "$env:VERSION"
-          -OutputDirectory "${{ runner.temp }}/sbom/cyclonedx"
+          -OutputDirectory "${{ runner.temp }}/sbom/cyclonedx/dotnet"
           -GitHubBearerToken "$env:GH_TOKEN_FOR_LICENSES"
+
+      # The npm half: the .nupkg also ships the Vite-bundled JS and copied igniteui-webcomponents theme
+      # CSS, neither of which the .NET-only BOM above can see. cyclonedx-npm is a locked devDependency
+      # of package.json, restored by the npm ci above; 'npx cyclonedx-npm' resolves that local install.
+      - name: Generate npm CycloneDX SBOM
+        shell: pwsh
+        run: >
+          .github/scripts/New-NpmCycloneDxSbom.ps1
+          -ManifestPath "${{ env.PROJECT_DIR }}/package.json"
+          -OutputFile "${{ runner.temp }}/sbom/cyclonedx/npm/bom.json"
+
+      # Pure PowerShell JSON merge, not an external tool: cyclonedx-cli (the only tool with a merge
+      # command) has no package-manager distribution, and cyclonedx-npm's own library can serialize but
+      # not deserialize CycloneDX JSON, so it can't load two finished documents either.
+      - name: Merge CycloneDX SBOMs
+        shell: pwsh
+        run: >
+          .github/scripts/Merge-CycloneDxSbom.ps1
+          -DotNetBomPath "${{ runner.temp }}/sbom/cyclonedx/dotnet/bom.json"
+          -NpmBomPath "${{ runner.temp }}/sbom/cyclonedx/npm/bom.json"
+          -PackageId "${{ env.PACKAGE_ID }}"
+          -PackageVersion "$env:VERSION"
+          -OutputFile "${{ runner.temp }}/sbom/cyclonedx/${{ env.PACKAGE_ID }}.${{ env.VERSION }}.cdx.json"
+
+      - name: Verify CycloneDX SBOM output
+        shell: pwsh
+        run: >
+          .github/scripts/Assert-CycloneDxSbom.ps1
+          -BomPath "${{ runner.temp }}/sbom/cyclonedx/${{ env.PACKAGE_ID }}.${{ env.VERSION }}.cdx.json"
 
       # An attestation binds to a digest rather than a path, so the bytes are re-hashed here and that
       # value is what gets attested, re-checked before publishing, and reported on the release.
