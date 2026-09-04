@@ -283,6 +283,7 @@ jobs:
   # dependency-review job pairing this one yet.
   dependency-scan:
     name: Scan dependencies
+    needs: pack
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
