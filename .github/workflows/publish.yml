@@ -214,7 +214,7 @@ jobs:
           --configuration ${{ env.BUILD_CONFIGURATION }}
           --no-build
           --no-restore
-          -p:PackageVersion=${{ env.VERSION }}
+          "-p:PackageVersion=$env:VERSION"
           -p:RepositoryUrl=${{ env.REPOSITORY_URL }}
           -p:RepositoryType=git
           -p:RepositoryCommit=${{ github.sha }}
