@@ -29,6 +29,7 @@ jobs:
     name: Build
     runs-on: windows-latest
     timeout-minutes: 20
+    environment: Release build
     permissions:
       contents: read
 
