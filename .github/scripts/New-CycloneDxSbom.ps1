@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Generates a CycloneDX SBOM for the project and validates its licence and supplier coverage.
+    Generates a CycloneDX SBOM for the project and reports its licence and author coverage.
 
 .DESCRIPTION
     Ships alongside the SPDX documents because the two derive their licence data from different places
