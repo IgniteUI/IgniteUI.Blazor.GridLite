@@ -224,13 +224,17 @@ jobs:
           -p:RepositoryCommit=${{ github.sha }}
           -o "${{ github.workspace }}/artifacts"
 
-      - name: Validate packaged assembly strong names
+      # The gate that runs on the actual shipped bytes: bin/ output was already checked once, but
+      # packing only re-zips it, so this re-validates both signals against the extracted nupkg
+      # instead of trusting that pack couldn't have picked up something else.
+      - name: Validate packaged assembly signatures
         shell: pwsh
         run: >
-          .github/scripts/Assert-PackageStrongName.ps1
+          .github/scripts/Assert-PackageSignatures.ps1
           -PackagePath "${env:GITHUB_WORKSPACE}/artifacts/${env:PACKAGE_ID}.${env:VERSION}.nupkg"
           -ExpectedPublicKeyPath "${{ env.EXPECTED_PUBLIC_KEY_PATH }}"
-          -WorkingDirectory "${{ runner.temp }}/strong-name-validation"
+          -ExpectedCertificateSha256Path "${{ env.EXPECTED_CERT_SHA256_PATH }}"
+          -WorkingDirectory "${{ runner.temp }}/package-signature-validation"
 
       - name: Restore .NET local tools
         run: dotnet tool restore
