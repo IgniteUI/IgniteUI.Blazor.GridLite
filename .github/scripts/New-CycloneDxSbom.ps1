@@ -7,9 +7,9 @@
     and neither is complete on its own.
 
     sbom-tool resolves licences from ClearlyDefined, a network service that harvests package definitions
-    on demand and degrades to NOASSERTION whenever it is slow or unavailable. CycloneDX reads the licence
-    expression and authors straight out of each package's own nuspec in the restore cache, so it produces
-    the same answer every run without a network round trip.
+    on demand and degrades to NOASSERTION whenever it is slow or unavailable. CycloneDX reads licence
+    expressions and authors from each package's nuspec; when GitHub licence resolution is enabled below,
+    unresolved file-based licences can additionally require authenticated GitHub API requests.
 
     The two also disagree usefully. ClearlyDefined scans licence file text and can name a licence that a
     nuspec only points at by filename; CycloneDX reports authors, which the SPDX documents leave as
