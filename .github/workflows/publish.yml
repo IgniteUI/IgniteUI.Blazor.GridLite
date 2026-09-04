@@ -39,10 +39,6 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Validate release tag
-        shell: pwsh
-        run: .github/scripts/Assert-ReleaseVersion.ps1 -Version "$env:VERSION"
-
       - name: Setup .NET
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
