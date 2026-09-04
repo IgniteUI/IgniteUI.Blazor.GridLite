@@ -424,13 +424,13 @@ jobs:
           -NpmBomPath "${{ runner.temp }}/sbom/cyclonedx/npm/bom.json"
           -PackageId "${{ env.PACKAGE_ID }}"
           -PackageVersion "$env:VERSION"
-          -OutputFile "${{ runner.temp }}/sbom/cyclonedx/${{ env.PACKAGE_ID }}.${{ env.VERSION }}.cdx.json"
+          -OutputFile "${{ runner.temp }}/sbom/cyclonedx/${{ env.PACKAGE_ID }}.$env:VERSION.cdx.json"
 
       - name: Verify CycloneDX SBOM output
         shell: pwsh
         run: >
           .github/scripts/Assert-CycloneDxSbom.ps1
-          -BomPath "${{ runner.temp }}/sbom/cyclonedx/${{ env.PACKAGE_ID }}.${{ env.VERSION }}.cdx.json"
+          -BomPath "${{ runner.temp }}/sbom/cyclonedx/${{ env.PACKAGE_ID }}.$env:VERSION.cdx.json"
 
       # An attestation binds to a digest rather than a path, so the bytes are re-hashed here and that
       # value is what gets attested, re-checked before publishing, and reported on the release.
@@ -493,7 +493,7 @@ jobs:
   # scripts-only sparse one so the publish gate itself is version-controlled and reviewable.
   publish:
     name: Publish to NuGet.org
-    needs: [pack, sbom]
+    needs: [pack, sbom, dependency-scan]
     runs-on: windows-latest
     timeout-minutes: 15
     environment: NuGet Deploy
