@@ -367,6 +367,32 @@ jobs:
         run: npm ci --ignore-scripts
         working-directory: ${{ env.PROJECT_DIR }}
 
+      # The npm half: the .nupkg also ships the Vite-bundled JS and copied igniteui-webcomponents theme
+      # CSS, neither of which the .NET-only BOM below can see. cyclonedx-npm is a locked devDependency
+      # of package.json, restored by the npm ci above; 'npx cyclonedx-npm' resolves that local install.
+      # Runs before the devDependency prune below, since cyclonedx-npm's own binary lives in node_modules.
+      - name: Generate npm CycloneDX SBOM
+        shell: pwsh
+        run: >
+          .github/scripts/New-NpmCycloneDxSbom.ps1
+          -ManifestPath "${{ env.PROJECT_DIR }}/package.json"
+          -OutputFile "${{ runner.temp }}/sbom/cyclonedx/npm/bom.json"
+
+      # sbom-tool's node_modules-based npm detectors do not distinguish dependencies from
+      # devDependencies, and its lockfile-based detector reads package-lock.json directly regardless of
+      # what is installed - so the lockfile goes too, leaving node_modules as the only npm source, now
+      # reduced to exactly the shipped set. Must run after the CycloneDX step above, which still needs
+      # cyclonedx-npm's own binary present.
+      - name: Reduce JavaScript dependencies to the shipped set
+        shell: pwsh
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+
+          npm prune --omit=dev --ignore-scripts
+          Remove-Item package-lock.json -Force
+
       - name: Restore .NET local tools
         run: dotnet tool restore
 
@@ -402,16 +428,6 @@ jobs:
           -PackageVersion "$env:VERSION"
           -OutputDirectory "${{ runner.temp }}/sbom/cyclonedx/dotnet"
           -GitHubBearerToken "$env:GH_TOKEN_FOR_LICENSES"
-
-      # The npm half: the .nupkg also ships the Vite-bundled JS and copied igniteui-webcomponents theme
-      # CSS, neither of which the .NET-only BOM above can see. cyclonedx-npm is a locked devDependency
-      # of package.json, restored by the npm ci above; 'npx cyclonedx-npm' resolves that local install.
-      - name: Generate npm CycloneDX SBOM
-        shell: pwsh
-        run: >
-          .github/scripts/New-NpmCycloneDxSbom.ps1
-          -ManifestPath "${{ env.PROJECT_DIR }}/package.json"
-          -OutputFile "${{ runner.temp }}/sbom/cyclonedx/npm/bom.json"
 
       # Pure PowerShell JSON merge, not an external tool: cyclonedx-cli (the only tool with a merge
       # command) has no package-manager distribution, and cyclonedx-npm's own library can serialize but
