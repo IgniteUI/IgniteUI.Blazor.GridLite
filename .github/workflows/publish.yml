@@ -24,9 +24,52 @@ env:
   SBOM_LICENSE_TIMEOUT_SECONDS: '180'
 
 jobs:
+  # Runs npm and vite, so it is deliberately kept free of every credential: no strong-name key,
+  # no Key Vault access, no publishing rights. Its only output is the built wwwroot assets.
+  build-assets:
+    name: Build web assets
+    runs-on: windows-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          package-manager-cache: false # never use caching in release builds
+
+      - name: Restore JavaScript dependencies
+        run: npm ci
+        working-directory: ${{ env.PROJECT_DIR }}
+
+      - name: Build JavaScript bundle
+        run: npm run build
+        working-directory: ${{ env.PROJECT_DIR }}
+
+      - name: Upload web assets
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: web-assets
+          path: |
+            src/IgniteUI.Blazor.GridLite/wwwroot/js/**
+            src/IgniteUI.Blazor.GridLite/wwwroot/css/themes/**
+          include-hidden-files: true
+          retention-days: 1
+          if-no-files-found: error
+
   # Holds the strong-name key, but no OIDC token, no Key Vault access and no publishing rights.
+  # It installs no npm packages and runs no bundler, so JavaScript dependency code is never present
+  # on the runner the private key is written to.
   build:
     name: Build
+    needs: build-assets
     runs-on: windows-latest
     timeout-minutes: 20
     environment: Release build
@@ -44,18 +87,14 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      # The Razor SDK reads wwwroot when it builds the static web asset manifest, so the assets
+      # have to be in place before restore rather than merged in at pack time.
+      - name: Download web assets
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          node-version: '22'
-
-      - name: Restore JavaScript dependencies
-        run: npm ci
-        working-directory: ${{ env.PROJECT_DIR }}
-
-      - name: Build JavaScript bundle
-        run: npm run build
-        working-directory: ${{ env.PROJECT_DIR }}
+          name: web-assets
+          path: src/IgniteUI.Blazor.GridLite/wwwroot
+          digest-mismatch: error
 
       - name: Restore .NET dependencies
         run: dotnet restore ${{ env.PROJECT_PATH }}
@@ -301,12 +340,20 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Scan NuGet dependencies
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          package-manager-cache: false
+
+      # Only what the package actually ships: the library project, and npm without devDependencies.
+      - name: Scan NuGet and npm dependencies
         shell: pwsh
         run: >
           .github/scripts/Invoke-DependencyScan.ps1
           -ProjectPath "${{ env.PROJECT_PATH }}"
           -OutputDirectory "${{ github.workspace }}/artifacts/dependency-scan"
+          -NpmManifestDirectory "${{ github.workspace }}/${{ env.PROJECT_DIR }}"
           -PackageId "${{ env.PACKAGE_ID }}"
           -Version "$env:VERSION"
 
@@ -315,6 +362,40 @@ jobs:
         with:
           name: dependency-scan
           path: artifacts/dependency-scan/*
+          retention-days: 30
+          if-no-files-found: error
+
+  # Measures the assets that were actually built, rather than a rebuild of them.
+  evidence:
+    name: Collect release evidence
+    needs: build
+    runs-on: windows-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Download build output
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: build-output
+          path: src/IgniteUI.Blazor.GridLite
+          digest-mismatch: error
+
+      - name: Check bundle size budget
+        shell: pwsh
+        run: ./eng/Check-BundleBudget.ps1
+
+      - name: Upload release evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-evidence
+          path: artifacts/perf/*
           retention-days: 30
           if-no-files-found: error
 
@@ -509,7 +590,7 @@ jobs:
   # scripts-only sparse one so the publish gate itself is version-controlled and reviewable.
   publish:
     name: Publish to NuGet.org
-    needs: [pack, sbom, dependency-scan]
+    needs: [pack, evidence, sbom, dependency-scan]
     runs-on: windows-latest
     timeout-minutes: 15
     environment: NuGet Deploy
@@ -573,7 +654,7 @@ jobs:
 
   attach-to-release:
     name: Attach release evidence
-    needs: [pack, sbom, dependency-scan, publish]
+    needs: [pack, evidence, sbom, dependency-scan, publish]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -597,6 +678,12 @@ jobs:
         with:
           name: sbom
           path: sbom
+
+      - name: Download release evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-evidence
+          path: evidence
 
       - name: Download dependency scan
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -626,5 +713,7 @@ jobs:
             "sbom/cyclonedx/${PACKAGE_ID}.${TAG}.cdx.json.sha256" \
             "sbom/attestations/provenance.sigstore.json" \
             "sbom/attestations/sbom-spdx.sigstore.json" \
-            "sbom/attestations/sbom-cyclonedx.sigstore.json"
+            "sbom/attestations/sbom-cyclonedx.sigstore.json" \
+            "evidence/performance-report.md" \
+            "evidence/performance-report.json"
 
