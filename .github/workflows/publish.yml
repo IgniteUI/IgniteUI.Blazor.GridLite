@@ -477,6 +477,9 @@ jobs:
       - name: Restore .NET local tools
         run: dotnet tool restore
 
+      # -ComponentScanExclusion keeps the packed nupkg out of component detection. It is a no-op
+      # here (artifacts/ sits outside -bc) but is passed to stay identical to the blazor workflow,
+      # where the npm graph forces -bc up to the repo root that also holds artifacts/.
       - name: Generate SBOMs
         shell: pwsh
         run: >
@@ -485,6 +488,7 @@ jobs:
           -PackageVersion "$env:VERSION"
           -BuildDropPath "${{ github.workspace }}/artifacts"
           -BuildComponentPath "${{ github.workspace }}/${{ env.PROJECT_DIR }}"
+          -ComponentScanExclusion '**/artifacts/**'
           -OutputRoot "${{ runner.temp }}/sbom"
           -LicenseTimeoutSeconds ${{ env.SBOM_LICENSE_TIMEOUT_SECONDS }}
 
@@ -521,6 +525,8 @@ jobs:
           -NpmBomPath "${{ runner.temp }}/sbom/cyclonedx/npm/bom.json"
           -PackageId "${{ env.PACKAGE_ID }}"
           -PackageVersion "$env:VERSION"
+          -RootLicenseExpression 'MIT'
+          -MergeToolVersion "${{ github.sha }}"
           -OutputFile "${{ runner.temp }}/sbom/cyclonedx/${{ env.PACKAGE_ID }}.$env:VERSION.cdx.json"
 
       - name: Verify CycloneDX SBOM output
