@@ -1,6 +1,5 @@
 {
   "name": "blazor-gridlite",
-  "version": "0.0.0",
   "private": true,
   "description": "Ignite UI GridLite Blazor wrapper",
   "author": "",
@@ -12,6 +11,7 @@
     "dev": "vite build --watch"
   },
   "devDependencies": {
+    "@cyclonedx/cyclonedx-npm": "6.0.1",
     "terser": "^5.44.1",
     "vite": "^7.3.6"
   },
