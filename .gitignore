@@ -57,4 +57,3 @@ TestResult.xml
 nunit-*.xml
 
 # Claude cache
-.claude/
