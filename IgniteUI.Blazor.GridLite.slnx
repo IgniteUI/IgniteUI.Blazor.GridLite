@@ -4,6 +4,8 @@
     <File Path="Directory.Build.props" />
     <File Path="Directory.Build.targets" />
     <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="nuget.config" />
   </Folder>
   <Project Path="demo/GridLite.DemoApp/GridLite.DemoApp.csproj" />
   <Project Path="src/IgniteUI.Blazor.GridLite/IgniteUI.Blazor.GridLite.csproj" />
