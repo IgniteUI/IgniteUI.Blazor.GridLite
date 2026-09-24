@@ -12,13 +12,10 @@
     <Description>Ignite UI GridLite Blazor wrapper</Description>
     <Authors>Infragistics</Authors>
     <PackageTags>Blazor Grid IgniteUI Lite OSS</PackageTags>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>IgniteUI.Blazor.Controls</RootNamespace>
 
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Copyright>Infragistics</Copyright>
     <PackageProjectUrl>https://www.infragistics.com/products/ignite-ui-blazor</PackageProjectUrl>
     <RepositoryUrl>https://github.com/IgniteUI/IgniteUI.Blazor.GridLite</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -45,14 +42,8 @@
     <SupportedPlatform Include="browser" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.0" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.0" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.0" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" />
   </ItemGroup>
 
 
