@@ -1,0 +1,24 @@
+@page "/"
+@using IgniteUI.Blazor.GridLite.TestBed.Components.Models
+
+<h1>GridLite TestBed</h1>
+
+<IgbGridLite TItem="NwindDataItem" Data="data" data-testid="test-grid">
+    <IgbGridLiteColumn Field="@nameof(NwindDataItem.ProductID)"
+                       Header="ID"
+                       DataType="GridLiteColumnDataType.Number" />
+    <IgbGridLiteColumn Field="@nameof(NwindDataItem.ProductName)"
+                       Header="Product Name"
+                       Sortable Filterable />
+    <IgbGridLiteColumn Field="@nameof(NwindDataItem.UnitPrice)"
+                       Header="Unit Price"
+                       DataType="GridLiteColumnDataType.Number"
+                       Sortable />
+    <IgbGridLiteColumn Field="@nameof(NwindDataItem.UnitsInStock)"
+                       Header="Units In Stock"
+                       DataType="GridLiteColumnDataType.Number" />
+</IgbGridLite>
+
+@code {
+    private readonly GridData data = new();
+}

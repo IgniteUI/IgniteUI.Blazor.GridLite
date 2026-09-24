@@ -2,12 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Update="Components/Pages/Home.razor.css" CssScope="home-scope" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\IgniteUI.Blazor.GridLite\IgniteUI.Blazor.GridLite.csproj" />
