@@ -10,8 +10,8 @@ public partial class IgbGridLiteColumn : ComponentBase
     /// <summary>
     /// The field from the data that the column references.
     /// </summary>
-    [Parameter]
-    public string? Field { get; set; }
+    [Parameter, EditorRequired]
+    public string Field { get; set; } = string.Empty;
 
     /// <summary>
     /// The header text of the column.

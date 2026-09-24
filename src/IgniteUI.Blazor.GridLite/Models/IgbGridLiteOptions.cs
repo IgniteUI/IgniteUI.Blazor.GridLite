@@ -13,7 +13,7 @@ internal class IgbGridLiteOptions
     /// </summary>
     [JsonPropertyName("javascriptPath")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string JavascriptPath { get; set; }
+    public string? JavascriptPath { get; set; }
 
     /// <summary>
     /// Specifies whether to enable debug mode.

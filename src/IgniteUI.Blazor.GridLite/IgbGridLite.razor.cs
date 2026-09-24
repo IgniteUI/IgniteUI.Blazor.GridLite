@@ -11,7 +11,7 @@ namespace IgniteUI.Blazor.Controls;
 /// <typeparam name="TItem">The data type of the items to display in the grid</typeparam>
 public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem : class
 {
-    [Inject] private IJSRuntime JSRuntime { get; set; }
+    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
 
     /// <summary>
     /// The data to display in the grid
@@ -115,9 +115,9 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     public EventCallback Rendered { get; set; }
 
     private ElementReference grid;
-    private IJSObjectReference blazorIgbGridLite;
-    private JSHandler<TItem> jsHandler;
-    private string gridId;
+    private IJSObjectReference? blazorIgbGridLite;
+    private JSHandler<TItem>? jsHandler;
+    private readonly string gridId = Guid.NewGuid().ToString("N");
     private bool isInitialized;
     private bool forceRender = true;
 
@@ -139,7 +139,6 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// <inheritdoc/>
     protected override void OnInitialized()
     {
-        gridId = Guid.NewGuid().ToString("N");
         Options ??= new IgbGridLiteOptions();
         base.OnInitialized();
     }
@@ -162,14 +161,15 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
 
     public override async Task SetParametersAsync(ParameterView parameters)
     {
-        var updateConfig = new Dictionary<string, object>();
+        var updateConfig = new Dictionary<string, object?>();
 
         if (isInitialized)
         {
             if (parameters.TryGetValue<IEnumerable<TItem>?>(nameof(Data), out var newData)
                 && !ReferenceEquals(Data, newData))
             {
-                updateConfig["data"] = newData;
+                // The web component spreads `data`, so it cannot take null; a null parameter means "no rows".
+                updateConfig["data"] = newData ?? Array.Empty<TItem>();
             }
 
             if (parameters.TryGetValue<bool>(nameof(AutoGenerate), out var newAutoGenerate)
@@ -223,7 +223,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
 
     private async Task RenderGridAsync()
     {
-        if (!isInitialized)
+        if (!isInitialized || jsHandler is null)
             return;
 
         await Task.Yield();
@@ -234,7 +234,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
         var config = new
         {
             id = gridId,
-            data = Data,
+            data = Data ?? Array.Empty<TItem>(),
             autoGenerate = AutoGenerate,
             adoptRootStyles = AdoptRootStyles,
             sortingOptions = SortingOptions,
@@ -276,6 +276,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// <param name="newData">The new data to display in the grid</param>
     public virtual async Task UpdateDataAsync(IEnumerable<TItem> newData)
     {
+        ArgumentNullException.ThrowIfNull(newData);
         Data = newData;
         var json = JsonSerializer.Serialize(newData, GridJsonSerializerOptions);
         await InvokeVoidJsAsync("blazor_igc_grid_lite.updateData", gridId, json);
@@ -287,6 +288,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// <param name="expressions">The sort expression(s) to apply</param>
     public virtual async Task SortAsync(IgbGridLiteSortingExpression expressions)
     {
+        ArgumentNullException.ThrowIfNull(expressions);
         var json = JsonSerializer.Serialize(expressions, GridJsonSerializerOptions);
         await InvokeVoidJsAsync("blazor_igc_grid_lite.sort", gridId, json);
     }
@@ -297,6 +299,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// <param name="expressions">The sort expression(s) to apply</param>
     public virtual async Task SortAsync(List<IgbGridLiteSortingExpression> expressions)
     {
+        ArgumentNullException.ThrowIfNull(expressions);
         var json = JsonSerializer.Serialize(expressions, GridJsonSerializerOptions);
         await InvokeVoidJsAsync("blazor_igc_grid_lite.sort", gridId, json);
     }
@@ -306,7 +309,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// </summary>
     /// <param name="key">Optional column field. If provided, only clears sort for that column.
     /// If null, clears all sorting.</param>
-    public virtual async Task ClearSortAsync(string key = null)
+    public virtual async Task ClearSortAsync(string? key = null)
     {
         await InvokeVoidJsAsync("blazor_igc_grid_lite.clearSort", gridId, key);
     }
@@ -317,6 +320,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// <param name="expressions">The filter expression(s) to apply</param>
     public virtual async Task FilterAsync(IgbGridLiteFilterExpression expression)
     {
+        ArgumentNullException.ThrowIfNull(expression);
         var json = JsonSerializer.Serialize(expression, GridJsonSerializerOptions);
         await InvokeVoidJsAsync("blazor_igc_grid_lite.filter", gridId, json);
     }
@@ -327,6 +331,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// <param name="expressions">The filter expression(s) to apply</param>
     public virtual async Task FilterAsync(List<IgbGridLiteFilterExpression> expressions)
     {
+        ArgumentNullException.ThrowIfNull(expressions);
         var json = JsonSerializer.Serialize(expressions, GridJsonSerializerOptions);
         await InvokeVoidJsAsync("blazor_igc_grid_lite.filter", gridId, json);
     }
@@ -336,7 +341,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// </summary>
     /// <param name="key">Optional column field. If provided, only clears filter for that column.
     /// If null, clears all filtering.</param>
-    public virtual async Task ClearFilterAsync(string key = null)
+    public virtual async Task ClearFilterAsync(string? key = null)
     {
         await InvokeVoidJsAsync("blazor_igc_grid_lite.clearFilter", gridId, key);
     }
@@ -344,10 +349,10 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// <summary>
     /// Returns the current column configuration list.
     /// </summary>
-    /// <returns>The column configuration if found, otherwise null</returns>
-    public ValueTask<IgbColumnConfiguration[]> GetColumnsAsync()
+    /// <returns>The column configurations</returns>
+    public async ValueTask<IgbColumnConfiguration[]> GetColumnsAsync()
     {
-        return this.InvokeJsAsync<IgbColumnConfiguration[]>("blazor_igc_grid_lite.getColumns", gridId);
+        return await InvokeJsAsync<IgbColumnConfiguration[]>("blazor_igc_grid_lite.getColumns", gridId) ?? [];
     }
 
     /// <summary>
@@ -357,12 +362,12 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// <param name="field">The column field to navigate to, if any</param>
     /// <param name="activate">Optionally also activate the navigated cell</param>
     /// <returns></returns>
-    public virtual async Task NavigateToAsync(long row, string field = null, bool activate = false)
+    public virtual async Task NavigateToAsync(long row, string? field = null, bool activate = false)
     {
         await InvokeVoidJsAsync("blazor_igc_grid_lite.navigateTo", gridId, row, field, activate);
     }
 
-    private async ValueTask<TValue> InvokeJsAsync<TValue>(string identifier, params object[] args)
+    private async ValueTask<TValue?> InvokeJsAsync<TValue>(string identifier, params object?[] args)
     {
         if (blazorIgbGridLite == null)
         {
@@ -379,7 +384,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
         }
     }
 
-    private async ValueTask InvokeVoidJsAsync(string identifier, params object[] args)
+    private async ValueTask InvokeVoidJsAsync(string identifier, params object?[] args)
     {
         if (blazorIgbGridLite == null)
         {

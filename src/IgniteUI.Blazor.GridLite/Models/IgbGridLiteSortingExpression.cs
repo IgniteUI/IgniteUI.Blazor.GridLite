@@ -12,7 +12,7 @@ public class IgbGridLiteSortingExpression
     /// The target column.
     /// </summary>
     [JsonPropertyName("key")]
-    public string Key { get; set; }
+    public required string Key { get; set; }
 
     /// <summary>
     /// Sort direction for this operation.

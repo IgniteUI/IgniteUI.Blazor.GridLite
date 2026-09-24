@@ -6,7 +6,7 @@ namespace IgniteUI.Blazor.Controls;
 public class IgbColumnConfiguration
 {
     [JsonPropertyName("field")]
-    public string? Field { get; init; }
+    public required string Field { get; init; }
 
     [JsonPropertyName("dataType")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
