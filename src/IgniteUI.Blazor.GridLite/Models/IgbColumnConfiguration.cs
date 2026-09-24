@@ -43,33 +43,6 @@ public class IgbColumnConfiguration
     [JsonPropertyName("filteringCaseSensitive")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool FilteringCaseSensitive { get; init; }
-
-    [JsonIgnore]
-    internal Func<IgbGridLiteHeaderContext<object>, object> HeaderTemplate { get; init; }
-
-    [JsonIgnore]
-    internal Func<IgbGridLiteCellContext<object>, object> CellTemplate { get; init; }
-
-    /// <summary>
-    /// Converts the column configuration to a JavaScript-compatible format.
-    /// Excludes templates and other non-serializable properties.
-    /// </summary>
-    internal object ToJsConfig()
-    {
-        return new
-        {
-            field = Field,
-            dataType = DataType?.ToString().ToLower(),
-            header = Header,
-            width = Width,
-            hidden = Hidden,
-            resizable = Resizable,
-            sortable = Sortable,
-            sortingCaseSensitive = SortingCaseSensitive,
-            filterable = Filterable,
-            filteringCaseSensitive = FilteringCaseSensitive
-        };
-    }
 }
 
 /// <summary>

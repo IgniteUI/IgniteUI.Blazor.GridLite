@@ -145,37 +145,4 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
             // Ignore deserialization errors
         }
     }
-
-    /// <summary>
-    /// Callback from JavaScript when a cell is clicked
-    /// </summary>
-    /// <param name="cellData">The cell data from JavaScript</param>
-    [JSInvokable]
-    public void JSCellClick(JsonElement cellData)
-    {
-        // Add cell click handling if needed
-        // This would require adding an OnCellClick event to IgbGridLite
-    }
-
-    /// <summary>
-    /// Callback from JavaScript when a row is clicked
-    /// </summary>
-    /// <param name="rowData">The row data from JavaScript</param>
-    [JSInvokable]
-    public void JSRowClick(JsonElement rowData)
-    {
-        // Add row click handling if needed
-        // This would require adding an OnRowClick event to IgbGridLite
-    }
-
-    /// <summary>
-    /// Callback from JavaScript when the grid data view changes
-    /// </summary>
-    /// <param name="dataView">The current data view from JavaScript</param>
-    [JSInvokable]
-    public void JSDataViewChanged(JsonElement dataView)
-    {
-        // Handle data view changes if needed
-        // This could be used to track the current visible/filtered data
-    }
 }
