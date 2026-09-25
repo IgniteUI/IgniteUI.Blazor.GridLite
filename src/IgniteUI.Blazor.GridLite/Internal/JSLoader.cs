@@ -6,7 +6,7 @@ internal static class JSLoader
 {
     public static async Task<IJSObjectReference> LoadAsync(
         IJSRuntime jsRuntime,
-        string path = null)
+        string? path = null)
     {
         var javascriptPath = path ??
             "./_content/IgniteUI.Blazor.GridLite/js/blazor-igc-grid-lite.js";

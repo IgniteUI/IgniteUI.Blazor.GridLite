@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- **BREAKING**: `IgbGridLiteSortingExpression.Key`, `IgbGridLiteFilterExpression.Key`, `IgbGridLiteFilterExpression.Condition` and `IgbColumnConfiguration.Field` are now `required`; object initializers must set them. `IgbGridLiteColumn.Field` is marked `[EditorRequired]`.
+- The event-args members the web component always sends are now `required` (only code that constructs event args itself, such as tests, is affected): `IgbGridLiteSortingEventArgs.Expression`, `IgbGridLiteSortedEventArgs.Expression`, `IgbGridLiteFilteringEventArgs.Key`/`Expressions`/`Type` and `IgbGridLiteFilteredEventArgs.Key`/`State`.
+- `GetColumnsAsync` returns an empty array instead of `null` before the grid has rendered. Nullable annotations on the public surface: the optional `key` of `ClearSortAsync`/`ClearFilterAsync` and `field` of `NavigateToAsync` are `string?`. `IgbGridLiteFilterExpression.SearchTerm` and `Criteria` are nullable.
+- `UpdateDataAsync`, `SortAsync` and `FilterAsync` throw `ArgumentNullException` for a null argument instead of sending `null` to the grid.
+
+### Fixed
+
+- A null `Data` no longer causes a client error. Before, a grid rendered without data threw initially, and resetting `Data` to null left the previous rows on screen. Null is now sent as an empty array in both cases.
+
 ## 0.9.0 - 2026-07-13
 
 This release updates to `igniteui-grid-lite` version `0.9.0` ([see changelog](https://github.com/IgniteUI/igniteui-grid-lite/blob/master/CHANGELOG.md)) with the following changes:

@@ -11,11 +11,11 @@ public class IgbGridLiteFilteredEventArgs
     /// The target column for the filter operation.
     /// </summary>
     [JsonPropertyName("key")]
-    public string Key { get; set; }
+    public required string Key { get; set; }
 
     /// <summary>
     /// The filter state of the column after the operation.
     /// </summary>
     [JsonPropertyName("state")]
-    public List<IgbGridLiteFilterExpression> State { get; set; }
+    public required List<IgbGridLiteFilterExpression> State { get; set; }
 }
