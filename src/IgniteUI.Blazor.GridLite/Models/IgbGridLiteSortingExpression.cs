@@ -28,12 +28,8 @@ public class IgbGridLiteSortingExpression
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? CaseSensitive { get; set; }
 
-    /// <summary>
-    /// Custom comparer function for this operation.
-    /// Note: This is not directly supported in Blazor and would need JavaScript interop.
-    /// </summary>
-    [JsonIgnore]
-    internal Func<object, object, int> Comparer { get; set; }
+    // TODO: the web component also accepts a custom comparer per expression; it is a client-side function,
+    // so exposing it needs the same JS-to-.NET callback design as the data pipeline.
 }
 
 /// <summary>

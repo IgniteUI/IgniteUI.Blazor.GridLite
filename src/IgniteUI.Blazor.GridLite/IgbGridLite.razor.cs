@@ -147,27 +147,16 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// <inheritdoc/>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        try
+        if (firstRender && !isInitialized)
         {
-            System.Diagnostics.Debug.WriteLine($"IgbGridLite<{typeof(TItem).Name}> OnAfterRenderAsync firstRender={firstRender} isInitialized={isInitialized} forceRender={forceRender}");
-
-            if (firstRender && !isInitialized)
-            {
-                blazorIgbGridLite = await JSLoader.LoadAsync(JSRuntime, Options?.JavascriptPath);
-                isInitialized = true;
-                jsHandler = new JSHandler<TItem>(this);
-                System.Diagnostics.Debug.WriteLine("IgbGridLite: JS initialized.");
-            }
-
-            if (isInitialized && forceRender)
-            {
-                await RenderGridAsync();
-            }
+            blazorIgbGridLite = await JSLoader.LoadAsync(JSRuntime, Options?.JavascriptPath);
+            isInitialized = true;
+            jsHandler = new JSHandler<TItem>(this);
         }
-        catch (Exception ex)
+
+        if (isInitialized && forceRender)
         {
-            System.Diagnostics.Debug.WriteLine($"IgbGridLite OnAfterRenderAsync error: {ex}");
-            throw;
+            await RenderGridAsync();
         }
     }
 
@@ -224,7 +213,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     }
 
     /// <summary>
-    /// The render() method is responsible for drawing the grid on the page. 
+    /// The render() method is responsible for drawing the grid on the page.
     /// It is the primary method that has to be called after configuring the options.
     /// </summary>
     public virtual async Task RenderAsync()
@@ -240,6 +229,8 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
         await Task.Yield();
         forceRender = false;
 
+        // TODO: expose the web component's dataPipelineConfiguration (remote sort/filter hooks). Its hooks are
+        // client-side callbacks, so they need a JS-to-.NET round trip and/or a value serialized here.
         var config = new
         {
             id = gridId,
@@ -313,7 +304,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// <summary>
     /// Resets the current sort state of the grid.
     /// </summary>
-    /// <param name="key">Optional column field. If provided, only clears sort for that column. 
+    /// <param name="key">Optional column field. If provided, only clears sort for that column.
     /// If null, clears all sorting.</param>
     public virtual async Task ClearSortAsync(string key = null)
     {
@@ -343,7 +334,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// <summary>
     /// Resets the current filter state of the grid.
     /// </summary>
-    /// <param name="key">Optional column field. If provided, only clears filter for that column. 
+    /// <param name="key">Optional column field. If provided, only clears filter for that column.
     /// If null, clears all filtering.</param>
     public virtual async Task ClearFilterAsync(string key = null)
     {

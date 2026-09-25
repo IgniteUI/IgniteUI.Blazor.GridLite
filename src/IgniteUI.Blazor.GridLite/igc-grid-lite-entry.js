@@ -173,6 +173,7 @@ window.blazor_igc_grid_lite = {
     }
   },
 
+  // TODO: getDataView/getTotalItems read the element's dataView/totalItems getters; not wired to .NET yet.
   getDataView(id) {
     const grid = this.grids.get(id);
     return grid ? grid.dataView : [];
