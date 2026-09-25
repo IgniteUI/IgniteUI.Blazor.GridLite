@@ -1,6 +1,3 @@
-# Node modules
-node_modules/
-
 # Build outputs
 wwwroot/js/blazor-igc-grid-lite.js
 wwwroot/js/blazor-igc-grid-lite.js.map

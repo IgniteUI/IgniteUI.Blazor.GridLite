@@ -47,16 +47,21 @@
   </ItemGroup>
 
 
+  <!-- The npm project lives at the repository root. -->
+  <PropertyGroup>
+    <RepoRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '..', '..'))</RepoRoot>
+  </PropertyGroup>
+
   <!-- Ensure JavaScript bundle is built before compilation -->
   <Target Name="EnsureNodeModules" BeforeTargets="BuildJavaScriptBundle">
     <PropertyGroup>
-      <NodeModulesPath>$(MSBuildProjectDirectory)/node_modules</NodeModulesPath>
+      <NodeModulesPath>$(RepoRoot)node_modules</NodeModulesPath>
     </PropertyGroup>
-    <Exec Command="npm install" WorkingDirectory="$(MSBuildProjectDirectory)" Condition="!Exists('$(NodeModulesPath)')" />
+    <Exec Command="npm install" WorkingDirectory="$(RepoRoot)" Condition="!Exists('$(NodeModulesPath)')" />
   </Target>
 
   <Target Name="BuildJavaScriptBundle" BeforeTargets="BeforeBuild" Condition="'$(RunNodeBuild)' == 'true'">
-    <Exec Command="npm run build" WorkingDirectory="$(MSBuildProjectDirectory)" />
+    <Exec Command="npm run build" WorkingDirectory="$(RepoRoot)" />
   </Target>
 
   <!-- Optional: Clean JavaScript build output -->
