@@ -43,7 +43,7 @@ dotnet add package IgniteUI.Blazor.GridLite
 
 ## Setup
 
-1 - Add the **IgniteUI.Blazor.Controls** namespace in the **_Imports.razor** file:
+1 - Add the **IgniteUI.Blazor.Controls** namespace in the **\_Imports.razor** file:
 
 ```razor
 @using IgniteUI.Blazor.Controls
@@ -73,28 +73,19 @@ dotnet add package IgniteUI.Blazor.GridLite
 }
 ```
 
-
-	  
-
-										   
-
-			  
-
-		
 ### Include the Theme Stylesheet
 
 Add one theme to your `App.razor`, `_Layout.cshtml`, or main layout file. Each theme is available in light and dark variants.
 
 ```html
 <!-- Light themes -->
-																																 
-			  
+
 <link href="_content/IgniteUI.Blazor.GridLite/css/themes/light/material.css" rel="stylesheet" />
 
 <!-- Or one of: -->
 <link href="_content/IgniteUI.Blazor.GridLite/css/themes/light/bootstrap.css" rel="stylesheet" />
 <link href="_content/IgniteUI.Blazor.GridLite/css/themes/light/fluent.css" rel="stylesheet" />
-	 
+
 <link href="_content/IgniteUI.Blazor.GridLite/css/themes/light/indigo.css" rel="stylesheet" />
 
 <!-- Dark variants are available under css/themes/dark/ with the same names -->
@@ -160,8 +151,6 @@ Configure pre-applied sorting and filtering when the grid first renders:
 }
 ```
 
-									 
-								   
 ### Sorting
 
 Enable sorting on individual columns and optionally make sorting case-sensitive:
@@ -227,18 +216,18 @@ Handle sorting and filtering events to persist user state, log analytics, or rea
 
 The `IgbGridLiteColumn` component supports the following properties:
 
-| Property                 | Type                          | Description                                                                                  |
-| :----------------------- | :---------------------------- | :------------------------------------------------------------------------------------------- |
-| `Field`                  | `string`                      | The model property to bind to. Use `nameof()` for compile-time safety.                       |
-| `Header`                 | `string`                      | Column header display text.                                                                  |
-| `Width`                  | `string`                      | Column width as a CSS value (e.g., `"100px"`, `"20%"`, `"auto"`).                            |
-| `DataType`               | `GridLiteColumnDataType`      | One of `String`, `Number`, `Boolean`, or `Date`.                                             |
-| `Hidden`                 | `bool`                        | Hides the column when `true`.                                                                |
-| `Resizable`              | `bool`                        | Allows the user to resize the column.                                                        |
-| `Sortable`               | `bool`                        | Enables sorting on the column.                                                               |
-| `SortingCaseSensitive`   | `bool`                        | When `true`, sort comparisons are case-sensitive.                                            |
-| `Filterable`             | `bool`                        | Enables filtering on the column.                                                             |
-| `FilteringCaseSensitive` | `bool`                        | When `true`, filter comparisons are case-sensitive.                                          |
+| Property                 | Type                     | Description                                                            |
+| :----------------------- | :----------------------- | :--------------------------------------------------------------------- |
+| `Field`                  | `string`                 | The model property to bind to. Use `nameof()` for compile-time safety. |
+| `Header`                 | `string`                 | Column header display text.                                            |
+| `Width`                  | `string`                 | Column width as a CSS value (e.g., `"100px"`, `"20%"`, `"auto"`).      |
+| `DataType`               | `GridLiteColumnDataType` | One of `String`, `Number`, `Boolean`, or `Date`.                       |
+| `Hidden`                 | `bool`                   | Hides the column when `true`.                                          |
+| `Resizable`              | `bool`                   | Allows the user to resize the column.                                  |
+| `Sortable`               | `bool`                   | Enables sorting on the column.                                         |
+| `SortingCaseSensitive`   | `bool`                   | When `true`, sort comparisons are case-sensitive.                      |
+| `Filterable`             | `bool`                   | Enables filtering on the column.                                       |
+| `FilteringCaseSensitive` | `bool`                   | When `true`, filter comparisons are case-sensitive.                    |
 
 ## AI-Assisted Development
 
@@ -288,9 +277,6 @@ For the full setup guide and configuration options, see the [Ignite UI Theming M
 
 Restore dependencies:
 
-							  
-					  
-
 ```bash
 dotnet restore
 ```
@@ -302,9 +288,6 @@ dotnet build
 ```
 
 The build process (configured in `IgniteUI.Blazor.GridLite.csproj`) automatically:
-					  
-
-		
 
 1. Installs npm dependencies.
 2. Builds the JavaScript bundle using Vite.

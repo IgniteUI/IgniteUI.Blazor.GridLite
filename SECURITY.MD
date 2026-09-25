@@ -6,11 +6,11 @@ This document describes how to report security vulnerabilities and which version
 
 We provide security fixes for supported releases according to the following guidance:
 
-| Version | Supported |
-| --- | --- |
-| Latest release | ✅ |
+| Version                | Supported                |
+| ---------------------- | ------------------------ |
+| Latest release         | ✅                       |
 | Previous major release | ✅ (critical fixes only) |
-| Older releases | ❌ |
+| Older releases         | ❌                       |
 
 If you are unsure whether your version is supported, please report the issue anyway and we will advise on next steps.
 
@@ -21,13 +21,13 @@ Please **do not** open a public GitHub issue for security vulnerabilities.
 Instead, report privately using one of the following methods (preferred first):
 
 1. **GitHub Private Vulnerability Reporting (recommended)**
-	- Go to the repository's **Security** tab and use **Report a vulnerability**.
+   - Go to the repository's **Security** tab and use **Report a vulnerability**.
 
 2. **Email**
-	- Send details to: **igniteui@infragistics.com**
+   - Send details to: **igniteui@infragistics.com**
 
 3. **Support Case**
-    - If you are a registered Infragistics user, you can report the vulnerability through a support case at (https://account.infragistics.com/support-cases)
+   - If you are a registered Infragistics user, you can report the vulnerability through a support case at (https://account.infragistics.com/support-cases)
 
 If neither option is available, contact the maintainers privately. Only use the public issue tracker for **non-security** bugs.
 

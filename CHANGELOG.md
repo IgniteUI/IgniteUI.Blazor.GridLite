@@ -41,7 +41,7 @@ This release updates to `igniteui-grid-lite` version `0.6.0` ([see changelog](ht
 
 ### Added
 
-- New `AdoptRootStyles` parameter for  property for adopting document-level styles into shadow DOM when using cell and header templates.
+- New `AdoptRootStyles` parameter for property for adopting document-level styles into shadow DOM when using cell and header templates.
 - Updated theming and component size handling across grid styles - now supports sizing via the `--ig-size` CSS variable.
 
 ## 0.4.0 - 2026-02-02
@@ -66,24 +66,24 @@ This release updates to `igniteui-grid-lite` version `0.4.0` with a new declarat
       new() { Key = "Id", HeaderText = "ID", Type = GridLiteColumnDataType.Number }
     };
   }
-  
+
   <!-- After -->
   <IgbGridLite Data="@data">
       <IgbGridLiteColumn Field="Id" Header="ID" DataType="GridLiteColumnDataType.Number" />
   </IgbGridLite>
   ```
 - **BREAKING**: Column property renames:
-    - `Key`→`Field`
-    - `Type`→`DataType`
-    - `HeaderText`→`Header`
+  - `Key`→`Field`
+  - `Type`→`DataType`
+  - `HeaderText`→`Header`
 - **BREAKING**: Column sort/filter configuration simplified:
   - `Sort` object → `Sortable` (bool) and `SortingCaseSensitive` (bool)
   - `Filter` object → `Filterable` (bool) and `FilteringCaseSensitive` (bool)
 - **BREAKING**: Renamed `IgbGridLiteSortConfiguration` → `IgbGridLiteSortingOptions`
 - **BREAKING**: Renamed `IgbGridLiteSortExpression` → `IgbGridLiteSortingExpression`
 - **BREAKING**: Grid parameter renames:
-    - `SortConfiguration`→`SortingOptions`
-    - `SortExpressions`→`SortingExpressions`
+  - `SortConfiguration`→`SortingOptions`
+  - `SortExpressions`→`SortingExpressions`
 - **BREAKING**: `IgbGridLiteSortingOptions.Multiple` (bool) → `Mode` (enum: `GridLiteSortingMode.Single` or `GridLiteSortingMode.Multiple`)
 
 ### Removed
