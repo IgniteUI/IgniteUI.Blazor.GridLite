@@ -5,12 +5,12 @@ import { copyFileSync, mkdirSync, existsSync } from 'fs';
 export default defineConfig({
     build: {
         lib: {
-            entry: resolve(__dirname, 'igc-grid-lite-entry.js'),
+            entry: resolve(__dirname, 'src/IgniteUI.Blazor.GridLite/igc-grid-lite-entry.js'),
             name: 'BlazorIgcGridLite',
             fileName: 'blazor-igc-grid-lite',
             formats: ['es']
         },
-        outDir: './wwwroot/js',
+        outDir: './src/IgniteUI.Blazor.GridLite/wwwroot/js',
         emptyOutDir: false,
         rollupOptions: {
             external: [],
@@ -28,7 +28,7 @@ export default defineConfig({
             name: 'copy-igniteui-themes',
             writeBundle() {
                 const themesSourceDir = resolve(__dirname, 'node_modules/igniteui-webcomponents/themes');
-                const themesDestDir = resolve(__dirname, './wwwroot/css/themes');
+                const themesDestDir = resolve(__dirname, './src/IgniteUI.Blazor.GridLite/wwwroot/css/themes');
 
                 // Create destination directory structure
                 const variants = ['light', 'dark'];

@@ -50,11 +50,9 @@ jobs:
 
       - name: Restore JavaScript dependencies
         run: npm ci
-        working-directory: ${{ env.PROJECT_DIR }}
 
       - name: Build JavaScript bundle
         run: npm run build
-        working-directory: ${{ env.PROJECT_DIR }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
@@ -320,7 +318,7 @@ jobs:
           .github/scripts/Invoke-DependencyScan.ps1
           -ProjectPath "${{ env.PROJECT_PATH }}"
           -OutputDirectory "${{ github.workspace }}/artifacts/dependency-scan"
-          -NpmManifestDirectory "${{ github.workspace }}/${{ env.PROJECT_DIR }}"
+          -NpmManifestDirectory "${{ github.workspace }}"
           -PackageId "${{ env.PACKAGE_ID }}"
           -Version "$env:VERSION"
 
@@ -379,7 +377,6 @@ jobs:
       # sbom-tool's component detector needs node_modules to see the JavaScript dependency graph too.
       - name: Restore JavaScript dependencies
         run: npm ci --ignore-scripts
-        working-directory: ${{ env.PROJECT_DIR }}
 
       # The npm half: the .nupkg also ships the Vite-bundled JS and copied igniteui-webcomponents theme
       # CSS, neither of which the .NET-only BOM below can see. cyclonedx-npm is a locked devDependency
@@ -389,7 +386,7 @@ jobs:
         shell: pwsh
         run: >
           .github/scripts/New-NpmCycloneDxSbom.ps1
-          -ManifestPath "${{ env.PROJECT_DIR }}/package.json"
+          -ManifestPath "package.json"
           -OutputFile "${{ runner.temp }}/sbom/cyclonedx/npm/bom.json"
 
       # sbom-tool's node_modules-based npm detectors do not distinguish dependencies from
@@ -399,7 +396,6 @@ jobs:
       # cyclonedx-npm's own binary present.
       - name: Reduce JavaScript dependencies to the shipped set
         shell: pwsh
-        working-directory: ${{ env.PROJECT_DIR }}
         run: |
           $ErrorActionPreference = 'Stop'
           $PSNativeCommandUseErrorActionPreference = $true
@@ -410,9 +406,9 @@ jobs:
       - name: Restore .NET local tools
         run: dotnet tool restore
 
-      # -ComponentScanExclusion keeps the packed nupkg out of component detection. It is a no-op
-      # here (artifacts/ sits outside -bc) but is passed to stay identical to the blazor workflow,
-      # where the npm graph forces -bc up to the repo root that also holds artifacts/.
+      # -bc is the repository root because the npm graph lives there alongside the .NET project;
+      # -ComponentScanExclusion then keeps the packed nupkg under -b, which that root also holds,
+      # from being detected as a component (a dependency of the package on itself).
       - name: Generate SBOMs
         shell: pwsh
         run: >
@@ -420,7 +416,7 @@ jobs:
           -PackageId "${{ env.PACKAGE_ID }}"
           -PackageVersion "$env:VERSION"
           -BuildDropPath "${{ github.workspace }}/artifacts"
-          -BuildComponentPath "${{ github.workspace }}/${{ env.PROJECT_DIR }}"
+          -BuildComponentPath "${{ github.workspace }}"
           -ComponentScanExclusion '**/artifacts/**'
           -OutputRoot "${{ runner.temp }}/sbom"
           -LicenseTimeoutSeconds ${{ env.SBOM_LICENSE_TIMEOUT_SECONDS }}
