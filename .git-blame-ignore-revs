@@ -8,4 +8,4 @@
 # out. Append the SHA in a follow-up commit (the hash is only known after the
 # formatting commit is created).
 
-# One-time repo-wide formatting commit (dotnet format whitespace + prettier)
+a62eb1defb983ca7aa3ecda513c0582406e374cb
