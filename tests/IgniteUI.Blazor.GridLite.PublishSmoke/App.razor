@@ -1,0 +1,47 @@
+<h1>IgniteUI.Blazor.GridLite publish smoke</h1>
+
+@* Data path: SmokeItem carries no trim attribute, so only IgbGridLite's annotation on TItem keeps its
+   properties. SmokeDetail is nested in it, which that annotation does not reach; it is preserved the
+   documented way, with the DynamicDependency on OnInitialized below. *@
+<IgbGridLite @ref="grid" TItem="SmokeItem" Data="items" Sorted="OnSorted" Filtered="OnFiltered">
+    <IgbGridLiteColumn Field="@nameof(SmokeItem.Name)" Header="Name" Sortable="true" />
+    <IgbGridLiteColumn Field="@nameof(SmokeItem.Price)" Header="Price" DataType="GridLiteColumnDataType.Number" />
+    <IgbGridLiteColumn Field="Detail.Code" Header="Code" />
+</IgbGridLite>
+
+@* Filter value path: a numeric SearchTerm is written by its runtime type through the library's
+   reflection-based serializer. *@
+<button id="filter-button" @onclick="FilterByPriceAsync">Price greater than 10</button>
+
+@* Event payload paths: the sorted and filtered details deserialize through the source-generated context. *@
+<p id="sorted-result">@sortedResult</p>
+<p id="filtered-result">@filteredResult</p>
+
+@code {
+    private IgbGridLite<SmokeItem> grid = null!;
+    private string sortedResult = "not sorted";
+    private string filteredResult = "not filtered";
+
+    private readonly List<SmokeItem> items =
+    [
+        new() { Name = "Alpha", Price = 5, Detail = new() { Code = "A-1" } },
+        new() { Name = "Beta", Price = 12.5, Detail = new() { Code = "B-2" } },
+        new() { Name = "Gamma", Price = 20, Detail = new() { Code = "C-3" } },
+    ];
+
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(SmokeDetail))]
+    protected override void OnInitialized() => base.OnInitialized();
+
+    private Task FilterByPriceAsync() => grid.FilterAsync(new IgbGridLiteFilterExpression
+    {
+        Key = nameof(SmokeItem.Price),
+        Condition = "greaterThan",
+        SearchTerm = 10,
+    });
+
+    private void OnSorted(IgbGridLiteSortedEventArgs args)
+        => sortedResult = $"{args.Expression.Key} {args.Expression.Direction}";
+
+    private void OnFiltered(IgbGridLiteFilteredEventArgs args)
+        => filteredResult = $"{args.Key}: {args.State.Count} expression(s)";
+}
