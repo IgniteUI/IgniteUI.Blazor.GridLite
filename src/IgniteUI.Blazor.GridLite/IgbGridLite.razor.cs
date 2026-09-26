@@ -1,6 +1,7 @@
 ﻿using IgniteUI.Blazor.Controls.Internal;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
 namespace IgniteUI.Blazor.Controls;
@@ -9,13 +10,18 @@ namespace IgniteUI.Blazor.Controls;
 /// IgbGridLite is a component for displaying data in a tabular format quick and easy.
 /// </summary>
 /// <typeparam name="TItem">The data type of the items to display in the grid</typeparam>
-public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem : class
+public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TItem>
+    : ComponentBase, IDisposable where TItem : class
 {
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
 
     /// <summary>
     /// The data to display in the grid
     /// </summary>
+    /// <remarks>
+    /// Serialized with reflection, keeping the C# property names. With full trimming the public properties of
+    /// <typeparamref name="TItem"/> are kept; complex types nested in it must be preserved by the app.
+    /// </remarks>
     [Parameter]
     public IEnumerable<TItem>? Data { get; set; }
 
@@ -121,16 +127,6 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     private bool isInitialized;
     private bool forceRender = true;
 
-    // Caching the JsonSerializerOptions instance as a static readonly field improves performance
-    // by avoiding repeated allocations and configuration. Reusing serializer options is recommended
-    // for high-frequency serialization operations, such as grid data updates.
-    private static readonly JsonSerializerOptions GridJsonSerializerOptions = new()
-    {
-        // TODO: This policy might need to be configurable in the future (for data serialization at least)
-        //PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-    };
-
     /// <summary>
     /// The unique identifier for this grid instance
     /// </summary>
@@ -161,53 +157,53 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
 
     public override async Task SetParametersAsync(ParameterView parameters)
     {
-        var updateConfig = new Dictionary<string, object?>();
+        GridLiteUpdateConfig? updateConfig = null;
 
         if (isInitialized)
         {
             if (parameters.TryGetValue<IEnumerable<TItem>?>(nameof(Data), out var newData)
                 && !ReferenceEquals(Data, newData))
             {
-                // The web component spreads `data`, so it cannot take null; a null parameter means "no rows".
-                updateConfig["data"] = newData ?? Array.Empty<TItem>();
+                (updateConfig ??= new()).Data = CreateDataPayload(newData);
             }
 
             if (parameters.TryGetValue<bool>(nameof(AutoGenerate), out var newAutoGenerate)
                 && AutoGenerate != newAutoGenerate)
             {
-                updateConfig["autoGenerate"] = newAutoGenerate;
+                (updateConfig ??= new()).AutoGenerate = newAutoGenerate;
             }
 
             if (parameters.TryGetValue<bool>(nameof(AdoptRootStyles), out var newAdoptRootStyles)
                 && AdoptRootStyles != newAdoptRootStyles)
             {
-                updateConfig["adoptRootStyles"] = newAdoptRootStyles;
+                (updateConfig ??= new()).AdoptRootStyles = newAdoptRootStyles;
             }
 
+            // The web component cannot take null for these; a reset to null restores its default instead.
             if (parameters.TryGetValue<IgbGridLiteSortingOptions?>(nameof(SortingOptions), out var newSortOptions)
                 && !ReferenceEquals(SortingOptions, newSortOptions))
             {
-                updateConfig["sortingOptions"] = newSortOptions;
+                (updateConfig ??= new()).SortingOptions = newSortOptions ?? new();
             }
 
             if (parameters.TryGetValue<IEnumerable<IgbGridLiteSortingExpression>?>(nameof(SortingExpressions), out var newSortingExpressions)
                 && !ReferenceEquals(SortingExpressions, newSortingExpressions))
             {
-                updateConfig["sortingExpressions"] = newSortingExpressions;
+                (updateConfig ??= new()).SortingExpressions = newSortingExpressions ?? [];
             }
 
             if (parameters.TryGetValue<IEnumerable<IgbGridLiteFilterExpression>?>(nameof(FilterExpressions), out var newFilterExpressions)
                 && !ReferenceEquals(FilterExpressions, newFilterExpressions))
             {
-                updateConfig["filterExpressions"] = newFilterExpressions;
+                (updateConfig ??= new()).FilterExpressions = newFilterExpressions ?? [];
             }
         }
 
         await base.SetParametersAsync(parameters);
 
-        if (updateConfig.Count > 0)
+        if (updateConfig != null)
         {
-            var json = JsonSerializer.Serialize(updateConfig, GridJsonSerializerOptions);
+            var json = JsonSerializer.Serialize(updateConfig, GridLiteJsonContext.Default.GridLiteUpdateConfig);
             await InvokeVoidJsAsync("blazor_igc_grid_lite.updateGrid", gridId, json);
         }
     }
@@ -231,34 +227,35 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
 
         // TODO: expose the web component's dataPipelineConfiguration (remote sort/filter hooks). Its hooks are
         // client-side callbacks, so they need a JS-to-.NET round trip and/or a value serialized here.
-        var config = new
+        var config = new GridLiteRenderConfig
         {
-            id = gridId,
-            data = Data ?? Array.Empty<TItem>(),
-            autoGenerate = AutoGenerate,
-            adoptRootStyles = AdoptRootStyles,
-            sortingOptions = SortingOptions,
-            sortingExpressions = SortingExpressions,
-            filterExpressions = FilterExpressions,
+            Id = gridId,
+            Data = CreateDataPayload(Data),
+            AutoGenerate = AutoGenerate,
+            AdoptRootStyles = AdoptRootStyles,
+            SortingOptions = SortingOptions,
+            SortingExpressions = SortingExpressions,
+            FilterExpressions = FilterExpressions,
+            Events = new GridLiteEventFlags
+            {
+                HasSorting = Sorting.HasDelegate,
+                HasSorted = Sorted.HasDelegate,
+                HasFiltering = Filtering.HasDelegate,
+                HasFiltered = Filtered.HasDelegate,
+            },
         };
 
-        var json = JsonSerializer.Serialize(config, GridJsonSerializerOptions);
+        var json = JsonSerializer.Serialize(config, GridLiteJsonContext.Default.GridLiteRenderConfig);
 
-        await InvokeVoidJsAsync("blazor_igc_grid_lite.renderGrid",
-            jsHandler.ObjectReference, grid, json, GetEventFlags());
+        await InvokeVoidJsAsync("blazor_igc_grid_lite.renderGrid", jsHandler.ObjectReference, grid, json);
 
         await Rendered.InvokeAsync();
     }
 
-    private object GetEventFlags()
+    private static GridLiteDataPayload CreateDataPayload(IEnumerable<TItem>? data)
     {
-        return new
-        {
-            hasSorting = Sorting.HasDelegate,
-            hasSorted = Sorted.HasDelegate,
-            hasFiltering = Filtering.HasDelegate,
-            hasFiltered = Filtered.HasDelegate
-        };
+        // The web component spreads `data`, so it cannot take null; a null parameter means "no rows".
+        return new GridLiteDataPayload(data ?? Array.Empty<TItem>(), AppValueSerializer.GetDataTypeInfo<TItem>());
     }
 
     /// <summary>
@@ -278,7 +275,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     {
         ArgumentNullException.ThrowIfNull(newData);
         Data = newData;
-        var json = JsonSerializer.Serialize(newData, GridJsonSerializerOptions);
+        var json = JsonSerializer.Serialize(newData, AppValueSerializer.GetDataTypeInfo<TItem>());
         await InvokeVoidJsAsync("blazor_igc_grid_lite.updateData", gridId, json);
     }
 
@@ -289,7 +286,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     public virtual async Task SortAsync(IgbGridLiteSortingExpression expressions)
     {
         ArgumentNullException.ThrowIfNull(expressions);
-        var json = JsonSerializer.Serialize(expressions, GridJsonSerializerOptions);
+        var json = JsonSerializer.Serialize(expressions, GridLiteJsonContext.Default.IgbGridLiteSortingExpression);
         await InvokeVoidJsAsync("blazor_igc_grid_lite.sort", gridId, json);
     }
 
@@ -300,7 +297,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     public virtual async Task SortAsync(List<IgbGridLiteSortingExpression> expressions)
     {
         ArgumentNullException.ThrowIfNull(expressions);
-        var json = JsonSerializer.Serialize(expressions, GridJsonSerializerOptions);
+        var json = JsonSerializer.Serialize(expressions, GridLiteJsonContext.Default.ListIgbGridLiteSortingExpression);
         await InvokeVoidJsAsync("blazor_igc_grid_lite.sort", gridId, json);
     }
 
@@ -321,7 +318,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     public virtual async Task FilterAsync(IgbGridLiteFilterExpression expression)
     {
         ArgumentNullException.ThrowIfNull(expression);
-        var json = JsonSerializer.Serialize(expression, GridJsonSerializerOptions);
+        var json = JsonSerializer.Serialize(expression, GridLiteJsonContext.Default.IgbGridLiteFilterExpression);
         await InvokeVoidJsAsync("blazor_igc_grid_lite.filter", gridId, json);
     }
 
@@ -332,7 +329,7 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     public virtual async Task FilterAsync(List<IgbGridLiteFilterExpression> expressions)
     {
         ArgumentNullException.ThrowIfNull(expressions);
-        var json = JsonSerializer.Serialize(expressions, GridJsonSerializerOptions);
+        var json = JsonSerializer.Serialize(expressions, GridLiteJsonContext.Default.ListIgbGridLiteFilterExpression);
         await InvokeVoidJsAsync("blazor_igc_grid_lite.filter", gridId, json);
     }
 
@@ -352,7 +349,10 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
     /// <returns>The column configurations</returns>
     public async ValueTask<IgbColumnConfiguration[]> GetColumnsAsync()
     {
-        return await InvokeJsAsync<IgbColumnConfiguration[]>("blazor_igc_grid_lite.getColumns", gridId) ?? [];
+        var columns = await InvokeJsAsync("blazor_igc_grid_lite.getColumns", gridId);
+        return columns is { ValueKind: JsonValueKind.Array } array
+            ? array.Deserialize(GridLiteJsonContext.Default.IgbColumnConfigurationArray) ?? []
+            : [];
     }
 
     /// <summary>
@@ -367,20 +367,22 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
         await InvokeVoidJsAsync("blazor_igc_grid_lite.navigateTo", gridId, row, field, activate);
     }
 
-    private async ValueTask<TValue?> InvokeJsAsync<TValue>(string identifier, params object?[] args)
+    // Results come back as JsonElement so the caller deserializes them through GridLiteJsonContext.
+    private async ValueTask<JsonElement?> InvokeJsAsync(string identifier, params object?[] args)
     {
         if (blazorIgbGridLite == null)
         {
-            return default;
+            return null;
         }
 
         try
         {
-            return await blazorIgbGridLite.InvokeAsync<TValue>(identifier, args);
+            return await blazorIgbGridLite.InvokeAsync<JsonElement>(identifier, args);
         }
-        catch (Exception ex) when (ex is ObjectDisposedException || ex is JSDisconnectedException)
+        catch (Exception ex) when (ex is ObjectDisposedException ||
+                                  ex is JSDisconnectedException)
         {
-            return default;
+            return null;
         }
     }
 

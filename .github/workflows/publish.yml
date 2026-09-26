@@ -86,6 +86,7 @@ jobs:
           -p:RunNodeBuild=false
           -p:GeneratePackageOnBuild=false
           -p:ContinuousIntegrationBuild=true
+          -p:ExposeInternalsToTests=false
           -p:SignAssembly=true
           -p:AssemblyOriginatorKeyFile="${{ runner.temp }}\IG.StrongName.snk"
 

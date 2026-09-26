@@ -1,19 +1,20 @@
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using IgniteUI.Blazor.Controls;
+using IgniteUI.Blazor.Controls.Internal;
 
 namespace IgniteUI.Blazor.GridLite.Tests;
 
 /// <summary>
-/// Verifies the wire format of the public models sent through JS interop:
-/// camelCase property keys and omission of unset optional values.
+/// Verifies the wire format of the public models sent through JS interop, through the source-generated
+/// metadata the library ships: camelCase property keys and omission of unset optional values.
 /// </summary>
 public class ModelSerializationTests
 {
-    private static JsonElement SerializeToElement(object value)
-    {
-        using var doc = JsonDocument.Parse(JsonSerializer.Serialize(value));
-        return doc.RootElement.Clone();
-    }
+    private static GridLiteJsonContext Context => GridLiteJsonContext.Default;
+
+    private static JsonElement SerializeToElement<T>(T value, JsonTypeInfo<T> typeInfo)
+        => JsonSerializer.SerializeToElement(value, typeInfo);
 
     [Fact]
     public void SortingExpression_SerializesWithCamelCaseKeys()
@@ -22,7 +23,7 @@ public class ModelSerializationTests
         {
             Key = "ProductName",
             Direction = GridLiteSortingDirection.Descending,
-        });
+        }, Context.IgbGridLiteSortingExpression);
 
         Assert.Equal("ProductName", json.GetProperty("key").GetString());
         Assert.Equal("descending", json.GetProperty("direction").GetString());
@@ -37,7 +38,7 @@ public class ModelSerializationTests
             Key = "ProductName",
             Direction = GridLiteSortingDirection.Ascending,
             CaseSensitive = true,
-        });
+        }, Context.IgbGridLiteSortingExpression);
 
         Assert.True(json.GetProperty("caseSensitive").GetBoolean());
     }
@@ -48,7 +49,7 @@ public class ModelSerializationTests
         // Shape the JS side sends to the JSSorting/JSSorted callbacks
         const string payload = """{"key":"UnitPrice","direction":"ascending","caseSensitive":false}""";
 
-        var expression = JsonSerializer.Deserialize<IgbGridLiteSortingExpression>(payload);
+        var expression = JsonSerializer.Deserialize(payload, Context.IgbGridLiteSortingExpression);
 
         Assert.NotNull(expression);
         Assert.Equal("UnitPrice", expression.Key);
@@ -66,7 +67,7 @@ public class ModelSerializationTests
             SearchTerm = "Cha",
             Criteria = "and",
             CaseSensitive = false,
-        });
+        }, Context.IgbGridLiteFilterExpression);
 
         Assert.Equal("ProductName", json.GetProperty("key").GetString());
         Assert.Equal("contains", json.GetProperty("condition").GetString());
@@ -82,7 +83,7 @@ public class ModelSerializationTests
         {
             Key = "InStock",
             Condition = "true", // unary condition, no search term
-        });
+        }, Context.IgbGridLiteFilterExpression);
 
         Assert.Equal("InStock", json.GetProperty("key").GetString());
         Assert.False(json.TryGetProperty("searchTerm", out _));
@@ -90,12 +91,25 @@ public class ModelSerializationTests
         Assert.False(json.TryGetProperty("caseSensitive", out _));
     }
 
+    // The filtering events hand these back to app code, which reads them as JsonElement.
+    [Fact]
+    public void FilterExpression_ReadsObjectValuesFromJsPayload_AsJsonElement()
+    {
+        const string payload = """{"key":"Price","condition":"greaterThan","searchTerm":10}""";
+
+        var expression = JsonSerializer.Deserialize(payload, Context.IgbGridLiteFilterExpression);
+
+        Assert.NotNull(expression);
+        Assert.Equal("greaterThan", Assert.IsType<JsonElement>(expression.Condition).GetString());
+        Assert.Equal(10, Assert.IsType<JsonElement>(expression.SearchTerm).GetInt32());
+    }
+
     [Theory]
     [InlineData(GridLiteSortingMode.Multiple, "multiple")]
     [InlineData(GridLiteSortingMode.Single, "single")]
     public void SortingOptions_SerializesMode(GridLiteSortingMode mode, string expected)
     {
-        var json = SerializeToElement(new IgbGridLiteSortingOptions { Mode = mode });
+        var json = SerializeToElement(new IgbGridLiteSortingOptions { Mode = mode }, Context.IgbGridLiteSortingOptions);
 
         Assert.Equal(expected, json.GetProperty("mode").GetString());
     }
@@ -109,7 +123,7 @@ public class ModelSerializationTests
             DataType = GridLiteColumnDataType.Number,
             Header = "Unit Price",
             Sortable = true,
-        });
+        }, Context.IgbColumnConfiguration);
 
         Assert.Equal("Price", json.GetProperty("field").GetString());
         Assert.Equal("number", json.GetProperty("dataType").GetString());
@@ -132,7 +146,7 @@ public class ModelSerializationTests
              "filterable":true,"filteringCaseSensitive":false}
             """;
 
-        var column = JsonSerializer.Deserialize<IgbColumnConfiguration>(payload);
+        var column = JsonSerializer.Deserialize(payload, Context.IgbColumnConfiguration);
 
         Assert.NotNull(column);
         Assert.Equal("ProductName", column.Field);

@@ -40,6 +40,8 @@ This repository is the **source of the `IgniteUI.Blazor.GridLite` package**: a R
 - PascalCase for public members; camelCase for private fields; `var` when the type is obvious; no `dynamic`
 - `[Parameter]` for component inputs; `EventCallback<T>` for events
 - Every public type and member has XML docs; overrides use `<inheritdoc/>`
+- Library-owned payloads serialize through the source-generated `GridLiteJsonContext`; app-owned values (`Data`, filter `Condition`/`SearchTerm`) go through `AppValueSerializer`, the only reflection-based serialization in `src/`
+- Trim diagnostics (IL2xxx) are build errors; suppress only on the smallest member, with `[UnconditionalSuppressMessage]` and a justification that says why the pattern is safe - never `#pragma` for ILxxxx
 
 ### JavaScript
 
@@ -50,9 +52,9 @@ This repository is the **source of the `IgniteUI.Blazor.GridLite` package**: a R
 ## Interop Pattern
 
 - **Loading**: `JSLoader.LoadAsync` imports the module in `OnAfterRenderAsync(firstRender)` and calls `get_igc_grid_lite()`; nothing touches JS before that, so prerendering is safe.
-- **Render**: `RenderGridAsync` serializes one config object (data, `autoGenerate`, `adoptRootStyles`, sorting/filter state) with the cached `GridJsonSerializerOptions` - no naming policy, so data keys keep the C# property names that `IgbGridLiteColumn.Field` uses via `nameof`; nulls omitted; enums as camelCase strings through `CamelCaseEnumConverter<T>` on each enum.
-- **Updates**: `SetParametersAsync` diffs incoming parameters against the current values (`ReferenceEquals` for objects) and pushes only the changed keys through `updateGrid`.
-- **Events**: `renderGrid` receives `hasSorting`/`hasSorted`/`hasFiltering`/`hasFiltered` flags and only attaches listeners for bound callbacks; JS calls back into `JSHandler<TItem>` through a `DotNetObjectReference`.
+- **Render**: `RenderGridAsync` serializes one `GridLiteRenderConfig` (data, `autoGenerate`, `adoptRootStyles`, sorting/filter state, event flags) through `GridLiteJsonContext`; nulls omitted; `data` goes through reflection with no naming policy (`TItem` is annotated to keep its public properties when trimmed), so data keys keep the C# property names that `IgbGridLiteColumn.Field` uses via `nameof`; enums as camelCase strings through `CamelCaseEnumConverter<T>` on each enum.
+- **Updates**: `SetParametersAsync` diffs incoming parameters against the current values (`ReferenceEquals` for objects) and pushes only the changed keys through `updateGrid` as a `GridLiteUpdateConfig`, whose null members are omitted; a parameter reset to null is sent as the web component's default (empty arrays, default `SortingOptions`), because the component cannot take null.
+- **Events**: `renderGrid` reads the `events.hasSorting`/`hasSorted`/`hasFiltering`/`hasFiltered` flags from the config and only attaches listeners for bound callbacks; JS calls back into `JSHandler<TItem>` through a `DotNetObjectReference`.
 - **Columns**: declarative children, no interop - Blazor re-renders the `<igc-grid-lite-column>` elements and the web component observes them.
 
 ## Key Guidelines for Contributors
