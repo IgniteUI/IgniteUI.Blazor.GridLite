@@ -14,8 +14,9 @@ window.blazor_igc_grid_lite = {
   grids: new Map(),
   dotNetRefs: new Map(),
 
-  renderGrid(dotNetObject, gridElement, options, events) {
+  renderGrid(dotNetObject, gridElement, options) {
     const config = JSON.parse(options);
+    const events = config.events;
 
     if (!customElements.get('igc-grid-lite')) {
       IgcGridLite.register();

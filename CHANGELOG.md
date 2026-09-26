@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- The library is trim-compatible (`IsTrimmable`). Only the app's own values are serialized with reflection: the `Data` items and the filter expressions' `Condition`/`SearchTerm`. Blazor WebAssembly's default `TrimMode=partial` leaves those types untrimmed. With `TrimMode=full`, a grid with a concrete item type keeps that type's public properties automatically; a component that passes its own generic parameter as `TItem` must annotate it with `[DynamicallyAccessedMembers(PublicProperties)]`, and complex types nested in the item type must be preserved by the app.
+
 ### Changed
 
 - **BREAKING**: `IgbGridLiteSortingExpression.Key`, `IgbGridLiteFilterExpression.Key`, `IgbGridLiteFilterExpression.Condition` and `IgbColumnConfiguration.Field` are now `required`; object initializers must set them. `IgbGridLiteColumn.Field` is marked `[EditorRequired]`.
@@ -17,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - A null `Data` no longer causes a client error. Before, a grid rendered without data threw initially, and resetting `Data` to null left the previous rows on screen. Null is now sent as an empty array in both cases.
+- Resetting `SortingOptions`, `SortingExpressions` or `FilterExpressions` to null restores the grid's default (multiple sorting, no sort, no filter) on the client.
 
 ## 0.9.0 - 2026-07-13
 
