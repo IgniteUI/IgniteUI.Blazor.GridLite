@@ -262,9 +262,9 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         // Deliberate nulls: the guards exist for callers with nullable analysis off.
         await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.UpdateDataAsync(null!)));
         await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.SortAsync((IgbGridLiteSortingExpression)null!)));
-        await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.SortAsync((List<IgbGridLiteSortingExpression>)null!)));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.SortAsync((IEnumerable<IgbGridLiteSortingExpression>)null!)));
         await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.FilterAsync((IgbGridLiteFilterExpression)null!)));
-        await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.FilterAsync((List<IgbGridLiteFilterExpression>)null!)));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.FilterAsync((IEnumerable<IgbGridLiteFilterExpression>)null!)));
 
         GridApi.VerifyNotInvoke($"{Api}.updateData");
         GridApi.VerifyNotInvoke($"{Api}.sort");

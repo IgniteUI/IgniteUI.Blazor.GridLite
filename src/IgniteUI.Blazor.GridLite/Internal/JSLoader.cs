@@ -4,15 +4,12 @@ namespace IgniteUI.Blazor.Controls.Internal;
 
 internal static class JSLoader
 {
-    public static async Task<IJSObjectReference> LoadAsync(
-        IJSRuntime jsRuntime,
-        string? path = null)
-    {
-        var javascriptPath = path ??
-            "./_content/IgniteUI.Blazor.GridLite/js/blazor-igc-grid-lite.js";
+    private const string ModulePath = "./_content/IgniteUI.Blazor.GridLite/js/blazor-igc-grid-lite.js";
 
+    public static async Task<IJSObjectReference> LoadAsync(IJSRuntime jsRuntime)
+    {
         var module = await jsRuntime.InvokeAsync<IJSObjectReference>(
-            "import", javascriptPath);
+            "import", ModulePath);
 
         return await module.InvokeAsync<IJSObjectReference>(
             "get_igc_grid_lite");

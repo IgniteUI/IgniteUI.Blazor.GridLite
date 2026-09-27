@@ -79,10 +79,6 @@ window.blazor_igc_grid_lite = {
         dotNetObject.invokeMethodAsync('JSFiltered', e.detail);
       });
     }
-
-    if (config.debug) {
-      console.log('IgcGridLite rendered:', config);
-    }
   },
 
   updateGrid(id, options) {
@@ -113,10 +109,6 @@ window.blazor_igc_grid_lite = {
 
     if (config.filterExpressions !== undefined) {
       grid.filterExpressions = config.filterExpressions;
-    }
-
-    if (config.debug) {
-      console.log('IgcGridLite updated:', config);
     }
   },
 
