@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The package no longer ships a source map for the grid's script (`blazor-igc-grid-lite.js.map`).
 - **BREAKING**: `IgbGridLiteSortingExpression.Key`, `IgbGridLiteFilterExpression.Key`, `IgbGridLiteFilterExpression.Condition` and `IgbColumnConfiguration.Field` are now `required`; object initializers must set them. `IgbGridLiteColumn.Field` is marked `[EditorRequired]`.
 - The event-args members the web component always sends are now `required` (only code that constructs event args itself, such as tests, is affected): `IgbGridLiteSortingEventArgs.Expression`, `IgbGridLiteSortedEventArgs.Expression`, `IgbGridLiteFilteringEventArgs.Key`/`Expressions`/`Type` and `IgbGridLiteFilteredEventArgs.Key`/`State`.
+- The same event-args members are `init`-only: a handler's changes to them never reached the grid.
 - `GetColumnsAsync` returns an empty array instead of `null` before the grid has rendered. Nullable annotations on the public surface: the optional `key` of `ClearSortAsync`/`ClearFilterAsync` and `field` of `NavigateToAsync` are `string?`. `IgbGridLiteFilterExpression.SearchTerm` and `Criteria` are nullable.
 - `UpdateDataAsync`, `SortAsync` and `FilterAsync` throw `ArgumentNullException` for a null argument instead of sending `null` to the grid.
 - **BREAKING**: The public methods of `IgbGridLite<TItem>` are no longer `virtual`.

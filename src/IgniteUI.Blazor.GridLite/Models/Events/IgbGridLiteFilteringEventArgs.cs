@@ -11,13 +11,13 @@ public class IgbGridLiteFilteringEventArgs
     /// The target column for the filter operation.
     /// </summary>
     [JsonPropertyName("key")]
-    public required string Key { get; set; }
+    public required string Key { get; init; }
 
     /// <summary>
     /// The filter expression(s) to apply.
     /// </summary>
     [JsonPropertyName("expressions")]
-    public required List<IgbGridLiteFilterExpression> Expressions { get; set; }
+    public required List<IgbGridLiteFilterExpression> Expressions { get; init; }
 
     /// <summary>
     /// The type of modification which will be applied to the filter state of the column.
@@ -26,5 +26,5 @@ public class IgbGridLiteFilteringEventArgs
     /// 'remove' - the expression(s) will be removed from the state of the column.
     /// </summary>
     [JsonPropertyName("type")]
-    public required string Type { get; set; } // TODO: "add", "modify", or "remove"
+    public required string Type { get; init; } // TODO: "add", "modify", or "remove"
 }
