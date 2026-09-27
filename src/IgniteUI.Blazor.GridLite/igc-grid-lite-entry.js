@@ -47,6 +47,9 @@ window.blazor_igc_grid_lite = {
     this.grids.set(config.id, gridElement);
     this.dotNetRefs.set(config.id, dotNetObject);
 
+    // TODO: the sorting and filtering handlers cannot cancel: grid-lite reads dispatchEvent's result synchronously,
+    // so preventDefault after the awaited .NET call comes too late. The returned flag is kept for a future
+    // client-side script parameter (the *Script pattern, e.g. IgbCombo.ItemTemplateScript) or a synchronous callback.
     if (events.hasSorting) {
       gridElement.addEventListener('sorting', async (e) => {
         const cancel = await dotNetObject.invokeMethodAsync('JSSorting', e.detail);

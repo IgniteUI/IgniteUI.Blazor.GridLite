@@ -83,10 +83,6 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// Fires when sorting is initiated through the UI.
     /// Returns the sort expression which will be used for the operation.
     /// </summary>
-    /// <remarks>
-    /// The event is cancellable which prevents the operation from being applied.
-    /// The expression can be modified prior to the operation running.
-    /// </remarks>
     [Parameter]
     public EventCallback<IgbGridLiteSortingEventArgs> Sorting { get; set; }
 
@@ -100,10 +96,6 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// <summary>
     /// Fires when filtering is initiated through the UI.
     /// </summary>
-    /// <remarks>
-    /// The event is cancellable which prevents the operation from being applied.
-    /// The expression can be modified prior to the operation running.
-    /// </remarks>
     [Parameter]
     public EventCallback<IgbGridLiteFilteringEventArgs> Filtering { get; set; }
 

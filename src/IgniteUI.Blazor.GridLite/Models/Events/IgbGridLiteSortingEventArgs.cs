@@ -14,7 +14,7 @@ public class IgbGridLiteSortingEventArgs
     public required IgbGridLiteSortingExpression Expression { get; set; }
 
     /// <summary>
-    /// Set to true to cancel the operation.
+    /// Not used yet; see the cancellation TODO in igc-grid-lite-entry.js.
     /// </summary>
     [JsonPropertyName("cancel")]
     internal bool Cancel { get; set; }

@@ -52,7 +52,7 @@ internal sealed class JSHandler<[DynamicallyAccessedMembers(DynamicallyAccessedM
 
             await GridReference.Sorting.InvokeAsync(eventArgs);
 
-            // Return true to cancel the operation
+            // Always false for now; see the cancellation TODO in igc-grid-lite-entry.js.
             return eventArgs.Cancel;
         }
         catch
@@ -112,8 +112,7 @@ internal sealed class JSHandler<[DynamicallyAccessedMembers(DynamicallyAccessedM
 
             await GridReference.Filtering.InvokeAsync(eventData);
 
-            // IgbGridLiteFilteringEventArgs doesn't have a Cancel property in the TypeScript definition
-            // but you could add it if needed
+            // See the cancellation TODO in igc-grid-lite-entry.js.
             return false;
         }
         catch

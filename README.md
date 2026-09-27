@@ -192,13 +192,13 @@ Handle sorting and filtering events to persist user state, log analytics, or rea
 @code {
     private void HandleSorting(IgbGridLiteSortingEventArgs e)
     {
-        // Fires before the sort is applied. Set e.Cancel = true to prevent the sort.
+        // Fires before the sort is applied.
     }
 
     private void HandleSorted(IgbGridLiteSortedEventArgs e)
     {
         // Fires after the sort is applied. Persist current sort state to a user profile.
-        UserPreferences.LastGridSort = (e.Key, e.Direction);
+        UserPreferences.LastGridSort = (e.Expression.Key, e.Expression.Direction);
     }
 
     private void HandleFiltering(IgbGridLiteFilteringEventArgs e)
@@ -209,7 +209,7 @@ Handle sorting and filtering events to persist user state, log analytics, or rea
     private void HandleFiltered(IgbGridLiteFilteredEventArgs e)
     {
         // Fires after the filter is applied. Log the filter for analytics.
-        Analytics.Track("grid.filter.applied", new { e.Key, e.Condition, e.SearchTerm });
+        Analytics.Track("grid.filter.applied", new { e.Key, Conditions = e.State.Select(x => x.Condition) });
     }
 }
 ```
