@@ -38,13 +38,16 @@ public class IgbGridLiteSortingExpression
 [JsonConverter(typeof(CamelCaseEnumConverter<GridLiteSortingDirection>))]
 public enum GridLiteSortingDirection
 {
+    /// <summary>Ascending order.</summary>
     // https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/customize-properties#custom-enum-member-names
     //[JsonStringEnumMemberName("ascending")] // .NET9+
     Ascending,
 
+    /// <summary>Descending order.</summary>
     //[JsonStringEnumMemberName("descending")] // .NET9+
     Descending,
 
+    /// <summary>No sorting; the grid removes the column's sort expression.</summary>
     //[JsonStringEnumMemberName("none")] // .NET9+
     None
 }

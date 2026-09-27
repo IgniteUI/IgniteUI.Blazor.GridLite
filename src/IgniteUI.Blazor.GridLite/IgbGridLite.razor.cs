@@ -155,6 +155,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
         }
     }
 
+    /// <inheritdoc/>
     public override async Task SetParametersAsync(ParameterView parameters)
     {
         GridLiteUpdateConfig? updateConfig = null;
@@ -314,7 +315,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// <summary>
     /// Performs a filter operation in the grid based on the passed expression(s).
     /// </summary>
-    /// <param name="expressions">The filter expression(s) to apply</param>
+    /// <param name="expression">The filter expression to apply</param>
     public virtual async Task FilterAsync(IgbGridLiteFilterExpression expression)
     {
         ArgumentNullException.ThrowIfNull(expression);
@@ -361,7 +362,6 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// <param name="row">The row index to navigate to</param>
     /// <param name="field">The column field to navigate to, if any</param>
     /// <param name="activate">Optionally also activate the navigated cell</param>
-    /// <returns></returns>
     public virtual async Task NavigateToAsync(long row, string? field = null, bool activate = false)
     {
         await InvokeVoidJsAsync("blazor_igc_grid_lite.navigateTo", gridId, row, field, activate);

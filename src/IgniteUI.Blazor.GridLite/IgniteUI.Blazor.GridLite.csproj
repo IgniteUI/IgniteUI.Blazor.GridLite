@@ -19,6 +19,8 @@
     <PackageProjectUrl>https://www.infragistics.com/products/ignite-ui-blazor</PackageProjectUrl>
     <RepositoryUrl>https://github.com/IgniteUI/IgniteUI.Blazor.GridLite</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <!-- Ships the XML docs next to the assembly in the package, for IntelliSense; also lets IDE0005 run at build. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <!-- Trim/single-file/AOT diagnostics build as errors (.editorconfig category rules); suppression policy: docs/TRIMMING.md.
          The public IsAotCompatible claim waits: the Data items are serialized with reflection, and Blazor itself is
