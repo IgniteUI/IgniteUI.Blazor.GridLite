@@ -11,7 +11,7 @@ namespace IgniteUI.Blazor.Controls;
 /// </summary>
 /// <typeparam name="TItem">The data type of the items to display in the grid</typeparam>
 public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TItem>
-    : ComponentBase, IDisposable where TItem : class
+    : ComponentBase, IAsyncDisposable where TItem : class
 {
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
 
@@ -108,9 +108,10 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     private JSHandler<TItem>? jsHandler;
     private readonly string gridId = Guid.NewGuid().ToString("N");
     private GridLiteEventFlags? sentEvents;
-    private bool isInitialized;
-    private bool forceRender = true;
-    private bool renderedOnClient;
+    private bool disposed;
+
+    // True once the grid has rendered on the client; false if the first render fails or disposal comes first.
+    private readonly TaskCompletionSource<bool> clientRender = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     /// <summary>
     /// The unique identifier for this grid instance
@@ -121,16 +122,27 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// <inheritdoc/>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && !isInitialized)
+        if (!firstRender)
+            return;
+
+        try
         {
             blazorIgbGridLite = await JSLoader.LoadAsync(JSRuntime);
-            isInitialized = true;
-            jsHandler = new JSHandler<TItem>(this);
-        }
 
-        if (isInitialized && forceRender)
-        {
+            if (disposed)
+            {
+                // Disposal ran while the script was loading, before there was anything to release.
+                await DisposeAsync();
+                return;
+            }
+
+            jsHandler = new JSHandler<TItem>(this);
             await RenderGridAsync();
+        }
+        finally
+        {
+            // After a failed first render, calls waiting for it return instead of hanging.
+            clientRender.TrySetResult(false);
         }
     }
 
@@ -139,7 +151,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     {
         GridLiteUpdateConfig? updateConfig = null;
 
-        if (isInitialized)
+        if (jsHandler is not null)
         {
             if (parameters.TryGetValue<IEnumerable<TItem>?>(nameof(Data), out var newData)
                 && !ReferenceEquals(Data, newData))
@@ -207,11 +219,15 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
 
     private async Task RenderGridAsync()
     {
-        if (!isInitialized || jsHandler is null)
+        if (jsHandler is null)
             return;
 
         await Task.Yield();
-        forceRender = false;
+
+        // A disposal during the yield has sent destroyGrid already; rendering now would leave the grid registered on the client.
+        if (disposed)
+            return;
+
         sentEvents = CreateEventFlags();
 
         // TODO: expose the web component's dataPipelineConfiguration (remote sort/filter hooks). Its hooks are
@@ -232,9 +248,8 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
 
         await InvokeVoidJsAsync("blazor_igc_grid_lite.renderGrid", jsHandler.ObjectReference, grid, json);
 
-        if (!renderedOnClient)
+        if (clientRender.TrySetResult(true))
         {
-            renderedOnClient = true;
             await Rendered.InvokeAsync();
         }
     }
@@ -259,7 +274,6 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     [Obsolete("The grid renders on its own and updates from its parameters; assign a new collection instead of changing one in place. It will be removed in a future release.")]
     public async Task RefreshAsync()
     {
-        forceRender = true;
         await RenderGridAsync();
     }
 
@@ -284,7 +298,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     {
         ArgumentNullException.ThrowIfNull(expressions);
         var json = JsonSerializer.Serialize(expressions, GridLiteJsonContext.Default.IgbGridLiteSortingExpression);
-        await InvokeVoidJsAsync("blazor_igc_grid_lite.sort", gridId, json);
+        await InvokeGridAsync("blazor_igc_grid_lite.sort", gridId, json);
     }
 
     /// <summary>
@@ -295,7 +309,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     {
         ArgumentNullException.ThrowIfNull(expressions);
         var json = JsonSerializer.Serialize(expressions, GridLiteJsonContext.Default.IEnumerableIgbGridLiteSortingExpression);
-        await InvokeVoidJsAsync("blazor_igc_grid_lite.sort", gridId, json);
+        await InvokeGridAsync("blazor_igc_grid_lite.sort", gridId, json);
     }
 
     /// <summary>
@@ -305,7 +319,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// If null, clears all sorting.</param>
     public async Task ClearSortAsync(string? key = null)
     {
-        await InvokeVoidJsAsync("blazor_igc_grid_lite.clearSort", gridId, key);
+        await InvokeGridAsync("blazor_igc_grid_lite.clearSort", gridId, key);
     }
 
     /// <summary>
@@ -316,7 +330,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     {
         ArgumentNullException.ThrowIfNull(expression);
         var json = JsonSerializer.Serialize(expression, GridLiteJsonContext.Default.IgbGridLiteFilterExpression);
-        await InvokeVoidJsAsync("blazor_igc_grid_lite.filter", gridId, json);
+        await InvokeGridAsync("blazor_igc_grid_lite.filter", gridId, json);
     }
 
     /// <summary>
@@ -327,7 +341,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     {
         ArgumentNullException.ThrowIfNull(expressions);
         var json = JsonSerializer.Serialize(expressions, GridLiteJsonContext.Default.IEnumerableIgbGridLiteFilterExpression);
-        await InvokeVoidJsAsync("blazor_igc_grid_lite.filter", gridId, json);
+        await InvokeGridAsync("blazor_igc_grid_lite.filter", gridId, json);
     }
 
     /// <summary>
@@ -337,7 +351,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// If null, clears all filtering.</param>
     public async Task ClearFilterAsync(string? key = null)
     {
-        await InvokeVoidJsAsync("blazor_igc_grid_lite.clearFilter", gridId, key);
+        await InvokeGridAsync("blazor_igc_grid_lite.clearFilter", gridId, key);
     }
 
     /// <summary>
@@ -346,6 +360,11 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// <returns>The column configurations</returns>
     public async ValueTask<IgbColumnConfiguration[]> GetColumnsAsync()
     {
+        if (!await clientRender.Task)
+        {
+            return [];
+        }
+
         var columns = await InvokeJsAsync("blazor_igc_grid_lite.getColumns", gridId);
         return columns is { ValueKind: JsonValueKind.Array } array
             ? array.Deserialize(GridLiteJsonContext.Default.IgbColumnConfigurationArray) ?? []
@@ -360,7 +379,16 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// <param name="activate">Optionally also activate the navigated cell</param>
     public async Task NavigateToAsync(long row, string? field = null, bool activate = false)
     {
-        await InvokeVoidJsAsync("blazor_igc_grid_lite.navigateTo", gridId, row, field, activate);
+        await InvokeGridAsync("blazor_igc_grid_lite.navigateTo", gridId, row, field, activate);
+    }
+
+    // Before the first client render there is no grid on the client for the call to reach, so it waits for one.
+    private async ValueTask InvokeGridAsync(string identifier, params object?[] args)
+    {
+        if (await clientRender.Task)
+        {
+            await InvokeVoidJsAsync(identifier, args);
+        }
     }
 
     // Results come back as JsonElement so the caller deserializes them through GridLiteJsonContext.
@@ -406,27 +434,26 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     }
 
     /// <inheritdoc/>
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         GC.SuppressFinalize(this);
+        disposed = true;
+        clientRender.TrySetResult(false);
 
-        if (gridId != null && isInitialized && blazorIgbGridLite != null)
+        try
         {
-            try
+            if (blazorIgbGridLite != null)
             {
-                _ = InvokeAsync(async () =>
-                {
-                    await InvokeVoidJsAsync("blazor_igc_grid_lite.destroyGrid", gridId);
-                });
-                _ = InvokeAsync(async () =>
-                {
-                    await blazorIgbGridLite.DisposeAsync();
-                });
+                await InvokeVoidJsAsync("blazor_igc_grid_lite.destroyGrid", gridId);
+                await blazorIgbGridLite.DisposeAsync();
             }
-            catch (Exception ex) when (ex is ObjectDisposedException || ex is JSDisconnectedException)
-            { }
         }
-
-        jsHandler?.Dispose();
+        catch (Exception ex) when (ex is ObjectDisposedException || ex is JSDisconnectedException)
+        { }
+        finally
+        {
+            // The client's reference to it keeps this component alive, so it is released even when a call above fails.
+            jsHandler?.Dispose();
+        }
     }
 }
