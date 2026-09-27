@@ -98,7 +98,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     public EventCallback<IgbGridLiteFilteredEventArgs> Filtered { get; set; }
 
     /// <summary>
-    /// Fires when <see cref="RenderAsync"/> completes
+    /// Fires once, when the grid has rendered on the client for the first time.
     /// </summary>
     [Parameter]
     public EventCallback Rendered { get; set; }
@@ -109,10 +109,12 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     private readonly string gridId = Guid.NewGuid().ToString("N");
     private bool isInitialized;
     private bool forceRender = true;
+    private bool renderedOnClient;
 
     /// <summary>
     /// The unique identifier for this grid instance
     /// </summary>
+    [Obsolete("The grid's internal id is not needed to use it. It will be removed in a future release.")]
     public string GridId => gridId;
 
     /// <inheritdoc/>
@@ -186,9 +188,9 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     }
 
     /// <summary>
-    /// The render() method is responsible for drawing the grid on the page.
-    /// It is the primary method that has to be called after configuring the options.
+    /// Re-renders the grid on the client with the current data and configuration.
     /// </summary>
+    [Obsolete("The grid renders on its own and updates from its parameters; assign a new collection instead of changing one in place. It will be removed in a future release.")]
     public async Task RenderAsync()
     {
         await RenderGridAsync();
@@ -226,7 +228,11 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
 
         await InvokeVoidJsAsync("blazor_igc_grid_lite.renderGrid", jsHandler.ObjectReference, grid, json);
 
-        await Rendered.InvokeAsync();
+        if (!renderedOnClient)
+        {
+            renderedOnClient = true;
+            await Rendered.InvokeAsync();
+        }
     }
 
     private static GridLiteDataPayload CreateDataPayload(IEnumerable<TItem>? data)
@@ -238,6 +244,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// <summary>
     /// Refreshes the grid by re-rendering it with the current data and configuration.
     /// </summary>
+    [Obsolete("The grid renders on its own and updates from its parameters; assign a new collection instead of changing one in place. It will be removed in a future release.")]
     public async Task RefreshAsync()
     {
         forceRender = true;
@@ -248,6 +255,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// Updates the data source for the grid.
     /// </summary>
     /// <param name="newData">The new data to display in the grid</param>
+    [Obsolete("Assign a new collection to the Data parameter instead. It will be removed in a future release.")]
     public async Task UpdateDataAsync(IEnumerable<TItem> newData)
     {
         ArgumentNullException.ThrowIfNull(newData);

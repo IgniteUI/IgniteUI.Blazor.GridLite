@@ -15,8 +15,7 @@ public class GridLiteRenderTests : GridLiteTestBase
         var cut = RenderGrid();
 
         var element = cut.Find("igc-grid-lite");
-        Assert.False(string.IsNullOrEmpty(cut.Instance.GridId));
-        Assert.Equal(cut.Instance.GridId, element.GetAttribute("id"));
+        Assert.False(string.IsNullOrEmpty(element.GetAttribute("id")));
     }
 
     [Fact]
@@ -95,11 +94,10 @@ public class GridLiteRenderTests : GridLiteTestBase
     public void GridId_IsStable_AcrossParameterUpdates()
     {
         var cut = RenderGrid();
-        var initialId = cut.Instance.GridId;
+        var initialId = cut.Find("igc-grid-lite").GetAttribute("id");
 
         cut.Render(ps => ps.Add(x => x.AutoGenerate, true));
 
-        Assert.Equal(initialId, cut.Instance.GridId);
         Assert.Equal(initialId, cut.Find("igc-grid-lite").GetAttribute("id"));
     }
 

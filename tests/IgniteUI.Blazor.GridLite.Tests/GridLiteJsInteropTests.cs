@@ -30,7 +30,7 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         Assert.NotNull(invocation.Arguments[0]); // DotNetObjectReference for JS -> .NET callbacks
 
         var config = ParseJsonArgument(invocation.Arguments[2]);
-        Assert.Equal(cut.Instance.GridId, config.GetProperty("id").GetString());
+        Assert.Equal(cut.Find("igc-grid-lite").GetAttribute("id"), config.GetProperty("id").GetString());
         Assert.Equal(Items.Count, config.GetProperty("data").GetArrayLength());
         Assert.False(config.GetProperty("autoGenerate").GetBoolean());
         Assert.False(config.GetProperty("adoptRootStyles").GetBoolean());
@@ -89,6 +89,21 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         cut.WaitForAssertion(() => Assert.Equal(1, renderedCount));
     }
 
+#pragma warning disable CS0618 // Deprecated but still shipped, so its behavior has to hold until it is removed.
+    // Without it, a re-render would signal readiness again to handlers that expect it once.
+    [Fact]
+    public async Task RefreshAsync_DoesNotFireRenderedAgain()
+    {
+        var renderedCount = 0;
+        var cut = RenderGrid(ps => ps.Add(x => x.Rendered, () => renderedCount++));
+        cut.WaitForAssertion(() => Assert.Equal(1, renderedCount));
+
+        await cut.InvokeAsync(() => cut.Instance.RefreshAsync());
+
+        GridApi.VerifyInvoke($"{Api}.renderGrid", calledTimes: 2);
+        Assert.Equal(1, renderedCount);
+    }
+
     [Fact]
     public async Task RefreshAsync_InvokesRenderGridAgain()
     {
@@ -108,11 +123,12 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         await cut.InvokeAsync(() => cut.Instance.UpdateDataAsync(newData));
 
         var invocation = GridApi.VerifyInvoke($"{Api}.updateData");
-        Assert.Equal(cut.Instance.GridId, invocation.Arguments[0]);
+        Assert.Equal(cut.Find("igc-grid-lite").GetAttribute("id"), invocation.Arguments[0]);
         var data = ParseJsonArgument(invocation.Arguments[1]);
         Assert.Equal(1, data.GetArrayLength());
         Assert.Same(newData, cut.Instance.Data);
     }
+#pragma warning restore CS0618
 
     [Fact]
     public async Task SortAsync_SingleExpression_InvokesSort_WithCamelCasePayload()
@@ -126,7 +142,7 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         }));
 
         var invocation = GridApi.VerifyInvoke($"{Api}.sort");
-        Assert.Equal(cut.Instance.GridId, invocation.Arguments[0]);
+        Assert.Equal(cut.Find("igc-grid-lite").GetAttribute("id"), invocation.Arguments[0]);
         var expression = ParseJsonArgument(invocation.Arguments[1]);
         Assert.Equal("Name", expression.GetProperty("key").GetString());
         Assert.Equal("descending", expression.GetProperty("direction").GetString());
@@ -159,7 +175,7 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         await cut.InvokeAsync(() => cut.Instance.ClearSortAsync(key));
 
         var invocation = GridApi.VerifyInvoke($"{Api}.clearSort");
-        Assert.Equal(cut.Instance.GridId, invocation.Arguments[0]);
+        Assert.Equal(cut.Find("igc-grid-lite").GetAttribute("id"), invocation.Arguments[0]);
         Assert.Equal(key, invocation.Arguments[1]);
     }
 
@@ -176,7 +192,7 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         }));
 
         var invocation = GridApi.VerifyInvoke($"{Api}.filter");
-        Assert.Equal(cut.Instance.GridId, invocation.Arguments[0]);
+        Assert.Equal(cut.Find("igc-grid-lite").GetAttribute("id"), invocation.Arguments[0]);
         var expression = ParseJsonArgument(invocation.Arguments[1]);
         Assert.Equal("Name", expression.GetProperty("key").GetString());
         Assert.Equal("contains", expression.GetProperty("condition").GetString());
@@ -236,7 +252,7 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         await cut.InvokeAsync(() => cut.Instance.ClearFilterAsync(key));
 
         var invocation = GridApi.VerifyInvoke($"{Api}.clearFilter");
-        Assert.Equal(cut.Instance.GridId, invocation.Arguments[0]);
+        Assert.Equal(cut.Find("igc-grid-lite").GetAttribute("id"), invocation.Arguments[0]);
         Assert.Equal(key, invocation.Arguments[1]);
     }
 
@@ -248,7 +264,7 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         await cut.InvokeAsync(() => cut.Instance.NavigateToAsync(5, "Price", activate: true));
 
         var invocation = GridApi.VerifyInvoke($"{Api}.navigateTo");
-        Assert.Equal(cut.Instance.GridId, invocation.Arguments[0]);
+        Assert.Equal(cut.Find("igc-grid-lite").GetAttribute("id"), invocation.Arguments[0]);
         Assert.Equal(5L, invocation.Arguments[1]);
         Assert.Equal("Price", invocation.Arguments[2]);
         Assert.True(Assert.IsType<bool>(invocation.Arguments[3]));
@@ -260,7 +276,9 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         var cut = RenderGrid();
 
         // Deliberate nulls: the guards exist for callers with nullable analysis off.
+#pragma warning disable CS0618 // Deprecated but still shipped.
         await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.UpdateDataAsync(null!)));
+#pragma warning restore CS0618
         await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.SortAsync((IgbGridLiteSortingExpression)null!)));
         await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.SortAsync((IEnumerable<IgbGridLiteSortingExpression>)null!)));
         await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.FilterAsync((IgbGridLiteFilterExpression)null!)));
@@ -296,7 +314,7 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         var columns = await cut.InvokeAsync(() => cut.Instance.GetColumnsAsync().AsTask());
 
         var invocation = GridApi.VerifyInvoke($"{Api}.getColumns");
-        Assert.Equal(cut.Instance.GridId, invocation.Arguments[0]);
+        Assert.Equal(cut.Find("igc-grid-lite").GetAttribute("id"), invocation.Arguments[0]);
         Assert.Equal(2, columns.Length);
         Assert.Equal("Name", columns[0].Field);
         Assert.True(columns[0].Sortable);
@@ -315,7 +333,7 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         cut.WaitForAssertion(() =>
         {
             var invocation = GridApi.VerifyInvoke($"{Api}.updateGrid");
-            Assert.Equal(cut.Instance.GridId, invocation.Arguments[0]);
+            Assert.Equal(cut.Find("igc-grid-lite").GetAttribute("id"), invocation.Arguments[0]);
             var update = ParseJsonArgument(invocation.Arguments[1]);
             Assert.Single(update.EnumerateObject());
             Assert.Equal(1, update.GetProperty("data").GetArrayLength());
@@ -405,7 +423,7 @@ public class GridLiteJsInteropTests : GridLiteTestBase
     public async Task Dispose_InvokesDestroyGrid()
     {
         var cut = RenderGrid();
-        var gridId = cut.Instance.GridId;
+        var gridId = cut.Find("igc-grid-lite").GetAttribute("id");
 
         await DisposeComponentsAsync();
 

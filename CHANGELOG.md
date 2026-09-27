@@ -22,10 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `UpdateDataAsync`, `SortAsync` and `FilterAsync` throw `ArgumentNullException` for a null argument instead of sending `null` to the grid.
 - **BREAKING**: The public methods of `IgbGridLite<TItem>` are no longer `virtual`.
 - **BREAKING**: The multi-expression overloads of `SortAsync` and `FilterAsync` take `IEnumerable<T>` instead of `List<T>`. Source-compatible; recompile against the new version.
+- `Rendered` fires once, when the grid first renders on the client; it no longer fires again after `RenderAsync` or `RefreshAsync`.
 
 ### Deprecated
 
 - `GridLiteColumnDataType.Date`: the grid-lite web component has no date data type, so this value behaves like `String`. It will be removed in a future release.
+- `RenderAsync` and `RefreshAsync`: the grid renders on its own and updates from its parameters. To show changed data or expressions, assign a new collection instead of changing one in place.
+- `UpdateDataAsync`: assign a new collection to `Data` instead.
+- `GridId`: not needed to use the grid.
 
 ### Fixed
 
