@@ -5,10 +5,14 @@
   "author": "",
   "license": "MIT",
   "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "build": "vite build",
+    "build:dev": "vite build --mode development",
     "watch": "vite build --watch",
-    "dev": "vite build --watch",
+    "dev": "vite build --watch --mode development",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "git config core.hooksPath .githooks"
@@ -20,8 +24,7 @@
     "@cyclonedx/cyclonedx-npm": "6.0.1",
     "lint-staged": "^17.4.1",
     "prettier": "^3.9.5",
-    "terser": "^5.44.1",
-    "vite": "^7.3.6"
+    "vite": "^8.3.1"
   },
   "dependencies": {
     "igniteui-grid-lite": "~0.9.0"

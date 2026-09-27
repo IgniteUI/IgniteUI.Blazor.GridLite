@@ -328,6 +328,8 @@ gh attestation verify IgniteUI.Blazor.GridLite.<version>.nupkg -R IgniteUI/Ignit
 gh attestation verify IgniteUI.Blazor.GridLite.<version>.nupkg -R IgniteUI/IgniteUI.Blazor.GridLite --predicate-type https://cyclonedx.org/bom
 ```
 
+The package itself contains `THIRD-PARTY-LICENSES.md`, with the license texts of the JavaScript dependencies bundled into the grid's script.
+
 ## Support
 
 ### Community Support
