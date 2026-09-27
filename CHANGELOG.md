@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `GetColumnsAsync` returns an empty array instead of `null` before the grid has rendered. Nullable annotations on the public surface: the optional `key` of `ClearSortAsync`/`ClearFilterAsync` and `field` of `NavigateToAsync` are `string?`. `IgbGridLiteFilterExpression.SearchTerm` and `Criteria` are nullable.
 - `UpdateDataAsync`, `SortAsync` and `FilterAsync` throw `ArgumentNullException` for a null argument instead of sending `null` to the grid.
 
+### Deprecated
+
+- `GridLiteColumnDataType.Date`: the grid-lite web component has no date data type, so this value behaves like `String`. It will be removed in a future release.
+
 ### Fixed
 
 - The package includes the XML documentation, so IntelliSense shows the descriptions of the grid's members ([#15](https://github.com/IgniteUI/IgniteUI.Blazor.GridLite/issues/15)).

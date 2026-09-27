@@ -223,7 +223,7 @@ The `IgbGridLiteColumn` component supports the following properties:
 | `Field`                  | `string`                 | The model property to bind to. Use `nameof()` for compile-time safety. |
 | `Header`                 | `string`                 | Column header display text.                                            |
 | `Width`                  | `string`                 | Column width as a CSS value (e.g., `"100px"`, `"20%"`, `"auto"`).      |
-| `DataType`               | `GridLiteColumnDataType` | One of `String`, `Number`, `Boolean`, or `Date`.                       |
+| `DataType`               | `GridLiteColumnDataType` | One of `String`, `Number` or `Boolean`.                                |
 | `Hidden`                 | `bool`                   | Hides the column when `true`.                                          |
 | `Resizable`              | `bool`                   | Allows the user to resize the column.                                  |
 | `Sortable`               | `bool`                   | Enables sorting on the column.                                         |
