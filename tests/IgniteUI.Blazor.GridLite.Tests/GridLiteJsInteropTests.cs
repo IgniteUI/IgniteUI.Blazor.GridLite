@@ -1,6 +1,8 @@
 using System.Text.Json;
 using Bunit;
 using IgniteUI.Blazor.Controls;
+using IgniteUI.Blazor.Controls.Internal;
+using Microsoft.JSInterop;
 
 namespace IgniteUI.Blazor.GridLite.Tests;
 
@@ -129,6 +131,39 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         Assert.Same(newData, cut.Instance.Data);
     }
 #pragma warning restore CS0618
+
+    // Without it, a callback bound after the first render has no listener on the client and never fires.
+    [Fact]
+    public void BindingCallbackAfterRender_InvokesUpdateGrid_WithEventFlags()
+    {
+        var cut = RenderGrid();
+
+        cut.Render(ps => ps.Add(x => x.Sorted, (IgbGridLiteSortedEventArgs _) => { }));
+
+        cut.WaitForAssertion(() =>
+        {
+            var update = ParseJsonArgument(GridApi.VerifyInvoke($"{Api}.updateGrid").Arguments[1]);
+            Assert.True(update.GetProperty("events").GetProperty("hasSorted").GetBoolean());
+            Assert.False(update.GetProperty("events").GetProperty("hasSorting").GetBoolean());
+        });
+    }
+
+    // Without it, an exception from the app's handler is swallowed and never reaches the browser console.
+    [Fact]
+    public async Task EventHandlerException_PropagatesToTheJsCaller()
+    {
+        var cut = RenderGrid(ps => ps
+            .Add(x => x.Sorted, (IgbGridLiteSortedEventArgs _) => throw new InvalidOperationException("sorted"))
+            .Add(x => x.Filtered, (IgbGridLiteFilteredEventArgs _) => throw new InvalidOperationException("filtered")));
+        var handler = Assert.IsType<DotNetObjectReference<JSHandler<TestItem>>>(
+            GridApi.VerifyInvoke($"{Api}.renderGrid").Arguments[0]).Value;
+
+        var sorted = JsonSerializer.SerializeToElement(new { key = "Name", direction = "ascending" });
+        var filtered = JsonSerializer.SerializeToElement(new { key = "Name", state = Array.Empty<object>() });
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => cut.InvokeAsync(() => handler.JSSorted(sorted)));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => cut.InvokeAsync(() => handler.JSFiltered(filtered)));
+    }
 
     [Fact]
     public async Task SortAsync_SingleExpression_InvokesSort_WithCamelCasePayload()

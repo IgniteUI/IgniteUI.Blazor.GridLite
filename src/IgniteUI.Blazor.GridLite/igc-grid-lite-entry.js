@@ -13,10 +13,11 @@ export function get_igc_grid_lite() {
 window.blazor_igc_grid_lite = {
   grids: new Map(),
   dotNetRefs: new Map(),
+  // An AbortController per grid; aborting it removes that grid's event listeners.
+  listeners: new Map(),
 
   renderGrid(dotNetObject, gridElement, options) {
     const config = JSON.parse(options);
-    const events = config.events;
 
     if (!customElements.get('igc-grid-lite')) {
       IgcGridLite.register();
@@ -46,38 +47,43 @@ window.blazor_igc_grid_lite = {
 
     this.grids.set(config.id, gridElement);
     this.dotNetRefs.set(config.id, dotNetObject);
+    this.attachListeners(config.id, config.events);
+  },
+
+  // Listens for the events that have a bound callback. A re-render or a changed binding calls this again
+  // for the same grid, so its previous listeners go first.
+  attachListeners(id, events) {
+    const gridElement = this.grids.get(id);
+    const dotNetObject = this.dotNetRefs.get(id);
+
+    this.listeners.get(id)?.abort();
+    const controller = new AbortController();
+    this.listeners.set(id, controller);
+
+    // The returned promise is left to the browser, so a failed .NET handler shows as an unhandled rejection.
+    const listen = (type, method) => {
+      gridElement.addEventListener(type, (e) => dotNetObject.invokeMethodAsync(method, e.detail), {
+        signal: controller.signal,
+      });
+    };
 
     // TODO: the sorting and filtering handlers cannot cancel: grid-lite reads dispatchEvent's result synchronously,
-    // so preventDefault after the awaited .NET call comes too late. The returned flag is kept for a future
-    // client-side script parameter (the *Script pattern, e.g. IgbCombo.ItemTemplateScript) or a synchronous callback.
+    // so a preventDefault after the .NET call would come too late. Cancelling needs a client-side script parameter
+    // (the *Script pattern, e.g. IgbCombo.ItemTemplateScript) or a synchronous callback.
     if (events.hasSorting) {
-      gridElement.addEventListener('sorting', async (e) => {
-        const cancel = await dotNetObject.invokeMethodAsync('JSSorting', e.detail);
-        if (cancel) {
-          e.preventDefault();
-        }
-      });
+      listen('sorting', 'JSSorting');
     }
 
     if (events.hasSorted) {
-      gridElement.addEventListener('sorted', (e) => {
-        dotNetObject.invokeMethodAsync('JSSorted', e.detail);
-      });
+      listen('sorted', 'JSSorted');
     }
 
     if (events.hasFiltering) {
-      gridElement.addEventListener('filtering', async (e) => {
-        const cancel = await dotNetObject.invokeMethodAsync('JSFiltering', e.detail);
-        if (cancel) {
-          e.preventDefault();
-        }
-      });
+      listen('filtering', 'JSFiltering');
     }
 
     if (events.hasFiltered) {
-      gridElement.addEventListener('filtered', (e) => {
-        dotNetObject.invokeMethodAsync('JSFiltered', e.detail);
-      });
+      listen('filtered', 'JSFiltered');
     }
   },
 
@@ -109,6 +115,10 @@ window.blazor_igc_grid_lite = {
 
     if (config.filterExpressions !== undefined) {
       grid.filterExpressions = config.filterExpressions;
+    }
+
+    if (config.events !== undefined) {
+      this.attachListeners(id, config.events);
     }
   },
 
@@ -164,6 +174,8 @@ window.blazor_igc_grid_lite = {
   destroyGrid(id) {
     const grid = this.grids.get(id);
     if (grid) {
+      this.listeners.get(id).abort();
+      this.listeners.delete(id);
       this.grids.delete(id);
       this.dotNetRefs.delete(id);
     }

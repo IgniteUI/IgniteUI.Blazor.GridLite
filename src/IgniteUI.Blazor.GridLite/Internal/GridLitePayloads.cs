@@ -27,24 +27,25 @@ internal class GridLiteUpdateConfig
 
     [JsonPropertyName("filterExpressions")]
     public IEnumerable<IgbGridLiteFilterExpression>? FilterExpressions { get; set; }
+
+    [JsonPropertyName("events")]
+    public GridLiteEventFlags? Events { get; set; }
 }
 
 /// <summary>
-/// The <c>renderGrid</c> payload: every grid property, plus the grid id and the bound events.
+/// The <c>renderGrid</c> payload: every grid property, plus the grid id.
 /// </summary>
 internal sealed class GridLiteRenderConfig : GridLiteUpdateConfig
 {
     [JsonPropertyName("id")]
     public required string Id { get; init; }
-
-    [JsonPropertyName("events")]
-    public required GridLiteEventFlags Events { get; init; }
 }
 
 /// <summary>
-/// Which grid events have a bound callback; <c>renderGrid</c> attaches listeners only for those.
+/// Which grid events have a bound callback; the client attaches listeners only for those. A record, so the
+/// grid can tell when a binding changed.
 /// </summary>
-internal sealed class GridLiteEventFlags
+internal sealed record GridLiteEventFlags
 {
     [JsonPropertyName("hasSorting")]
     public bool HasSorting { get; init; }

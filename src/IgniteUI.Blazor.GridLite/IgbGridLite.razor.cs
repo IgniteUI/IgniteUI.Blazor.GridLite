@@ -107,6 +107,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     private IJSObjectReference? blazorIgbGridLite;
     private JSHandler<TItem>? jsHandler;
     private readonly string gridId = Guid.NewGuid().ToString("N");
+    private GridLiteEventFlags? sentEvents;
     private bool isInitialized;
     private bool forceRender = true;
     private bool renderedOnClient;
@@ -180,6 +181,14 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
 
         await base.SetParametersAsync(parameters);
 
+        // The client listens only for bound callbacks, so binding or unbinding one re-attaches its listeners.
+        var events = CreateEventFlags();
+        if (jsHandler is not null && events != sentEvents)
+        {
+            sentEvents = events;
+            (updateConfig ??= new()).Events = events;
+        }
+
         if (updateConfig != null)
         {
             var json = JsonSerializer.Serialize(updateConfig, GridLiteJsonContext.Default.GridLiteUpdateConfig);
@@ -203,6 +212,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
 
         await Task.Yield();
         forceRender = false;
+        sentEvents = CreateEventFlags();
 
         // TODO: expose the web component's dataPipelineConfiguration (remote sort/filter hooks). Its hooks are
         // client-side callbacks, so they need a JS-to-.NET round trip and/or a value serialized here.
@@ -215,13 +225,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
             SortingOptions = SortingOptions,
             SortingExpressions = SortingExpressions,
             FilterExpressions = FilterExpressions,
-            Events = new GridLiteEventFlags
-            {
-                HasSorting = Sorting.HasDelegate,
-                HasSorted = Sorted.HasDelegate,
-                HasFiltering = Filtering.HasDelegate,
-                HasFiltered = Filtered.HasDelegate,
-            },
+            Events = sentEvents,
         };
 
         var json = JsonSerializer.Serialize(config, GridLiteJsonContext.Default.GridLiteRenderConfig);
@@ -234,6 +238,14 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
             await Rendered.InvokeAsync();
         }
     }
+
+    private GridLiteEventFlags CreateEventFlags() => new()
+    {
+        HasSorting = Sorting.HasDelegate,
+        HasSorted = Sorted.HasDelegate,
+        HasFiltering = Filtering.HasDelegate,
+        HasFiltered = Filtered.HasDelegate,
+    };
 
     private static GridLiteDataPayload CreateDataPayload(IEnumerable<TItem>? data)
     {

@@ -38,6 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A null `Data` no longer causes a client error. Before, a grid rendered without data threw initially, and resetting `Data` to null left the previous rows on screen. Null is now sent as an empty array in both cases.
 - Resetting `SortingOptions`, `SortingExpressions` or `FilterExpressions` to null restores the grid's default (multiple sorting, no sort, no filter) on the client.
 - The `Sorting` and `Filtering` docs no longer claim the events can cancel or modify the operation; they are notifications.
+- `RenderAsync` and `RefreshAsync` no longer add another set of event listeners, which raised every event callback once more per call.
+- A `Sorting`, `Sorted`, `Filtering` or `Filtered` callback bound after the grid's first render fires; before, the grid did not listen for it.
+- An exception from a `Sorting`, `Sorted`, `Filtering` or `Filtered` handler, or from reading the event's payload, is no longer swallowed; the browser reports it as an unhandled error.
 
 ## 0.9.0 - 2026-07-13
 
