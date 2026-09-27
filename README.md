@@ -282,10 +282,14 @@ For the full setup guide and configuration options, see the [Ignite UI Theming M
 ### Build
 
 ```bash
+npm ci
+npm run build
 dotnet build
 ```
 
-The library project runs `npm install` and `npm run build` from the repository root as part of the build, producing the JavaScript bundle and the theme CSS under `wwwroot`. Pass `-p:RunNodeBuild=false` to skip that step when the assets are already built (CI and the release workflow build them in an explicit npm step first).
+`npm run build` at the repository root produces the JavaScript bundle and the theme CSS under `wwwroot`, plus `THIRD-PARTY-LICENSES.md`. The .NET build does not run it, so run it again after changing the JavaScript side or the npm dependencies. The library packs on every build, and the pack fails while `THIRD-PARTY-LICENSES.md` is missing.
+
+For debugging, `npm run build:dev` builds the bundle unminified and with a source map; the next `npm run build` removes the map again.
 
 ### Tests
 

@@ -1,11 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <!-- Custom props -->
-    <RunNodeBuild>true</RunNodeBuild>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <PackageId>IgniteUI.Blazor.GridLite</PackageId>
@@ -63,27 +58,34 @@
   </ItemGroup>
 
 
-  <!-- The npm project lives at the repository root. -->
+  <!-- The JS bundle, the theme CSS and THIRD-PARTY-LICENSES.md come from `npm ci` and `npm run build` at the repository
+       root, run as their own step (README "Build", ci.yml, publish.yml), so a .NET build never rebuilds the JS from a
+       different state than the one that was tested. Building them from here instead, kept for reference: in a
+       multi-targeted build these run the npm build once in the outer build and the parallel inner builds find its
+       outputs up to date; BeforeTargets hooks run even when the hooked target's condition is false, hence the
+       repeated RunNodeBuild conditions.
+
   <PropertyGroup>
+    <RunNodeBuild>true</RunNodeBuild>
     <RepoRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '..', '..'))</RepoRoot>
   </PropertyGroup>
 
-  <!-- Ensure JavaScript bundle is built before compilation -->
-  <Target Name="EnsureNodeModules" BeforeTargets="BuildJavaScriptBundle">
+  <Target Name="EnsureNodeModules" BeforeTargets="BuildJavaScriptBundle" Condition="'$(RunNodeBuild)' == 'true'">
     <PropertyGroup>
       <NodeModulesPath>$(RepoRoot)node_modules</NodeModulesPath>
     </PropertyGroup>
     <Exec Command="npm install" WorkingDirectory="$(RepoRoot)" Condition="!Exists('$(NodeModulesPath)')" />
   </Target>
 
-  <Target Name="BuildJavaScriptBundle" BeforeTargets="BeforeBuild" Condition="'$(RunNodeBuild)' == 'true'">
+  <Target Name="BuildJavaScriptBundle" BeforeTargets="DispatchToInnerBuilds;BeforeBuild" Condition="'$(RunNodeBuild)' == 'true'"
+          Inputs="$(RepoRoot)package.json;$(RepoRoot)package-lock.json;$(RepoRoot)vite.config.js;igc-grid-lite-entry.js"
+          Outputs="wwwroot/js/blazor-igc-grid-lite.js;THIRD-PARTY-LICENSES.md">
     <Exec Command="npm run build" WorkingDirectory="$(RepoRoot)" />
   </Target>
 
-  <!-- Optional: Clean JavaScript build output -->
-  <Target Name="CleanJavaScriptBundle" AfterTargets="Clean">
-    <Delete Files="$(MSBuildProjectDirectory)/wwwroot/js/blazor-igc-grid-lite.js" />
-    <Delete Files="$(MSBuildProjectDirectory)/wwwroot/js/blazor-igc-grid-lite.js.map" />
+  <Target Name="CleanJavaScriptBundle" AfterTargets="Clean" Condition="'$(RunNodeBuild)' == 'true'">
+    <Delete Files="wwwroot/js/blazor-igc-grid-lite.js;wwwroot/js/blazor-igc-grid-lite.js.map;THIRD-PARTY-LICENSES.md" />
   </Target>
+  -->
 
 </Project>

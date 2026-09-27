@@ -25,7 +25,7 @@ This repository is the **source of the `IgniteUI.Blazor.GridLite` package**: a R
 ## Build & Tooling
 
 - **Multi-target**: `net8.0`, `net9.0`, `net10.0`; SDK pinned by `global.json`; package versions in `Directory.Packages.props`; repo-wide compiler settings in `Directory.Build.props`.
-- **`dotnet build`** runs `npm install` + `npm run build` from the repository root first; pass `-p:RunNodeBuild=false` when the assets are already built (CI and the release workflow do the npm step explicitly).
+- **`dotnet build`** does not run npm: run `npm ci` + `npm run build` at the repository root first, and again after JS or npm dependency changes (CI and the release workflow do the same). The library packs on every build, and the pack fails without `THIRD-PARTY-LICENSES.md`.
 - **Tests**: `dotnet test tests/IgniteUI.Blazor.GridLite.Tests --settings .runsettings`; integration tests need `playwright.ps1 install` once (see README "Tests").
 - **Formatting**: `npm ci` at the root activates the Prettier pre-commit hook. C#: `dotnet format whitespace . --folder --exclude node_modules` and nothing else - the full `dotnet format` (or `style`/`analyzers`) writes conflict markers into multi-targeted sources (dotnet/format#1634). `.editorconfig` rules run as build warnings via `EnforceCodeStyleInBuild`.
 

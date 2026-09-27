@@ -83,7 +83,6 @@ jobs:
           --configuration ${{ env.BUILD_CONFIGURATION }}
           --no-restore
           "-p:Version=$env:VERSION"
-          -p:RunNodeBuild=false
           -p:GeneratePackageOnBuild=false
           -p:ContinuousIntegrationBuild=true
           -p:ExposeInternalsToTests=false
