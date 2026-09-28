@@ -192,7 +192,8 @@ Handle sorting and filtering events to persist user state, log analytics, or rea
 @code {
     private void HandleSorting(IgbGridLiteSortingEventArgs e)
     {
-        // Fires before the sort is applied.
+        // Raised as a sort starts in UI. A notification: can't cancel the sort,
+        // which may already be applied by the time this runs.
     }
 
     private void HandleSorted(IgbGridLiteSortedEventArgs e)
@@ -203,7 +204,8 @@ Handle sorting and filtering events to persist user state, log analytics, or rea
 
     private void HandleFiltering(IgbGridLiteFilteringEventArgs e)
     {
-        // Fires before the filter is applied.
+        // Raised as a filter starts in UI. A notification: can't cancel the filter,
+        // which may already be applied by the time this runs.
     }
 
     private void HandleFiltered(IgbGridLiteFilteredEventArgs e)
