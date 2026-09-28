@@ -12,7 +12,6 @@ export default defineConfig(({ mode }) => {
     build: {
       lib: {
         entry: resolve(import.meta.dirname, 'src/IgniteUI.Blazor.GridLite/igc-grid-lite-entry.js'),
-        name: 'BlazorIgcGridLite',
         fileName: 'blazor-igc-grid-lite',
         formats: ['es'],
       },

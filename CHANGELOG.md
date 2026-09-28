@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Rendered` fires once, when the grid first renders on the client; it no longer fires again after `RenderAsync` or `RefreshAsync`.
 - The grid's methods, such as `SortAsync`, `FilterAsync`, `NavigateToAsync` and `GetColumnsAsync`, wait for the grid's first client render when called before it, instead of doing nothing.
 - `IgbGridLite<TItem>` implements `IAsyncDisposable` instead of `IDisposable`, and its disposal completes once the client-side grid is released.
+- The grid's script keeps its state in the module instead of on `window`: the undocumented `window.IgcGridLite` and `window.blazor_igc_grid_lite` globals are gone.
 
 ### Deprecated
 
