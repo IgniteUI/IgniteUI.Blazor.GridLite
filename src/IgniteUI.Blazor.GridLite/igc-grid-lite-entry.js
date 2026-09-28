@@ -160,7 +160,7 @@ export const blazor_igc_grid_lite = {
   navigateTo(id, row, field, activate) {
     const grid = this.grids.get(id);
     if (grid) {
-      grid.navigateTo(row, field, activate);
+      grid.navigateTo(row, { column: field, activate });
     }
   },
 

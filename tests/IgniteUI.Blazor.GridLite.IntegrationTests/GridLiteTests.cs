@@ -59,4 +59,31 @@ public class GridLiteTests : BlazorPageTest<Program>
 
         await Expect(Page.Locator("#filtered-count")).ToHaveTextAsync("1");
     }
+
+    // Without the options form, activate is dropped when no field is given: grid-lite reads the null column
+    // argument of its deprecated positional overload as an options object.
+    [Test]
+    public async Task NavigateToAsync_WithoutField_ActivatesCellInRow()
+    {
+        await Page.GotoAsync(Host.ServerAddress);
+        var grid = Page.Locator("igc-grid-lite");
+        await Expect(grid.GetByText("Chai", new() { Exact = true })).ToBeVisibleAsync();
+
+        await Page.Locator("#navigate-button").ClickAsync();
+
+        // The active state is a cell property, not an attribute, so it is polled.
+        var cells = grid.Locator("igc-grid-lite-cell");
+        var activeRows = "none";
+        for (var attempt = 0; attempt < 50 && activeRows == "none"; attempt++)
+        {
+            activeRows = await cells.EvaluateAllAsync<string>(
+                "cells => cells.filter(c => c.active).map(c => c.row.index).join(',') || 'none'");
+            if (activeRows == "none")
+            {
+                await Task.Delay(100);
+            }
+        }
+
+        Assert.That(activeRows, Is.EqualTo("3"), "Row indices of the active cells.");
+    }
 }

@@ -40,8 +40,8 @@ $projectDirectory = Split-Path -Path (Resolve-Path -LiteralPath $ManifestPath) -
 
 Push-Location -LiteralPath $projectDirectory
 try {
-    # --omit dev excludes vite/terser (build tooling, never shipped); igniteui-grid-lite and its resolved
-    # runtime tree (igniteui-webcomponents, lit, @lit/context, @lit-labs/virtualizer) are not devDependencies.
+    # --omit dev excludes vite (build tooling, never shipped); igniteui-grid-lite and its resolved
+    # runtime tree (igniteui-webcomponents, lit, @lit/context) are not devDependencies.
     npx --no-install cyclonedx-npm `
         --omit dev `
         --spec-version $SpecVersion `

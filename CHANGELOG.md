@@ -7,14 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+This release updates to `igniteui-grid-lite` version `0.11.0` ([see changelog](https://github.com/IgniteUI/igniteui-grid-lite/blob/master/CHANGELOG.md)), which includes 0.10.0. Its changes are marked "grid-lite" below.
+
 ### Added
 
+- grid-lite: the full ARIA grid pattern (roles, row and column counts and indices, `aria-sort`, `aria-selected`), with the filter row exposed as a second header row. Keyboard navigation and clicks move DOM focus to the active cell, so screen readers announce it.
 - The package includes `THIRD-PARTY-LICENSES.md` with the license texts of the JavaScript dependencies bundled into the grid's script.
 - The library is trim-compatible (`IsTrimmable`). Only the app's own values are serialized with reflection: the `Data` items and the filter expressions' `Condition`/`SearchTerm`. Blazor WebAssembly's default `TrimMode=partial` leaves those types untrimmed. With `TrimMode=full`, a grid with a concrete item type keeps that type's public properties automatically; a component that passes its own generic parameter as `TItem` must annotate it with `[DynamicallyAccessedMembers(PublicProperties)]`, and complex types nested in the item type must be preserved by the app.
 - The library's own interop code is AOT-safe: it needs no runtime code generation, and its build rejects any that is added. Native AOT is not claimed, since the app's values above are still serialized with reflection.
 
 ### Changed
 
+- grid-lite: row virtualization uses `igc-virtual-scroll` from `igniteui-webcomponents` instead of `@lit-labs/virtualizer`, which grid-lite reports as smoother scrolling and faster sorting and jumps on large data sets. `igniteui-webcomponents` is updated to 7.4.1.
+- grid-lite: `NavigateToAsync` without a `field` keeps the current column, so with `activate: true` it activates a cell in that row: in the active column, or the first visible one if no cell is active. Before, it activated nothing.
 - The package no longer ships a source map for the grid's script (`blazor-igc-grid-lite.js.map`).
 - **BREAKING**: `IgbGridLiteSortingExpression.Key`, `IgbGridLiteFilterExpression.Key`, `IgbGridLiteFilterExpression.Condition` and `IgbColumnConfiguration.Field` are now `required`; object initializers must set them. `IgbGridLiteColumn.Field` is marked `[EditorRequired]`.
 - The event-args members the web component always sends are now `required` (only code that constructs event args itself, such as tests, is affected): `IgbGridLiteSortingEventArgs.Expression`, `IgbGridLiteSortedEventArgs.Expression`, `IgbGridLiteFilteringEventArgs.Key`/`Expressions`/`Type` and `IgbGridLiteFilteredEventArgs.Key`/`State`.
@@ -37,6 +42,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- grid-lite: `Sorting` and `Filtering` fire before the sort or filter is applied, and `Sorted` and `Filtered` after the rows update.
+- grid-lite: filters with only OR expressions no longer match every row, and string filter conditions no longer fail on `null` cell values. Filter expressions whose key matches no column are skipped.
+- grid-lite: declarative columns inside a wrapping element no longer drop their sibling columns, and navigation skips hidden columns.
 - The package includes the XML documentation, so IntelliSense shows the descriptions of the grid's members ([#15](https://github.com/IgniteUI/IgniteUI.Blazor.GridLite/issues/15)).
 - A null `Data` no longer causes a client error. Before, a grid rendered without data threw initially, and resetting `Data` to null left the previous rows on screen. Null is now sent as an empty array in both cases.
 - Resetting `SortingOptions`, `SortingExpressions` or `FilterExpressions` to null restores the grid's default (multiple sorting, no sort, no filter) on the client.
