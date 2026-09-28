@@ -177,12 +177,12 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
 
         if (isInitialized)
         {
-            if (parameters.TryGetValue<IEnumerable<TItem>?>(nameof(Data), out var newData) 
+            if (parameters.TryGetValue<IEnumerable<TItem>?>(nameof(Data), out var newData)
                 && !ReferenceEquals(Data, newData))
             {
                 updateConfig["data"] = newData;
             }
-            
+
             if (parameters.TryGetValue<bool>(nameof(AutoGenerate), out var newAutoGenerate)
                 && AutoGenerate != newAutoGenerate)
             {
@@ -194,19 +194,19 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
             {
                 updateConfig["adoptRootStyles"] = newAdoptRootStyles;
             }
-            
+
             if (parameters.TryGetValue<IgbGridLiteSortingOptions?>(nameof(SortingOptions), out var newSortOptions)
                 && !ReferenceEquals(SortingOptions, newSortOptions))
             {
                 updateConfig["sortingOptions"] = newSortOptions;
             }
-            
+
             if (parameters.TryGetValue<IEnumerable<IgbGridLiteSortingExpression>?>(nameof(SortingExpressions), out var newSortingExpressions)
                 && !ReferenceEquals(SortingExpressions, newSortingExpressions))
             {
                 updateConfig["sortingExpressions"] = newSortingExpressions;
             }
-            
+
             if (parameters.TryGetValue<IEnumerable<IgbGridLiteFilterExpression>?>(nameof(FilterExpressions), out var newFilterExpressions)
                 && !ReferenceEquals(FilterExpressions, newFilterExpressions))
             {
@@ -373,7 +373,10 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
 
     private async ValueTask<TValue> InvokeJsAsync<TValue>(string identifier, params object[] args)
     {
-        if (blazorIgbGridLite == null) { return default; }
+        if (blazorIgbGridLite == null)
+        {
+            return default;
+        }
 
         try
         {
@@ -387,7 +390,10 @@ public partial class IgbGridLite<TItem> : ComponentBase, IDisposable where TItem
 
     private async ValueTask InvokeVoidJsAsync(string identifier, params object[] args)
     {
-        if (blazorIgbGridLite == null) return;
+        if (blazorIgbGridLite == null)
+        {
+            return;
+        }
 
         try
         {

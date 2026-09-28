@@ -1,0 +1,12 @@
+# Only tracked files need entries — Prettier 3 also respects .gitignore by
+# default (--ignore-path defaults to ['.gitignore', '.prettierignore']), so
+# build output, node_modules, obj/bin etc. are already excluded.
+
+# Lockfiles
+package-lock.json
+
+# Vendored Bootstrap from the Blazor project template
+demo/GridLite.DemoApp/wwwroot/lib/
+
+# Built by `npm run build`; Prettier reads only the root .gitignore, not the nested one under src/
+src/IgniteUI.Blazor.GridLite/wwwroot/

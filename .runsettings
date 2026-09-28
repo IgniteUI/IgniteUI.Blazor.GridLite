@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+	<NUnit>
+		<NumberOfTestWorkers>1</NumberOfTestWorkers>
+	</NUnit>
+	<Playwright>
+		<LaunchOptions>
+			<Headless>true</Headless>
+		</LaunchOptions>
+	</Playwright>
+	<TestRunParameters>
+		<Parameter name="defaultTimeout" value="40000" />
+	</TestRunParameters>
+
+	<DataCollectionRunSettings>
+		<DataCollectors>
+			<DataCollector friendlyName="Code Coverage">
+				<Configuration>
+					<Format>cobertura</Format>
+					<CodeCoverage>
+						<ModulePaths>
+							<Include>
+								<!-- Only the product assembly -->
+								<ModulePath>IgniteUI.Blazor.GridLite.dll</ModulePath>
+							</Include>
+						</ModulePaths>
+						<Attributes>
+							<Exclude>
+								<Attribute>^System\.CodeDom\.Compiler\.GeneratedCodeAttribute$</Attribute>
+								<Attribute>^System\.Runtime\.CompilerServices\.CompilerGeneratedAttribute$</Attribute>
+							</Exclude>
+						</Attributes>
+					</CodeCoverage>
+				</Configuration>
+			</DataCollector>
+		</DataCollectors>
+	</DataCollectionRunSettings>
+</RunSettings>
