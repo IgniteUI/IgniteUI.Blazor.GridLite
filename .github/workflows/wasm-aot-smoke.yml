@@ -1,0 +1,58 @@
+name: Wasm AOT Smoke
+
+# Manual: Blazor WASM AOT compilation (Mono AOT) of the smoke app + the browser checks against it.
+# Slow (multi-minute AOT compile) and emits no IL3xxx (the library build's AOT analyzer covers those) —
+# this validates the actual wasm-AOT consumer scenario end-to-end.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  wasm-aot:
+    name: Wasm AOT publish & browser smoke
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Only net10.0 is published and tested here.
+      - name: Setup .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build static web assets (wwwroot)
+        run: npm run build
+
+      - name: Install wasm-tools workload
+        run: dotnet workload install wasm-tools
+
+      # TargetFrameworks narrows restore too: with all three TFMs it also requires wasm-tools-net8/-net9.
+      - name: Publish smoke app with AOT compilation
+        run: dotnet publish tests/IgniteUI.Blazor.GridLite.PublishSmoke --configuration Release -p:TargetFrameworks=net10.0 -p:RunAOTCompilation=true -p:RunNodeBuild=false
+
+      - name: Build integration tests
+        run: dotnet build tests/IgniteUI.Blazor.GridLite.IntegrationTests --configuration Release -p:RunNodeBuild=false
+
+      - name: Install Playwright
+        shell: pwsh
+        run: ./tests/IgniteUI.Blazor.GridLite.IntegrationTests/bin/Release/net10.0/playwright.ps1 install
+
+      # The TrimmedPublish fixture serves whatever publish output exists — here, the AOT-compiled one.
+      - name: Run browser checks against the AOT publish
+        run: >
+          dotnet test ./tests/IgniteUI.Blazor.GridLite.IntegrationTests/IgniteUI.Blazor.GridLite.IntegrationTests.csproj
+          --settings ./.runsettings --no-build --configuration Release
+          --filter Category=TrimmedPublish

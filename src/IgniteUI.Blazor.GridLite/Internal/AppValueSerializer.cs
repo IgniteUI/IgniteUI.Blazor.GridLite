@@ -31,7 +31,11 @@ internal static class AppValueSerializer
         return new JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            // Native AOT is not claimed for this reflection-based serialization. A pragma, unlike
+            // UnconditionalSuppressMessage, silences only the library build: a PublishAot app still gets the warning.
+#pragma warning disable IL3050
             TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
+#pragma warning restore IL3050
         };
     }
 }

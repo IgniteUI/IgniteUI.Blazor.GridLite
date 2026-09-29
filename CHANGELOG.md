@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - The library is trim-compatible (`IsTrimmable`). Only the app's own values are serialized with reflection: the `Data` items and the filter expressions' `Condition`/`SearchTerm`. Blazor WebAssembly's default `TrimMode=partial` leaves those types untrimmed. With `TrimMode=full`, a grid with a concrete item type keeps that type's public properties automatically; a component that passes its own generic parameter as `TItem` must annotate it with `[DynamicallyAccessedMembers(PublicProperties)]`, and complex types nested in the item type must be preserved by the app.
+- The library's own interop code is AOT-safe: it needs no runtime code generation, and its build rejects any that is added. Native AOT is not claimed, since the app's values above are still serialized with reflection.
 
 ### Changed
 

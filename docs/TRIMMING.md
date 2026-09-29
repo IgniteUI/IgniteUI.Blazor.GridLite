@@ -47,7 +47,16 @@ or with a [trimmer root descriptor](https://learn.microsoft.com/dotnet/core/depl
 
 ## Native AOT
 
-Not claimed. The `Data` items and the filter values are serialized with reflection, which needs runtime type information that Native AOT does not guarantee. Blazor WebAssembly, including publishes with `RunAOTCompilation=true`, runs on Mono with the interpreter available and is unaffected.
+Not claimed. The library builds warning-free under the [AOT analyzer](https://learn.microsoft.com/dotnet/core/deploying/native-aot/) (`EnableAotAnalyzer`, errors via `.editorconfig`), but the `Data` items and the filter values are serialized with reflection, which Native AOT does not guarantee, and Blazor itself is not AOT-compatible yet (`Microsoft.AspNetCore.Components` ships `IsTrimmable` only; [dotnet/aspnetcore#51598](https://github.com/dotnet/aspnetcore/issues/51598) tracks it). What this means per deployment model:
+
+- **Blazor WebAssembly**: unaffected. Both the default interpreter and `RunAOTCompilation=true` publishes run on Mono with the interpreter retained, so no Native AOT semantics apply. The manual `Wasm AOT Smoke` workflow runs the trimmed-publish browser checks against a `RunAOTCompilation` publish.
+- **Blazor Server**: unaffected; it runs on CoreCLR.
+- **Blazor Hybrid**: unaffected where a JIT is available (Windows, Android). iOS Release builds are AOT-compiled by Mono without the interpreter by default; reflection-based serialization is expected to work there, but that is unverified for this library.
+- **Native AOT (ILC)**: not supported for Blazor Server (ASP.NET Core's Native AOT support excludes it). Blazor Hybrid on iOS/Mac Catalyst can publish with `PublishAot`; that combination is unverified for this library, and the reflection-based `Data` serialization is where it could fail.
+
+## Maintaining AOT compatibility (contributors)
+
+AOT diagnostics (IL3xxx) build as errors, like the trim ones (`dotnet_analyzer_diagnostic.category-AOT.severity = error`), and the trimming rules below apply to them the same way, with one deliberate exception. Dynamic code that is safe everywhere the library runs gets `[UnconditionalSuppressMessage("AOT", "IL3050:RequiresDynamicCode", ...)]`. Dynamic code that Native AOT is not claimed for, meaning the reflection-based serializer in `AppValueSerializer`, gets `#pragma warning disable IL3050` instead: that silences only the library's own build, so a `PublishAot` app still receives the warning from ILC. After changes to serialization or interop, also run the manual `Wasm AOT Smoke` workflow, or the local commands in the PublishSmoke README.
 
 ## Maintaining trim compatibility (contributors)
 
@@ -58,4 +67,4 @@ When the analyzer flags new code, follow the standard playbook: avoid reflection
 1. **Serialization goes through source-generated `JsonTypeInfo`.** Extend `GridLiteJsonContext` rather than calling reflection-based `JsonSerializer` overloads. App-owned values go through `AppValueSerializer`, the library's only reflection-based serialization.
 2. **Never annotate _method parameters or fields_ of component classes** with `[DynamicallyAccessedMembers]`. `OpenComponent<T>` roots component members "via reflection", and the annotation then surfaces as IL2111/IL2110 in every consuming app. Annotated properties and type parameters are fine.
 3. **Suppress narrowly.** Put `[UnconditionalSuppressMessage]` on the smallest member, with a justification that states why the pattern is safe; extract a small helper if needed, so that the justification matches exactly what the member does.
-4. **Never use `#pragma` for ILxxxx.** It silences only the build analyzer and leaves no metadata for publish-time trim tooling (ILLink, NativeAOT's ILCompiler).
+4. **Never use `#pragma` for ILxxxx.** It silences only the build analyzer and leaves no metadata for publish-time trim tooling (ILLink, NativeAOT's ILCompiler). The one exception is the unclaimed Native AOT path described above, where keeping the publish-time warning is the point.

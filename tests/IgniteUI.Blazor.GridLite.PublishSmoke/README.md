@@ -49,6 +49,22 @@ dotnet test tests/IgniteUI.Blazor.GridLite.IntegrationTests --filter Category=Tr
 
 The manual browser pass above remains useful for the other TFMs and for linker experiments.
 
+## Wasm AOT
+
+The manual **`Wasm AOT Smoke`** workflow (`workflow_dispatch`) publishes this app with `-p:RunAOTCompilation=true` (net10.0, a slow multi-minute compile) and runs the same browser checks against that output. Locally, with the `wasm-tools` workload installed (`dotnet workload install wasm-tools`):
+
+```bash
+# The browser checks serve whatever publish output exists, so clear the previous one and stop if the AOT publish fails.
+# -p:TargetFrameworks narrows restore too; with all three TFMs it also requires wasm-tools-net8/-net9.
+rm -rf tests/IgniteUI.Blazor.GridLite.PublishSmoke/bin/Release/net10.0/publish &&
+dotnet publish tests/IgniteUI.Blazor.GridLite.PublishSmoke -c Release -p:TargetFrameworks=net10.0 -p:RunAOTCompilation=true &&
+dotnet test tests/IgniteUI.Blazor.GridLite.IntegrationTests --filter Category=TrimmedPublish --settings .runsettings
+```
+
+Later `TrimmedPublish` runs keep testing that AOT output until the app is published again without `RunAOTCompilation`.
+
+Wasm AOT is Mono AOT with the interpreter retained: it validates the product path, but emits no Native AOT diagnostics. Those come from the library build's AOT analyzer.
+
 ## When to run
 
 - After any change to reflection, serialization, `[DynamicallyAccessedMembers]` annotations or suppressions in `src/` (see docs/TRIMMING.md).

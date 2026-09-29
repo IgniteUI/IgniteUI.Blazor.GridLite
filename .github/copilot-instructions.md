@@ -41,7 +41,7 @@ This repository is the **source of the `IgniteUI.Blazor.GridLite` package**: a R
 - `[Parameter]` for component inputs; `EventCallback<T>` for events
 - Every public type and member has XML docs; overrides use `<inheritdoc/>`
 - Library-owned payloads serialize through the source-generated `GridLiteJsonContext`; app-owned values (`Data`, filter `Condition`/`SearchTerm`) go through `AppValueSerializer`, the only reflection-based serialization in `src/`
-- Trim diagnostics (IL2xxx) are build errors; suppress only on the smallest member, with `[UnconditionalSuppressMessage]` and a justification that says why the pattern is safe - never `#pragma` for ILxxxx
+- Trim/AOT diagnostics (IL2xxx/IL3xxx) are build errors; suppress only on the smallest member, with `[UnconditionalSuppressMessage]` and a justification that says why the pattern is safe - never `#pragma` for ILxxxx, except IL3050 on dynamic code Native AOT is not claimed for (see docs/TRIMMING.md)
 
 ### JavaScript
 

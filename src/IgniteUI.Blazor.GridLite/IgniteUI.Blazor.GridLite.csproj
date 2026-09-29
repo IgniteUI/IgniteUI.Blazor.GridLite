@@ -20,8 +20,13 @@
     <RepositoryUrl>https://github.com/IgniteUI/IgniteUI.Blazor.GridLite</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
 
-    <!-- Trim-analysis diagnostics build as errors (.editorconfig, category-Trimming); suppression policy: docs/TRIMMING.md. -->
+    <!-- Trim/single-file/AOT diagnostics build as errors (.editorconfig category rules); suppression policy: docs/TRIMMING.md.
+         The public IsAotCompatible claim waits: the Data items are serialized with reflection, and Blazor itself is
+         not AOT-compatible yet (Microsoft.AspNetCore.Components ships IsTrimmable only; dotnet/aspnetcore#51598) -
+         replace these three with <IsAotCompatible>true</IsAotCompatible> when both change. -->
     <IsTrimmable>true</IsTrimmable>
+    <EnableAotAnalyzer>true</EnableAotAnalyzer>
+    <EnableSingleFileAnalyzer>true</EnableSingleFileAnalyzer>
   </PropertyGroup>
 
   <ItemGroup>
