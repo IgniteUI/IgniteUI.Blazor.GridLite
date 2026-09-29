@@ -23,6 +23,8 @@
 <p id="refresh-count">@refreshCount</p>
 <p id="sorted-count">@sortedCount</p>
 
+<button id="navigate-button" @onclick="@(() => grid.NavigateToAsync(3, activate: true))">Navigate</button>
+
 <button id="bind-filtered-button" @onclick="BindFiltered">Bind Filtered</button>
 <p id="filtered-bound">@filtered.HasDelegate</p>
 <p id="filtered-count">@filteredCount</p>
