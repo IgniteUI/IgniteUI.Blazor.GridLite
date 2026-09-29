@@ -55,9 +55,9 @@ The manual **`Wasm AOT Smoke`** workflow (`workflow_dispatch`) publishes this ap
 
 ```bash
 # The browser checks serve whatever publish output exists, so clear the previous one and stop if the AOT publish fails.
-# -p:TargetFrameworks narrows restore too; with all three TFMs it also requires wasm-tools-net8/-net9.
+# Restore ignores -f, and restoring net8/net9 with AOT on needs wasm-tools-net8/-net9; -p:TargetFrameworks limits restore to net10.
 rm -rf tests/IgniteUI.Blazor.GridLite.PublishSmoke/bin/Release/net10.0/publish &&
-dotnet publish tests/IgniteUI.Blazor.GridLite.PublishSmoke -c Release -p:TargetFrameworks=net10.0 -p:RunAOTCompilation=true &&
+dotnet publish tests/IgniteUI.Blazor.GridLite.PublishSmoke -c Release -f net10.0 -p:TargetFrameworks=net10.0 -p:RunAOTCompilation=true &&
 dotnet test tests/IgniteUI.Blazor.GridLite.IntegrationTests --filter Category=TrimmedPublish --settings .runsettings
 ```
 
