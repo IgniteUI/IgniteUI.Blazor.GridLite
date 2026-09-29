@@ -15,8 +15,7 @@ public class TestItem
 
 /// <summary>
 /// Base class for IgbGridLite component tests.
-/// Stubs the JS module chain the component loads on first render
-/// (module import -> <c>get_igc_grid_lite</c>) so tests can verify every
+/// Stubs the JS module the component loads on first render so tests can verify every
 /// call that goes through JS interop, including its serialized payloads.
 /// The component's <c>IJSRuntime</c> injection is the seam — bUnit replaces
 /// it with <see cref="BunitContext.JSInterop"/>, no library changes needed.
@@ -32,20 +31,13 @@ public abstract class GridLiteTestBase : BunitContext
         new() { Id = 3, Name = "Aniseed Syrup", Price = 10.0 },
     ];
 
-    /// <summary>The stub for the imported blazor-igc-grid-lite.js module.</summary>
-    protected BunitJSModuleInterop Module { get; }
-
-    /// <summary>
-    /// The stub for the grid API object returned by <c>get_igc_grid_lite()</c>.
-    /// All <c>blazor_igc_grid_lite.*</c> invocations are recorded here.
-    /// </summary>
+    /// <summary>The stub for the imported blazor-igc-grid-lite.js module; all <c>blazor_igc_grid_lite.*</c> invocations are recorded here.</summary>
     protected BunitJSModuleInterop GridApi { get; }
 
     protected GridLiteTestBase()
     {
         JSInterop.Mode = JSRuntimeMode.Loose;
-        Module = JSInterop.SetupModule(ModulePath);
-        GridApi = Module.SetupModule("get_igc_grid_lite", Array.Empty<object>());
+        GridApi = JSInterop.SetupModule(ModulePath);
     }
 
     /// <summary>

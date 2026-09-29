@@ -46,12 +46,12 @@ This repository is the **source of the `IgniteUI.Blazor.GridLite` package**: a R
 ### JavaScript
 
 - `igc-grid-lite-entry.js` is plain ESM, no framework, no TypeScript; keep it small and readable - it is the entire client side
-- Do not add new `window` globals; the existing `window.blazor_igc_grid_lite` state is slated to move into module scope
+- State stays in the module (the exported `blazor_igc_grid_lite` object); do not add `window` globals
 - Payloads cross as JSON strings the .NET side serializes; the JS side `JSON.parse`s and assigns - keep that shape, and keep property names camelCase to match the `[JsonPropertyName]`s
 
 ## Interop Pattern
 
-- **Loading**: `JSLoader.LoadAsync` imports the module in `OnAfterRenderAsync(firstRender)` and calls `get_igc_grid_lite()`; nothing touches JS before that, so prerendering is safe.
+- **Loading**: `JSLoader.LoadAsync` imports the module in `OnAfterRenderAsync(firstRender)`, and the grid calls its exported `blazor_igc_grid_lite` object; nothing touches JS before that, so prerendering is safe.
 - **Render**: `RenderGridAsync` serializes one `GridLiteRenderConfig` (data, `autoGenerate`, `adoptRootStyles`, sorting/filter state, event flags) through `GridLiteJsonContext`; nulls omitted; `data` goes through reflection with no naming policy (`TItem` is annotated to keep its public properties when trimmed), so data keys keep the C# property names that `IgbGridLiteColumn.Field` uses via `nameof`; enums as camelCase strings through `CamelCaseEnumConverter<T>` on each enum.
 - **Updates**: `SetParametersAsync` diffs incoming parameters against the current values (`ReferenceEquals` for objects) and pushes only the changed keys through `updateGrid` as a `GridLiteUpdateConfig`, whose null members are omitted; a parameter reset to null is sent as the web component's default (empty arrays, default `SortingOptions`), because the component cannot take null.
 - **Events**: `renderGrid` reads the `events.hasSorting`/`hasSorted`/`hasFiltering`/`hasFiltered` flags from the config and only attaches listeners for bound callbacks, replacing the grid's previous listeners; `SetParametersAsync` sends the flags through `updateGrid` when a binding changes; JS calls back into `JSHandler<TItem>` through a `DotNetObjectReference` without awaiting, so a handler's exception propagates and the browser reports it - do not catch it in `JSHandler`.

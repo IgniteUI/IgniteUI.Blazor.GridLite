@@ -141,22 +141,17 @@ public class GridLiteJsInteropTests : GridLiteTestBase
 
         public HeldScriptLoad(BunitServiceProvider services)
         {
-            Module.Setup(m => m.InvokeAsync<IJSObjectReference>("get_igc_grid_lite", It.IsAny<object?[]?>()))
-                .ReturnsAsync(GridApi.Object);
-
             var runtime = new Mock<IJSRuntime>();
             runtime.Setup(r => r.InvokeAsync<IJSObjectReference>("import", It.IsAny<object?[]?>()))
                 .Returns(new ValueTask<IJSObjectReference>(import.Task));
             services.AddSingleton(runtime.Object);
         }
 
-        public Mock<IJSObjectReference> Module { get; } = new();
-
         public Mock<IJSObjectReference> GridApi { get; } = new();
 
         public IEnumerable<object?> GridApiCalls => GridApi.Invocations.Select(i => i.Arguments.FirstOrDefault() ?? i.Method.Name);
 
-        public void Complete() => import.SetResult(Module.Object);
+        public void Complete() => import.SetResult(GridApi.Object);
 
         public void Fail(Exception exception) => import.SetException(exception);
     }
@@ -201,7 +196,6 @@ public class GridLiteJsInteropTests : GridLiteTestBase
 
         cut.WaitForAssertion(() => load.GridApi.Verify(x => x.DisposeAsync(), Times.Once));
         Assert.Equal([$"{Api}.destroyGrid", nameof(IJSObjectReference.DisposeAsync)], load.GridApiCalls);
-        load.Module.Verify(x => x.DisposeAsync(), Times.Once);
     }
 
     // Without the check, a render that resumes after disposal registers the grid on the client again

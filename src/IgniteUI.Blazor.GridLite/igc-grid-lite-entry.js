@@ -3,14 +3,7 @@ import { IgcGridLite } from 'igniteui-grid-lite';
 // Register the component
 IgcGridLite.register();
 
-export { IgcGridLite };
-
-export function get_igc_grid_lite() {
-  window.IgcGridLite = IgcGridLite;
-  return window;
-}
-
-window.blazor_igc_grid_lite = {
+export const blazor_igc_grid_lite = {
   grids: new Map(),
   dotNetRefs: new Map(),
   // An AbortController per grid; aborting it removes that grid's event listeners.
