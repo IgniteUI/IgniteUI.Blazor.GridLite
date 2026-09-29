@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The package includes the XML documentation, so IntelliSense shows the descriptions of the grid's members ([#15](https://github.com/IgniteUI/IgniteUI.Blazor.GridLite/issues/15)).
 - A null `Data` no longer causes a client error. Before, a grid rendered without data threw initially, and resetting `Data` to null left the previous rows on screen. Null is now sent as an empty array in both cases.
 - Resetting `SortingOptions`, `SortingExpressions` or `FilterExpressions` to null restores the grid's default (multiple sorting, no sort, no filter) on the client.
 

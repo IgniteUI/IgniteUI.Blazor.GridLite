@@ -339,6 +339,6 @@ dotnet_analyzer_diagnostic.category-SingleFile.severity = error
 dotnet_analyzer_diagnostic.category-AOT.severity = error
 
 #### Test Exclusions — keep LAST: a section header ends the repo-wide [*.cs] rules above it ####
-[tests/**.{cs,razor}]
-# IDE0005 analyzer can't run on build w/o `GenerateDocumentationFile` (not on for test projects)
+[{tests,demo}/**.{cs,razor}]
+# IDE0005 analyzer can't run on build w/o `GenerateDocumentationFile` (not on for test and demo projects)
 dotnet_diagnostic.IDE0005.severity = suggestion

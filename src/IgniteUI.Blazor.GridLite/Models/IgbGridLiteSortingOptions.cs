@@ -8,19 +8,22 @@ namespace IgniteUI.Blazor.Controls;
 /// </summary>
 public class IgbGridLiteSortingOptions
 {
-    /// <summary>   
-    /// The sorting mode. Can be "single" or "multiple".
+    /// <summary>
+    /// Whether the grid sorts by one column at a time or by several.
     /// </summary>
     [JsonPropertyName("mode")]
     public GridLiteSortingMode Mode { get; set; } = GridLiteSortingMode.Multiple;
 }
 
 /// <summary>
-/// The data type for a column.
+/// How many columns the grid sorts by at a time.
 /// </summary>
 [JsonConverter(typeof(CamelCaseEnumConverter<GridLiteSortingMode>))]
 public enum GridLiteSortingMode
 {
+    /// <summary>Sorting by a column adds to the existing sort expressions.</summary>
     Multiple,
+
+    /// <summary>Sorting by a column replaces the existing sort expression.</summary>
     Single,
 }
