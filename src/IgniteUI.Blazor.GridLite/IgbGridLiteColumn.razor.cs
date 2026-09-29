@@ -66,4 +66,7 @@ public partial class IgbGridLiteColumn : ComponentBase
     /// </summary>
     [Parameter]
     public bool FilteringCaseSensitive { get; set; }
+
+    // TODO: CellTemplate and HeaderTemplate as RenderFragment<T> parameters here, with context types
+    // mirroring igniteui-grid-lite's IgcCellContext and IgcHeaderContext, once templates are supported.
 }

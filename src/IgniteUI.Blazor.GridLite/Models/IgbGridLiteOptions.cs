@@ -16,13 +16,6 @@ internal class IgbGridLiteOptions
     public string JavascriptPath { get; set; }
 
     /// <summary>
-    /// Configuration object which controls remote data operations for the grid.
-    /// </summary>
-    [JsonPropertyName("dataPipelineConfiguration")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public DataPipelineConfiguration DataPipelineConfiguration { get; set; }
-
-    /// <summary>
     /// Specifies whether to enable debug mode.
     /// </summary>
     [JsonPropertyName("debug")]
