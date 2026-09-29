@@ -320,11 +320,10 @@ A demo application is available in [`demo/GridLite.DemoApp/`](demo/GridLite.Demo
 
 ## Supply chain
 
-Every release publishes an SPDX 2.2 SBOM, an SPDX 3.0 SBOM, and a CycloneDX SBOM covering both the NuGet and the npm dependencies the package ships, together with three Sigstore attestations — build provenance, the SPDX SBOM, and the CycloneDX SBOM — each bound to the SHA-256 digest of the signed package that was pushed to NuGet.org. They are attached to the corresponding [GitHub release](https://github.com/IgniteUI/IgniteUI.Blazor.GridLite/releases) alongside the package and its checksum. To verify a package you downloaded:
+Every release publishes an SPDX 2.2 SBOM, an SPDX 3.0 SBOM, and a CycloneDX SBOM covering both the NuGet and the npm dependencies the package ships, together with three Sigstore attestations — build provenance, the SPDX SBOM, and the CycloneDX SBOM — each bound to the SHA-256 digest of the signed package that was pushed to NuGet.org. They are attached to the corresponding [GitHub release](https://github.com/IgniteUI/IgniteUI.Blazor.GridLite/releases) alongside the package and its checksum. To verify the package downloaded from the GitHub release:
 
 ```bash
 gh attestation verify IgniteUI.Blazor.GridLite.<version>.nupkg -R IgniteUI/IgniteUI.Blazor.GridLite
-dotnet nuget verify IgniteUI.Blazor.GridLite.<version>.nupkg
 ```
 
 The two SBOM attestations carry distinct predicate types, so either can be requested on its own:
@@ -333,6 +332,14 @@ The two SBOM attestations carry distinct predicate types, so either can be reque
 gh attestation verify IgniteUI.Blazor.GridLite.<version>.nupkg -R IgniteUI/IgniteUI.Blazor.GridLite --predicate-type https://spdx.dev/Document
 gh attestation verify IgniteUI.Blazor.GridLite.<version>.nupkg -R IgniteUI/IgniteUI.Blazor.GridLite --predicate-type https://cyclonedx.org/bom
 ```
+
+The package's signatures can be checked on either copy, from the GitHub release or from NuGet.org:
+
+```bash
+dotnet nuget verify IgniteUI.Blazor.GridLite.<version>.nupkg
+```
+
+A copy from NuGet.org also carries NuGet.org's repository signature, which this checks as well. That signature changes the file's digest, so the attestations match only the package from the GitHub release.
 
 The package itself contains `THIRD-PARTY-LICENSES.md`, with the license texts of the JavaScript dependencies bundled into the grid's script.
 
