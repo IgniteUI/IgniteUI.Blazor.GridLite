@@ -2,7 +2,7 @@
 
   <!-- Repo-wide MSBuild targets — intentionally empty. Being present stops MSBuild from importing a
        Directory.Build.targets from above the repo. The library's static web assets (the wwwroot/js bundle
-       and the theme CSS) are produced by `npm run build`, which the library project runs from its own build
-       unless RunNodeBuild=false — CI and the release workflow build the assets in an explicit npm step first. -->
+       and the theme CSS) and THIRD-PARTY-LICENSES.md are produced by `npm run build` at the repository root,
+       run as its own step before the .NET build (README "Build"; CI and the release workflow do the same). -->
 
 </Project>

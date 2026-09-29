@@ -18,14 +18,14 @@ This repository is the **source of the `IgniteUI.Blazor.GridLite` package**: a R
 ## Repository Architecture
 
 - **`src/IgniteUI.Blazor.GridLite/`** - the library. `IgbGridLite<TItem>` (`.razor` + `.razor.cs`) renders `<igc-grid-lite>` and drives it over JS interop; `IgbGridLiteColumn` renders a declarative `<igc-grid-lite-column>` child element with plain attributes and needs no interop. `Internal/` holds the module loader (`JSLoader`), the `[JSInvokable]` callback surface (`JSHandler<TItem>`) and the camelCase enum converter. `Models/` are the option, expression and event-args types that cross the wire as JSON.
-- **`src/IgniteUI.Blazor.GridLite/igc-grid-lite-entry.js`** - the whole client footprint: a hand-written ES module bundled by Vite (`vite.config.js` at the repository root) into `wwwroot/js/blazor-igc-grid-lite.js`; the theme CSS is copied from `igniteui-webcomponents` into `wwwroot/css/themes`. Both outputs are build products, not sources.
+- **`src/IgniteUI.Blazor.GridLite/igc-grid-lite-entry.js`** - the whole client footprint: a hand-written ES module bundled by Vite (`vite.config.js` at the repository root) into `wwwroot/js/blazor-igc-grid-lite.js`; the theme CSS is copied from `igniteui-webcomponents` into `wwwroot/css/themes`; Vite's `build.license` writes `THIRD-PARTY-LICENSES.md` next to the csproj, which packs it (a pack fails without it). All three are build products, not sources.
 - **`tests/`** - `IgniteUI.Blazor.GridLite.Tests` (xUnit + bUnit, runs on net8.0/net9.0/net10.0; `GridLiteJsInteropTests` asserts every interop call and its serialized payload), `IgniteUI.Blazor.GridLite.TestBed` (minimal Blazor Server host), `IgniteUI.Blazor.GridLite.PublishSmoke` (Blazor WebAssembly app published with full trimming; see its README and `docs/TRIMMING.md`) and `IgniteUI.Blazor.GridLite.IntegrationTests` (NUnit + Playwright against the TestBed, plus the `TrimmedPublish` checks against the smoke app's publish output).
 - **`demo/GridLite.DemoApp/`** - Blazor Server sample.
 
 ## Build & Tooling
 
 - **Multi-target**: `net8.0`, `net9.0`, `net10.0`; SDK pinned by `global.json`; package versions in `Directory.Packages.props`; repo-wide compiler settings in `Directory.Build.props`.
-- **`dotnet build`** runs `npm install` + `npm run build` from the repository root first; pass `-p:RunNodeBuild=false` when the assets are already built (CI and the release workflow do the npm step explicitly).
+- **`dotnet build`** does not run npm: run `npm ci` + `npm run build` at the repository root first, and again after JS or npm dependency changes (CI and the release workflow do the same). The library packs on every build, and the pack fails without `THIRD-PARTY-LICENSES.md`.
 - **Tests**: `dotnet test tests/IgniteUI.Blazor.GridLite.Tests --settings .runsettings`; integration tests need `playwright.ps1 install` once (see README "Tests").
 - **Formatting**: `npm ci` at the root activates the Prettier pre-commit hook. C#: `dotnet format whitespace . --folder --exclude node_modules` and nothing else - the full `dotnet format` (or `style`/`analyzers`) writes conflict markers into multi-targeted sources (dotnet/format#1634). `.editorconfig` rules run as build warnings via `EnforceCodeStyleInBuild`.
 

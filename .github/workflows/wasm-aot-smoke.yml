@@ -41,10 +41,10 @@ jobs:
 
       # TargetFrameworks narrows restore too: with all three TFMs it also requires wasm-tools-net8/-net9.
       - name: Publish smoke app with AOT compilation
-        run: dotnet publish tests/IgniteUI.Blazor.GridLite.PublishSmoke --configuration Release -p:TargetFrameworks=net10.0 -p:RunAOTCompilation=true -p:RunNodeBuild=false
+        run: dotnet publish tests/IgniteUI.Blazor.GridLite.PublishSmoke --configuration Release -p:TargetFrameworks=net10.0 -p:RunAOTCompilation=true
 
       - name: Build integration tests
-        run: dotnet build tests/IgniteUI.Blazor.GridLite.IntegrationTests --configuration Release -p:RunNodeBuild=false
+        run: dotnet build tests/IgniteUI.Blazor.GridLite.IntegrationTests --configuration Release
 
       - name: Install Playwright
         shell: pwsh

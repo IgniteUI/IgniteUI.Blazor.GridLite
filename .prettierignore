@@ -10,3 +10,4 @@ demo/GridLite.DemoApp/wwwroot/lib/
 
 # Built by `npm run build`; Prettier reads only the root .gitignore, not the nested one under src/
 src/IgniteUI.Blazor.GridLite/wwwroot/
+src/IgniteUI.Blazor.GridLite/THIRD-PARTY-LICENSES.md
