@@ -20,6 +20,7 @@ This package is the Blazor wrapper for Grid Lite only. It does not include cell 
 - [AI-Assisted Development](#ai-assisted-development)
 - [Building from Source](#building-from-source)
 - [Demo Application](#demo-application)
+- [Supply chain](#supply-chain)
 - [Support](#support)
 - [Contributing](#contributing)
 - [License](#license)
@@ -60,7 +61,7 @@ dotnet add package IgniteUI.Blazor.GridLite
 3 - Add the Grid Lite component to your razor page:
 
 ```razor
-<IgbGridLite Data="data" AutoGenerateColumns="true">
+<IgbGridLite Data="data" AutoGenerate="true">
 </IgbGridLite>
 
 @code {
@@ -121,7 +122,7 @@ No service registration is required. The component uses standard Blazor JSIntero
 }
 ```
 
-> **Note:** The `Salary` column above uses `DataType.Number` for clarity. For currency formatting, render the value through a `CellTemplate` and apply the formatter on the rendered text rather than at the column-type level.
+> **Note:** The `Salary` column above uses `DataType.Number` for clarity. Cell templates are not available yet, so values that need custom formatting (currency, units) are best exposed pre-formatted from the data source, e.g. a string property.
 
 ## Advanced Configuration
 
@@ -270,32 +271,57 @@ For the full setup guide and configuration options, see the [Ignite UI Theming M
 
 ### Prerequisites
 
-- .NET 8, .NET 9, or .NET 10 SDK.
-- Node.js 18 or later (used to build the JavaScript bundle).
+- .NET SDK 10.0.100 or later in the 10.0.x band (pinned by `global.json`; it builds all three target frameworks and the .NET 8/9 runtimes are only needed to run the tests on those).
+- Node.js 22.12 or later (required by the Vite build of the JavaScript bundle).
 
-### Build Steps
-
-Restore dependencies:
-
-```bash
-dotnet restore
-```
-
-Build the project:
+### Build
 
 ```bash
 dotnet build
 ```
 
-The build process (configured in `IgniteUI.Blazor.GridLite.csproj`) automatically:
+The library project runs `npm install` and `npm run build` from the repository root as part of the build, producing the JavaScript bundle and the theme CSS under `wwwroot`. Pass `-p:RunNodeBuild=false` to skip that step when the assets are already built (CI and the release workflow build them in an explicit npm step first).
 
-1. Installs npm dependencies.
-2. Builds the JavaScript bundle using Vite.
-3. Copies theme files to `wwwroot`.
+### Tests
+
+Unit tests (xUnit + bUnit, run against net8.0, net9.0 and net10.0) and browser integration tests (NUnit + Playwright against the `tests/IgniteUI.Blazor.GridLite.TestBed` app):
+
+```bash
+dotnet build -c Release
+dotnet test tests/IgniteUI.Blazor.GridLite.Tests --settings .runsettings --no-build -c Release
+pwsh tests/IgniteUI.Blazor.GridLite.IntegrationTests/bin/Release/net10.0/playwright.ps1 install
+dotnet test tests/IgniteUI.Blazor.GridLite.IntegrationTests --settings .runsettings --no-build -c Release
+```
+
+### Formatting
+
+Run `npm ci` once at the repository root: it installs the JS toolchain (Vite, Prettier) and activates the pre-commit hook that formats staged JS/JSON/YAML/CSS files. C# whitespace is formatted with
+
+```bash
+dotnet format whitespace . --folder --exclude node_modules
+```
+
+Only this folder-mode whitespace command is safe here — the full `dotnet format` (and its `style`/`analyzers` verbs) corrupts multi-targeted projects by writing conflict markers into sources ([dotnet/format#1634](https://github.com/dotnet/format/issues/1634)). Both checks run in CI.
 
 ## Demo Application
 
 A demo application is available in [`demo/GridLite.DemoApp/`](demo/GridLite.DemoApp/) showcasing the supported grid features and configurations.
+
+## Supply chain
+
+Every release publishes an SPDX 2.2 SBOM, an SPDX 3.0 SBOM, and a CycloneDX SBOM covering both the NuGet and the npm dependencies the package ships, together with three Sigstore attestations — build provenance, the SPDX SBOM, and the CycloneDX SBOM — each bound to the SHA-256 digest of the signed package that was pushed to NuGet.org. They are attached to the corresponding [GitHub release](https://github.com/IgniteUI/IgniteUI.Blazor.GridLite/releases) alongside the package and its checksum. To verify a package you downloaded:
+
+```bash
+gh attestation verify IgniteUI.Blazor.GridLite.<version>.nupkg -R IgniteUI/IgniteUI.Blazor.GridLite
+dotnet nuget verify IgniteUI.Blazor.GridLite.<version>.nupkg
+```
+
+The two SBOM attestations carry distinct predicate types, so either can be requested on its own:
+
+```bash
+gh attestation verify IgniteUI.Blazor.GridLite.<version>.nupkg -R IgniteUI/IgniteUI.Blazor.GridLite --predicate-type https://spdx.dev/Document
+gh attestation verify IgniteUI.Blazor.GridLite.<version>.nupkg -R IgniteUI/IgniteUI.Blazor.GridLite --predicate-type https://cyclonedx.org/bom
+```
 
 ## Support
 

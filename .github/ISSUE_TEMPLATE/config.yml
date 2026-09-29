@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a Question
+    url: https://discord.gg/39MjrTRqds
+    about: Real-time discussion on the Infragistics Discord.
+  - name: Read the Docs
+    url: https://www.infragistics.com/products/ignite-ui-blazor/blazor/components/grid-lite/overview
+    about: Be sure you've read the docs!
