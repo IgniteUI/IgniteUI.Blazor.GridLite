@@ -34,31 +34,20 @@ internal sealed class JSHandler<[DynamicallyAccessedMembers(DynamicallyAccessedM
     /// Will execute <see cref="IgbGridLite{TItem}.Sorting"/>
     /// </remarks>
     [JSInvokable]
-    public async Task<bool> JSSorting(JsonElement sortExpression)
+    public async Task JSSorting(JsonElement sortExpression)
     {
         if (!GridReference.Sorting.HasDelegate)
-            return false; // Don't cancel
+            return;
 
-        try
+        var expression = sortExpression.Deserialize(GridLiteJsonContext.Default.IgbGridLiteSortingExpression)
+            ?? throw new JsonException("sorting event payload deserialized to null");
+
+        var eventArgs = new IgbGridLiteSortingEventArgs
         {
-            var expression = sortExpression.Deserialize(GridLiteJsonContext.Default.IgbGridLiteSortingExpression)
-                ?? throw new JsonException("sorting event payload deserialized to null");
+            Expression = expression
+        };
 
-            var eventArgs = new IgbGridLiteSortingEventArgs
-            {
-                Expression = expression,
-                Cancel = false
-            };
-
-            await GridReference.Sorting.InvokeAsync(eventArgs);
-
-            // Always false for now; see the cancellation TODO in igc-grid-lite-entry.js.
-            return eventArgs.Cancel;
-        }
-        catch
-        {
-            return false;
-        }
+        await GridReference.Sorting.InvokeAsync(eventArgs);
     }
 
     /// <summary>
@@ -69,27 +58,20 @@ internal sealed class JSHandler<[DynamicallyAccessedMembers(DynamicallyAccessedM
     /// Will execute <see cref="IgbGridLite{TItem}.Sorted"/>
     /// </remarks>
     [JSInvokable]
-    public void JSSorted(JsonElement sortExpression)
+    public async Task JSSorted(JsonElement sortExpression)
     {
         if (!GridReference.Sorted.HasDelegate)
             return;
 
-        try
-        {
-            var expression = sortExpression.Deserialize(GridLiteJsonContext.Default.IgbGridLiteSortingExpression)
-                ?? throw new JsonException("sorted event payload deserialized to null");
+        var expression = sortExpression.Deserialize(GridLiteJsonContext.Default.IgbGridLiteSortingExpression)
+            ?? throw new JsonException("sorted event payload deserialized to null");
 
-            var eventArgs = new IgbGridLiteSortedEventArgs
-            {
-                Expression = expression
-            };
-
-            GridReference.Sorted.InvokeAsync(eventArgs);
-        }
-        catch
+        var eventArgs = new IgbGridLiteSortedEventArgs
         {
-            // Ignore deserialization errors
-        }
+            Expression = expression
+        };
+
+        await GridReference.Sorted.InvokeAsync(eventArgs);
     }
 
     /// <summary>
@@ -100,25 +82,15 @@ internal sealed class JSHandler<[DynamicallyAccessedMembers(DynamicallyAccessedM
     /// Will execute <see cref="IgbGridLite{TItem}.Filtering"/>
     /// </remarks>
     [JSInvokable]
-    public async Task<bool> JSFiltering(JsonElement filteringEvent)
+    public async Task JSFiltering(JsonElement filteringEvent)
     {
         if (!GridReference.Filtering.HasDelegate)
-            return false; // Don't cancel
+            return;
 
-        try
-        {
-            var eventData = filteringEvent.Deserialize(GridLiteJsonContext.Default.IgbGridLiteFilteringEventArgs)
-                ?? throw new JsonException("filtering event payload deserialized to null");
+        var eventData = filteringEvent.Deserialize(GridLiteJsonContext.Default.IgbGridLiteFilteringEventArgs)
+            ?? throw new JsonException("filtering event payload deserialized to null");
 
-            await GridReference.Filtering.InvokeAsync(eventData);
-
-            // See the cancellation TODO in igc-grid-lite-entry.js.
-            return false;
-        }
-        catch
-        {
-            return false;
-        }
+        await GridReference.Filtering.InvokeAsync(eventData);
     }
 
     /// <summary>
@@ -129,21 +101,14 @@ internal sealed class JSHandler<[DynamicallyAccessedMembers(DynamicallyAccessedM
     /// Will execute <see cref="IgbGridLite{TItem}.Filtered"/>
     /// </remarks>
     [JSInvokable]
-    public void JSFiltered(JsonElement filteredEvent)
+    public async Task JSFiltered(JsonElement filteredEvent)
     {
         if (!GridReference.Filtered.HasDelegate)
             return;
 
-        try
-        {
-            var eventData = filteredEvent.Deserialize(GridLiteJsonContext.Default.IgbGridLiteFilteredEventArgs)
-                ?? throw new JsonException("filtered event payload deserialized to null");
+        var eventData = filteredEvent.Deserialize(GridLiteJsonContext.Default.IgbGridLiteFilteredEventArgs)
+            ?? throw new JsonException("filtered event payload deserialized to null");
 
-            GridReference.Filtered.InvokeAsync(eventData);
-        }
-        catch
-        {
-            // Ignore deserialization errors
-        }
+        await GridReference.Filtered.InvokeAsync(eventData);
     }
 }

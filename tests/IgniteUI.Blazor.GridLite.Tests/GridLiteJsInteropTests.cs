@@ -1,6 +1,10 @@
 using System.Text.Json;
 using Bunit;
 using IgniteUI.Blazor.Controls;
+using IgniteUI.Blazor.Controls.Internal;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.JSInterop;
+using Moq;
 
 namespace IgniteUI.Blazor.GridLite.Tests;
 
@@ -129,6 +133,141 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         Assert.Same(newData, cut.Instance.Data);
     }
 #pragma warning restore CS0618
+
+    // bUnit cannot hold back a call that returns an IJSObjectReference, so this swaps in a runtime whose import waits.
+    private sealed class HeldScriptLoad
+    {
+        private readonly TaskCompletionSource<IJSObjectReference> import = new();
+
+        public HeldScriptLoad(BunitServiceProvider services)
+        {
+            Module.Setup(m => m.InvokeAsync<IJSObjectReference>("get_igc_grid_lite", It.IsAny<object?[]?>()))
+                .ReturnsAsync(GridApi.Object);
+
+            var runtime = new Mock<IJSRuntime>();
+            runtime.Setup(r => r.InvokeAsync<IJSObjectReference>("import", It.IsAny<object?[]?>()))
+                .Returns(new ValueTask<IJSObjectReference>(import.Task));
+            services.AddSingleton(runtime.Object);
+        }
+
+        public Mock<IJSObjectReference> Module { get; } = new();
+
+        public Mock<IJSObjectReference> GridApi { get; } = new();
+
+        public IEnumerable<object?> GridApiCalls => GridApi.Invocations.Select(i => i.Arguments.FirstOrDefault() ?? i.Method.Name);
+
+        public void Complete() => import.SetResult(Module.Object);
+
+        public void Fail(Exception exception) => import.SetException(exception);
+    }
+
+    // Without the wait, a call made while the grid's script loads is dropped.
+    [Fact]
+    public async Task SortAsync_BeforeClientRender_RunsAfterIt()
+    {
+        var load = new HeldScriptLoad(Services);
+        var cut = Render<IgbGridLite<TestItem>>(ps => ps.Add(x => x.Data, Items));
+
+        var sort = cut.InvokeAsync(() => cut.Instance.SortAsync(new IgbGridLiteSortingExpression { Key = "Name" }));
+        await cut.InvokeAsync(load.Complete);
+        await sort;
+
+        Assert.Equal([$"{Api}.renderGrid", $"{Api}.sort"], load.GridApiCalls);
+    }
+
+    // Without it, a call made before a failed first render never returns.
+    [Fact]
+    public async Task SortAsync_BeforeFailedClientRender_Returns()
+    {
+        var load = new HeldScriptLoad(Services);
+        var cut = Render<IgbGridLite<TestItem>>(ps => ps.Add(x => x.Data, Items));
+
+        var sort = cut.InvokeAsync(() => cut.Instance.SortAsync(new IgbGridLiteSortingExpression { Key = "Name" }));
+        await cut.InvokeAsync(() => load.Fail(new JSException("module failed to load")));
+
+        await sort.WaitAsync(TimeSpan.FromSeconds(5));
+        Assert.Empty(load.GridApiCalls);
+    }
+
+    // Without the check, the grid renders on the client after disposal and its .NET reference is never released.
+    [Fact]
+    public async Task DisposingWhileScriptLoads_DoesNotRenderAfterwards()
+    {
+        var load = new HeldScriptLoad(Services);
+        var cut = Render<IgbGridLite<TestItem>>(ps => ps.Add(x => x.Data, Items));
+
+        await DisposeComponentsAsync();
+        await cut.InvokeAsync(load.Complete);
+
+        cut.WaitForAssertion(() => load.GridApi.Verify(x => x.DisposeAsync(), Times.Once));
+        Assert.Equal([$"{Api}.destroyGrid", nameof(IJSObjectReference.DisposeAsync)], load.GridApiCalls);
+        load.Module.Verify(x => x.DisposeAsync(), Times.Once);
+    }
+
+    // Without the check, a render that resumes after disposal registers the grid on the client again
+    // after destroyGrid removed it.
+    [Fact]
+    public async Task RenderAfterDisposal_DoesNotInvokeRenderGrid()
+    {
+        var cut = RenderGrid();
+        var grid = cut.Instance;
+        await DisposeComponentsAsync();
+
+#pragma warning disable CS0618 // Deprecated but still shipped.
+        await cut.InvokeAsync(() => grid.RefreshAsync());
+#pragma warning restore CS0618
+
+        GridApi.VerifyInvoke($"{Api}.destroyGrid");
+        GridApi.VerifyInvoke($"{Api}.renderGrid", calledTimes: 1);
+    }
+
+    // Without it, a failed destroyGrid leaves the .NET reference registered with the client, which keeps the grid alive.
+    [Fact]
+    public async Task FailedDestroyGrid_StillReleasesDotNetReference()
+    {
+        var cut = RenderGrid();
+        var reference = Assert.IsType<DotNetObjectReference<JSHandler<TestItem>>>(
+            GridApi.VerifyInvoke($"{Api}.renderGrid").Arguments[0]);
+        GridApi.SetupVoid($"{Api}.destroyGrid", _ => true).SetException(new JSException("destroyGrid failed"));
+
+        await DisposeComponentsAsync();
+
+        GridApi.VerifyInvoke($"{Api}.destroyGrid");
+        Assert.Throws<ObjectDisposedException>(() => reference.Value);
+    }
+
+    // Without it, a callback bound after the first render has no listener on the client and never fires.
+    [Fact]
+    public void BindingCallbackAfterRender_InvokesUpdateGrid_WithEventFlags()
+    {
+        var cut = RenderGrid();
+
+        cut.Render(ps => ps.Add(x => x.Sorted, (IgbGridLiteSortedEventArgs _) => { }));
+
+        cut.WaitForAssertion(() =>
+        {
+            var update = ParseJsonArgument(GridApi.VerifyInvoke($"{Api}.updateGrid").Arguments[1]);
+            Assert.True(update.GetProperty("events").GetProperty("hasSorted").GetBoolean());
+            Assert.False(update.GetProperty("events").GetProperty("hasSorting").GetBoolean());
+        });
+    }
+
+    // Without it, an exception from the app's handler is swallowed and never reaches the browser console.
+    [Fact]
+    public async Task EventHandlerException_PropagatesToTheJsCaller()
+    {
+        var cut = RenderGrid(ps => ps
+            .Add(x => x.Sorted, (IgbGridLiteSortedEventArgs _) => throw new InvalidOperationException("sorted"))
+            .Add(x => x.Filtered, (IgbGridLiteFilteredEventArgs _) => throw new InvalidOperationException("filtered")));
+        var handler = Assert.IsType<DotNetObjectReference<JSHandler<TestItem>>>(
+            GridApi.VerifyInvoke($"{Api}.renderGrid").Arguments[0]).Value;
+
+        var sorted = JsonSerializer.SerializeToElement(new { key = "Name", direction = "ascending" });
+        var filtered = JsonSerializer.SerializeToElement(new { key = "Name", state = Array.Empty<object>() });
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => cut.InvokeAsync(() => handler.JSSorted(sorted)));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => cut.InvokeAsync(() => handler.JSFiltered(filtered)));
+    }
 
     [Fact]
     public async Task SortAsync_SingleExpression_InvokesSort_WithCamelCasePayload()

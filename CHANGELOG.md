@@ -19,11 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING**: `IgbGridLiteSortingExpression.Key`, `IgbGridLiteFilterExpression.Key`, `IgbGridLiteFilterExpression.Condition` and `IgbColumnConfiguration.Field` are now `required`; object initializers must set them. `IgbGridLiteColumn.Field` is marked `[EditorRequired]`.
 - The event-args members the web component always sends are now `required` (only code that constructs event args itself, such as tests, is affected): `IgbGridLiteSortingEventArgs.Expression`, `IgbGridLiteSortedEventArgs.Expression`, `IgbGridLiteFilteringEventArgs.Key`/`Expressions`/`Type` and `IgbGridLiteFilteredEventArgs.Key`/`State`.
 - The same event-args members are `init`-only: a handler's changes to them never reached the grid.
-- `GetColumnsAsync` returns an empty array instead of `null` before the grid has rendered. Nullable annotations on the public surface: the optional `key` of `ClearSortAsync`/`ClearFilterAsync` and `field` of `NavigateToAsync` are `string?`. `IgbGridLiteFilterExpression.SearchTerm` and `Criteria` are nullable.
+- `GetColumnsAsync` returns an empty array instead of `null` when there is no grid on the client. Nullable annotations on the public surface: the optional `key` of `ClearSortAsync`/`ClearFilterAsync` and `field` of `NavigateToAsync` are `string?`. `IgbGridLiteFilterExpression.SearchTerm` and `Criteria` are nullable.
 - `UpdateDataAsync`, `SortAsync` and `FilterAsync` throw `ArgumentNullException` for a null argument instead of sending `null` to the grid.
 - **BREAKING**: The public methods of `IgbGridLite<TItem>` are no longer `virtual`.
 - **BREAKING**: The multi-expression overloads of `SortAsync` and `FilterAsync` take `IEnumerable<T>` instead of `List<T>`. Source-compatible; recompile against the new version.
 - `Rendered` fires once, when the grid first renders on the client; it no longer fires again after `RenderAsync` or `RefreshAsync`.
+- The grid's methods, such as `SortAsync`, `FilterAsync`, `NavigateToAsync` and `GetColumnsAsync`, wait for the grid's first client render when called before it, instead of doing nothing.
+- `IgbGridLite<TItem>` implements `IAsyncDisposable` instead of `IDisposable`, and its disposal completes once the client-side grid is released.
 
 ### Deprecated
 
@@ -38,6 +40,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A null `Data` no longer causes a client error. Before, a grid rendered without data threw initially, and resetting `Data` to null left the previous rows on screen. Null is now sent as an empty array in both cases.
 - Resetting `SortingOptions`, `SortingExpressions` or `FilterExpressions` to null restores the grid's default (multiple sorting, no sort, no filter) on the client.
 - The `Sorting` and `Filtering` docs no longer claim the events can cancel or modify the operation; they are notifications.
+- `RenderAsync` and `RefreshAsync` no longer add another set of event listeners, which raised every event callback once more per call.
+- A `Sorting`, `Sorted`, `Filtering` or `Filtered` callback bound after the grid's first render fires; before, the grid did not listen for it.
+- An exception from a `Sorting`, `Sorted`, `Filtering` or `Filtered` handler, or from reading the event's payload, is no longer swallowed; the browser reports it as an unhandled error.
+- A grid removed while its script is still loading no longer renders on the client afterwards.
 
 ## 0.9.0 - 2026-07-13
 

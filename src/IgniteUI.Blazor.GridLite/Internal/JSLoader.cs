@@ -8,7 +8,8 @@ internal static class JSLoader
 
     public static async Task<IJSObjectReference> LoadAsync(IJSRuntime jsRuntime)
     {
-        var module = await jsRuntime.InvokeAsync<IJSObjectReference>(
+        // Only the grid API is kept; disposing the module reference leaves the module loaded.
+        await using var module = await jsRuntime.InvokeAsync<IJSObjectReference>(
             "import", ModulePath);
 
         return await module.InvokeAsync<IJSObjectReference>(

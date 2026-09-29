@@ -3,7 +3,7 @@
 
 <h1>GridLite TestBed</h1>
 
-<IgbGridLite TItem="NwindDataItem" Data="data" data-testid="test-grid">
+<IgbGridLite @ref="grid" TItem="NwindDataItem" Data="data" Sorted="OnSorted" Filtered="filtered" data-testid="test-grid">
     <IgbGridLiteColumn Field="@nameof(NwindDataItem.ProductID)"
                        Header="ID"
                        DataType="GridLiteColumnDataType.Number" />
@@ -19,6 +19,33 @@
                        DataType="GridLiteColumnDataType.Number" />
 </IgbGridLite>
 
+<button id="refresh-button" @onclick="RefreshAsync">Refresh</button>
+<p id="refresh-count">@refreshCount</p>
+<p id="sorted-count">@sortedCount</p>
+
+<button id="bind-filtered-button" @onclick="BindFiltered">Bind Filtered</button>
+<p id="filtered-bound">@filtered.HasDelegate</p>
+<p id="filtered-count">@filteredCount</p>
+
 @code {
     private readonly GridData data = new();
+    private IgbGridLite<NwindDataItem> grid = null!;
+    private EventCallback<IgbGridLiteFilteredEventArgs> filtered;
+    private int refreshCount;
+    private int sortedCount;
+    private int filteredCount;
+
+    private void BindFiltered() => filtered = EventCallback.Factory.Create<IgbGridLiteFilteredEventArgs>(this, OnFiltered);
+
+    private void OnFiltered(IgbGridLiteFilteredEventArgs args) => filteredCount++;
+
+    private async Task RefreshAsync()
+    {
+#pragma warning disable CS0618 // Deprecated but still shipped: a re-render must not duplicate the grid's event listeners.
+        await grid.RefreshAsync();
+#pragma warning restore CS0618
+        refreshCount++;
+    }
+
+    private void OnSorted(IgbGridLiteSortedEventArgs args) => sortedCount++;
 }
