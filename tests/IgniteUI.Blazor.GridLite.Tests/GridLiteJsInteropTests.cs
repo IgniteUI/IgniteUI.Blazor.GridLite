@@ -26,7 +26,7 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         var cut = RenderGrid();
 
         var invocation = GridApi.VerifyInvoke($"{Api}.renderGrid");
-        Assert.Equal(4, invocation.Arguments.Count);
+        Assert.Equal(3, invocation.Arguments.Count);
         Assert.NotNull(invocation.Arguments[0]); // DotNetObjectReference for JS -> .NET callbacks
 
         var config = ParseJsonArgument(invocation.Arguments[2]);
@@ -70,9 +70,8 @@ public class GridLiteJsInteropTests : GridLiteTestBase
             .Add(x => x.Sorting, (IgbGridLiteSortingEventArgs _) => { })
             .Add(x => x.Filtered, (IgbGridLiteFilteredEventArgs _) => { }));
 
-        var flagsArgument = GridApi.VerifyInvoke($"{Api}.renderGrid").Arguments[3];
-        Assert.NotNull(flagsArgument);
-        var flags = ParseJsonArgument(JsonSerializer.Serialize(flagsArgument));
+        var config = ParseJsonArgument(GridApi.VerifyInvoke($"{Api}.renderGrid").Arguments[2]);
+        var flags = config.GetProperty("events");
 
         Assert.True(flags.GetProperty("hasSorting").GetBoolean());
         Assert.False(flags.GetProperty("hasSorted").GetBoolean());
@@ -184,6 +183,33 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         Assert.Equal("Cha", expression.GetProperty("searchTerm").GetString());
     }
 
+    public static TheoryData<object, string> SearchTerms => new()
+    {
+        { 5, "5" },
+        { 5u, "5" },
+        { true, "true" },
+        { new DateTime(2026, 9, 25, 0, 0, 0, DateTimeKind.Utc), "\"2026-09-25T00:00:00Z\"" },
+        { DayOfWeek.Friday, "5" },
+    };
+
+    // Search terms are compared against the data, so any type the data can hold must serialize, and the same way.
+    [Theory]
+    [MemberData(nameof(SearchTerms))]
+    public async Task FilterAsync_WritesSearchTerm_ByItsRuntimeType(object searchTerm, string expectedJson)
+    {
+        var cut = RenderGrid();
+
+        await cut.InvokeAsync(() => cut.Instance.FilterAsync(new IgbGridLiteFilterExpression
+        {
+            Key = "Price",
+            Condition = "equals",
+            SearchTerm = searchTerm,
+        }));
+
+        var expression = ParseJsonArgument(GridApi.VerifyInvoke($"{Api}.filter").Arguments[1]);
+        Assert.Equal(expectedJson, expression.GetProperty("searchTerm").GetRawText());
+    }
+
     [Fact]
     public async Task FilterAsync_ExpressionList_InvokesFilter_WithArrayPayload()
     {
@@ -245,10 +271,11 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         GridApi.VerifyNotInvoke($"{Api}.filter");
     }
 
+    // Apps test their own components with bUnit's loose JSInterop too, where an unconfigured call yields default.
     [Fact]
     public async Task GetColumnsAsync_ReturnsEmpty_WhenJsReturnsNothing()
     {
-        var cut = RenderGrid(); // loose interop: the unconfigured getColumns call yields null
+        var cut = RenderGrid();
 
         var columns = await cut.InvokeAsync(() => cut.Instance.GetColumnsAsync().AsTask());
 
@@ -264,13 +291,17 @@ public class GridLiteJsInteropTests : GridLiteTestBase
             new IgbColumnConfiguration { Field = "Name", Sortable = true },
             new IgbColumnConfiguration { Field = "Price", DataType = GridLiteColumnDataType.Number },
         };
-        GridApi.Setup<IgbColumnConfiguration[]>($"{Api}.getColumns", _ => true).SetResult(expected);
+        GridApi.Setup<JsonElement>($"{Api}.getColumns", _ => true).SetResult(JsonSerializer.SerializeToElement(expected));
 
         var columns = await cut.InvokeAsync(() => cut.Instance.GetColumnsAsync().AsTask());
 
         var invocation = GridApi.VerifyInvoke($"{Api}.getColumns");
         Assert.Equal(cut.Instance.GridId, invocation.Arguments[0]);
-        Assert.Same(expected, columns);
+        Assert.Equal(2, columns.Length);
+        Assert.Equal("Name", columns[0].Field);
+        Assert.True(columns[0].Sortable);
+        Assert.Equal("Price", columns[1].Field);
+        Assert.Equal(GridLiteColumnDataType.Number, columns[1].DataType);
     }
 
     [Fact]
@@ -315,6 +346,29 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         {
             var update = ParseJsonArgument(GridApi.VerifyInvoke($"{Api}.updateGrid").Arguments[1]);
             Assert.Equal(0, update.GetProperty("data").GetArrayLength());
+        });
+    }
+
+    // The web component throws on null for these, so a reset has to arrive as the component's default.
+    [Fact]
+    public void ResettingToNull_InvokesUpdateGrid_WithComponentDefaults()
+    {
+        var cut = RenderGrid(ps => ps
+            .Add(x => x.SortingOptions, new IgbGridLiteSortingOptions { Mode = GridLiteSortingMode.Single })
+            .Add(x => x.SortingExpressions, [new IgbGridLiteSortingExpression { Key = "Name", Direction = GridLiteSortingDirection.Ascending }])
+            .Add(x => x.FilterExpressions, [new IgbGridLiteFilterExpression { Key = "Name", Condition = "contains", SearchTerm = "a" }]));
+
+        cut.Render(ps => ps
+            .Add(x => x.SortingOptions, null)
+            .Add(x => x.SortingExpressions, null)
+            .Add(x => x.FilterExpressions, null));
+
+        cut.WaitForAssertion(() =>
+        {
+            var update = ParseJsonArgument(GridApi.VerifyInvoke($"{Api}.updateGrid").Arguments[1]);
+            Assert.Equal("multiple", update.GetProperty("sortingOptions").GetProperty("mode").GetString());
+            Assert.Equal(0, update.GetProperty("sortingExpressions").GetArrayLength());
+            Assert.Equal(0, update.GetProperty("filterExpressions").GetArrayLength());
         });
     }
 

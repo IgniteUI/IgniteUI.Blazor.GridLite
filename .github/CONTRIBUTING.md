@@ -128,7 +128,7 @@ In order to contribute code to a new feature, you need to follow these guideline
 2. Follow a test-driven development process (TDD) to ensure full code coverage.
    - Unit tests go in `tests/IgniteUI.Blazor.GridLite.Tests`: JS interop calls and their payloads in `GridLiteJsInteropTests`, rendered markup in `GridLiteRenderTests`, the wire format in `ModelSerializationTests` and `EnumSerializationTests`. Behavior in a real browser goes in `tests/IgniteUI.Blazor.GridLite.IntegrationTests` (NUnit + Playwright against the TestBed app).
 3. Document all newly added public methods, inputs, outputs and properties.
-4. Make sure all static code analysis and tests pass before opening a pull request.
+4. Make sure all static code analysis and tests pass before opening a pull request. Note that trim-analysis diagnostics (IL2xxx) build as errors — see the ["Maintaining trim compatibility" section of docs/TRIMMING.md](../docs/TRIMMING.md#maintaining-trim-compatibility-contributors) for the policy on fixing versus suppressing them.
 5. Test the component with screen reader and browser tools for accessibility compliance.
 6. Reference the issue you've been working on in your commit message and pull request title/description.
 7. Don't forget to make the necessary status updates, as described in the workflow section.

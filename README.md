@@ -17,6 +17,7 @@ This package is the Blazor wrapper for Grid Lite only. It does not include cell 
 - [Basic Usage](#basic-usage)
 - [Advanced Configuration](#advanced-configuration)
 - [Column Configuration Reference](#column-configuration-reference)
+- [Publishing with trimming](#publishing-with-trimming)
 - [AI-Assisted Development](#ai-assisted-development)
 - [Building from Source](#building-from-source)
 - [Demo Application](#demo-application)
@@ -229,6 +230,10 @@ The `IgbGridLiteColumn` component supports the following properties:
 | `SortingCaseSensitive`   | `bool`                   | When `true`, sort comparisons are case-sensitive.                      |
 | `Filterable`             | `bool`                   | Enables filtering on the column.                                       |
 | `FilteringCaseSensitive` | `bool`                   | When `true`, filter comparisons are case-sensitive.                    |
+
+## Publishing with trimming
+
+The library is trim-compatible. With Blazor WebAssembly's default `TrimMode=partial` nothing is needed. With `TrimMode=full`, the grid keeps the public properties of its item type automatically, while complex types nested in the item type have to be preserved by the app. See [docs/TRIMMING.md](docs/TRIMMING.md) for the details, including components that wrap the grid with their own generic parameter.
 
 ## AI-Assisted Development
 

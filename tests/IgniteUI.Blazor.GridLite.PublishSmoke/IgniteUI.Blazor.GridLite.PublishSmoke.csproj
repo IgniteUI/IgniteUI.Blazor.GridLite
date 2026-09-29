@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <!-- Publish-compatibility smoke app: publishes the library under assembly trimming and exercises
+       its reflection-based and interop paths in the browser. See docs/TRIMMING.md. -->
+  <PropertyGroup>
+    <!-- Match the library's TFMs so each gets a real ILLink pass. -->
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <!-- Blazor WebAssembly defaults to partial, which trims only assemblies marked trimmable: the library,
+         but never the app's own types. The library's contract for app types (the Data item type) only
+         matters, and is only exercised, under full trimming. -->
+    <TrimMode>full</TrimMode>
+    <!-- Trim analyzer for the app's own code (errors via the repo .editorconfig);
+         linker-level issues still only surface at publish. -->
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <!-- Fail the publish on any ILLink warning, reported individually. Linker *analysis*
+         warnings stay suppressed (Blazor default) — the framework's own assemblies emit them;
+         the library's analysis cleanliness is enforced at build time via the repo .editorconfig. -->
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
+    <ILLinkTreatWarningsAsErrors>true</ILLinkTreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\IgniteUI.Blazor.GridLite\IgniteUI.Blazor.GridLite.csproj" />
+  </ItemGroup>
+
+</Project>

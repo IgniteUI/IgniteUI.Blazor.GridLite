@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "IgniteUI.Blazor.GridLite.PublishSmoke": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:62031;http://localhost:62032"
+    }
+  }
+}

@@ -1,4 +1,5 @@
 ﻿using Microsoft.JSInterop;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
 namespace IgniteUI.Blazor.Controls.Internal;
@@ -7,7 +8,8 @@ namespace IgniteUI.Blazor.Controls.Internal;
 /// Provides internal-only <see cref="JSInvokableAttribute"/> callbacks for IgbGridLite
 /// </summary>
 /// <typeparam name="TItem">The data type of the items to display in the grid</typeparam>
-internal sealed class JSHandler<TItem> : IDisposable where TItem : class
+internal sealed class JSHandler<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TItem>
+    : IDisposable where TItem : class
 {
     private readonly IgbGridLite<TItem> GridReference;
     internal readonly DotNetObjectReference<JSHandler<TItem>> ObjectReference;
@@ -39,8 +41,7 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
 
         try
         {
-            var expression = JsonSerializer.Deserialize<IgbGridLiteSortingExpression>(
-                sortExpression.GetRawText())
+            var expression = sortExpression.Deserialize(GridLiteJsonContext.Default.IgbGridLiteSortingExpression)
                 ?? throw new JsonException("sorting event payload deserialized to null");
 
             var eventArgs = new IgbGridLiteSortingEventArgs
@@ -75,8 +76,7 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
 
         try
         {
-            var expression = JsonSerializer.Deserialize<IgbGridLiteSortingExpression>(
-                sortExpression.GetRawText())
+            var expression = sortExpression.Deserialize(GridLiteJsonContext.Default.IgbGridLiteSortingExpression)
                 ?? throw new JsonException("sorted event payload deserialized to null");
 
             var eventArgs = new IgbGridLiteSortedEventArgs
@@ -107,8 +107,7 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
 
         try
         {
-            var eventData = JsonSerializer.Deserialize<IgbGridLiteFilteringEventArgs>(
-                filteringEvent.GetRawText())
+            var eventData = filteringEvent.Deserialize(GridLiteJsonContext.Default.IgbGridLiteFilteringEventArgs)
                 ?? throw new JsonException("filtering event payload deserialized to null");
 
             await GridReference.Filtering.InvokeAsync(eventData);
@@ -138,8 +137,7 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
 
         try
         {
-            var eventData = JsonSerializer.Deserialize<IgbGridLiteFilteredEventArgs>(
-                filteredEvent.GetRawText())
+            var eventData = filteredEvent.Deserialize(GridLiteJsonContext.Default.IgbGridLiteFilteredEventArgs)
                 ?? throw new JsonException("filtered event payload deserialized to null");
 
             GridReference.Filtered.InvokeAsync(eventData);

@@ -19,6 +19,9 @@
     <PackageProjectUrl>https://www.infragistics.com/products/ignite-ui-blazor</PackageProjectUrl>
     <RepositoryUrl>https://github.com/IgniteUI/IgniteUI.Blazor.GridLite</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+
+    <!-- Trim-analysis diagnostics build as errors (.editorconfig, category-Trimming); suppression policy: docs/TRIMMING.md. -->
+    <IsTrimmable>true</IsTrimmable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -44,6 +47,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(ExposeInternalsToTests)' != 'false'">
+    <InternalsVisibleTo Include="IgniteUI.Blazor.GridLite.Tests" />
   </ItemGroup>
 
 
