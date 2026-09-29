@@ -40,7 +40,8 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
         try
         {
             var expression = JsonSerializer.Deserialize<IgbGridLiteSortingExpression>(
-                sortExpression.GetRawText());
+                sortExpression.GetRawText())
+                ?? throw new JsonException("sorting event payload deserialized to null");
 
             var eventArgs = new IgbGridLiteSortingEventArgs
             {
@@ -75,7 +76,8 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
         try
         {
             var expression = JsonSerializer.Deserialize<IgbGridLiteSortingExpression>(
-                sortExpression.GetRawText());
+                sortExpression.GetRawText())
+                ?? throw new JsonException("sorted event payload deserialized to null");
 
             var eventArgs = new IgbGridLiteSortedEventArgs
             {
@@ -106,7 +108,8 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
         try
         {
             var eventData = JsonSerializer.Deserialize<IgbGridLiteFilteringEventArgs>(
-                filteringEvent.GetRawText());
+                filteringEvent.GetRawText())
+                ?? throw new JsonException("filtering event payload deserialized to null");
 
             await GridReference.Filtering.InvokeAsync(eventData);
 
@@ -136,7 +139,8 @@ internal sealed class JSHandler<TItem> : IDisposable where TItem : class
         try
         {
             var eventData = JsonSerializer.Deserialize<IgbGridLiteFilteredEventArgs>(
-                filteredEvent.GetRawText());
+                filteredEvent.GetRawText())
+                ?? throw new JsonException("filtered event payload deserialized to null");
 
             GridReference.Filtered.InvokeAsync(eventData);
         }

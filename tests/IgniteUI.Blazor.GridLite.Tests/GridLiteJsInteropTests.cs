@@ -229,6 +229,33 @@ public class GridLiteJsInteropTests : GridLiteTestBase
     }
 
     [Fact]
+    public async Task PublicMethods_RejectNullArguments_WithoutCallingJs()
+    {
+        var cut = RenderGrid();
+
+        // Deliberate nulls: the guards exist for callers with nullable analysis off.
+        await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.UpdateDataAsync(null!)));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.SortAsync((IgbGridLiteSortingExpression)null!)));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.SortAsync((List<IgbGridLiteSortingExpression>)null!)));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.FilterAsync((IgbGridLiteFilterExpression)null!)));
+        await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.FilterAsync((List<IgbGridLiteFilterExpression>)null!)));
+
+        GridApi.VerifyNotInvoke($"{Api}.updateData");
+        GridApi.VerifyNotInvoke($"{Api}.sort");
+        GridApi.VerifyNotInvoke($"{Api}.filter");
+    }
+
+    [Fact]
+    public async Task GetColumnsAsync_ReturnsEmpty_WhenJsReturnsNothing()
+    {
+        var cut = RenderGrid(); // loose interop: the unconfigured getColumns call yields null
+
+        var columns = await cut.InvokeAsync(() => cut.Instance.GetColumnsAsync().AsTask());
+
+        Assert.Empty(columns);
+    }
+
+    [Fact]
     public async Task GetColumnsAsync_ReturnsColumns_FromJsResult()
     {
         var cut = RenderGrid();
@@ -261,6 +288,33 @@ public class GridLiteJsInteropTests : GridLiteTestBase
             var update = ParseJsonArgument(invocation.Arguments[1]);
             Assert.Single(update.EnumerateObject());
             Assert.Equal(1, update.GetProperty("data").GetArrayLength());
+        });
+    }
+
+    [Fact]
+    public void InitialRender_WithoutData_SendsEmptyArray()
+    {
+        var cut = Render<IgbGridLite<TestItem>>();
+
+        cut.WaitForAssertion(() =>
+        {
+            var config = ParseJsonArgument(GridApi.VerifyInvoke($"{Api}.renderGrid").Arguments[2]);
+            Assert.Equal(JsonValueKind.Array, config.GetProperty("data").ValueKind);
+            Assert.Equal(0, config.GetProperty("data").GetArrayLength());
+        });
+    }
+
+    [Fact]
+    public void ResettingDataToNull_InvokesUpdateGrid_WithEmptyArray()
+    {
+        var cut = RenderGrid();
+
+        cut.Render(ps => ps.Add(x => x.Data, (IEnumerable<TestItem>?)null));
+
+        cut.WaitForAssertion(() =>
+        {
+            var update = ParseJsonArgument(GridApi.VerifyInvoke($"{Api}.updateGrid").Arguments[1]);
+            Assert.Equal(0, update.GetProperty("data").GetArrayLength());
         });
     }
 

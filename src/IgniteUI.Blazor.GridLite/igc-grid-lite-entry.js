@@ -155,7 +155,7 @@ window.blazor_igc_grid_lite = {
 
   getColumns(id) {
     const grid = this.grids.get(id);
-    return grid ? grid.columns : null;
+    return grid ? grid.columns : [];
   },
 
   navigateTo(id, row, field, activate) {

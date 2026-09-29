@@ -11,13 +11,13 @@ public class IgbGridLiteFilterExpression
     /// The target column for the filter operation.
     /// </summary>
     [JsonPropertyName("key")]
-    public string Key { get; set; }
+    public required string Key { get; set; }
 
     /// <summary>
     /// The filter condition to apply. Can be a condition name (string) or a FilterOperation // TODO
     /// </summary>
     [JsonPropertyName("condition")]
-    public object Condition { get; set; }
+    public required object Condition { get; set; }
 
     /// <summary>
     /// The filtering value used in the filter condition function.
@@ -25,7 +25,7 @@ public class IgbGridLiteFilterExpression
     /// </summary>
     [JsonPropertyName("searchTerm")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public object SearchTerm { get; set; }
+    public object? SearchTerm { get; set; }
 
     /// <summary>
     /// Dictates how this expression should resolve in the filter operation.
@@ -34,7 +34,7 @@ public class IgbGridLiteFilterExpression
     /// </summary>
     [JsonPropertyName("criteria")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string Criteria { get; set; } // "and" or "or"
+    public string? Criteria { get; set; } // "and" or "or"
 
     /// <summary>
     /// Whether the filter operation should be case sensitive.

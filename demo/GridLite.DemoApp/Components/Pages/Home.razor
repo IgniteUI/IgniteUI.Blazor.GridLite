@@ -31,15 +31,15 @@
 <button @onclick="ToggleUnitColumns">Toggle Unit columns</button>
 
 @code {
-    public IgbGridLite<NwindDataItem> grid;
+    public IgbGridLite<NwindDataItem>? grid;
 
     private IgbGridLiteSortingOptions sortingOptions = new IgbGridLiteSortingOptions()
     {
         Mode = GridLiteSortingMode.Multiple
     };
 
-    private List<IgbGridLiteSortingExpression> initialSort;
-    private List<IgbGridLiteFilterExpression> initialFilter;
+    private List<IgbGridLiteSortingExpression> initialSort = [];
+    private List<IgbGridLiteFilterExpression> initialFilter = [];
     private bool showUnitColumns = false;
 
     protected override void OnInitialized()
@@ -72,6 +72,9 @@
 
     public async Task BtnClick()
     {
+        if (grid is null)
+            return;
+
         await this.grid.SortAsync(new List<IgbGridLiteSortingExpression>
             {
                 new IgbGridLiteSortingExpression() { Key = nameof(NwindDataItem.ProductName), Direction = GridLiteSortingDirection.Descending }
@@ -119,7 +122,7 @@
         }
     }
 
-    private NwindData _nwindData = null;
+    private NwindData? _nwindData = null;
     public NwindData NwindData
     {
         get
