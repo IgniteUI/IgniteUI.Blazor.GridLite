@@ -192,24 +192,26 @@ Handle sorting and filtering events to persist user state, log analytics, or rea
 @code {
     private void HandleSorting(IgbGridLiteSortingEventArgs e)
     {
-        // Fires before the sort is applied. Set e.Cancel = true to prevent the sort.
+        // Raised as a sort starts in UI. A notification: can't cancel the sort,
+        // which may already be applied by the time this runs.
     }
 
     private void HandleSorted(IgbGridLiteSortedEventArgs e)
     {
         // Fires after the sort is applied. Persist current sort state to a user profile.
-        UserPreferences.LastGridSort = (e.Key, e.Direction);
+        UserPreferences.LastGridSort = (e.Expression.Key, e.Expression.Direction);
     }
 
     private void HandleFiltering(IgbGridLiteFilteringEventArgs e)
     {
-        // Fires before the filter is applied.
+        // Raised as a filter starts in UI. A notification: can't cancel the filter,
+        // which may already be applied by the time this runs.
     }
 
     private void HandleFiltered(IgbGridLiteFilteredEventArgs e)
     {
         // Fires after the filter is applied. Log the filter for analytics.
-        Analytics.Track("grid.filter.applied", new { e.Key, e.Condition, e.SearchTerm });
+        Analytics.Track("grid.filter.applied", new { e.Key, Conditions = e.State.Select(x => x.Condition) });
     }
 }
 ```
@@ -223,7 +225,7 @@ The `IgbGridLiteColumn` component supports the following properties:
 | `Field`                  | `string`                 | The model property to bind to. Use `nameof()` for compile-time safety. |
 | `Header`                 | `string`                 | Column header display text.                                            |
 | `Width`                  | `string`                 | Column width as a CSS value (e.g., `"100px"`, `"20%"`, `"auto"`).      |
-| `DataType`               | `GridLiteColumnDataType` | One of `String`, `Number`, `Boolean`, or `Date`.                       |
+| `DataType`               | `GridLiteColumnDataType` | One of `String`, `Number` or `Boolean`.                                |
 | `Hidden`                 | `bool`                   | Hides the column when `true`.                                          |
 | `Resizable`              | `bool`                   | Allows the user to resize the column.                                  |
 | `Sortable`               | `bool`                   | Enables sorting on the column.                                         |

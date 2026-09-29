@@ -11,10 +11,10 @@ public class IgbGridLiteSortingEventArgs
     /// The sort expression which will be used for the operation.
     /// </summary>
     [JsonPropertyName("expression")]
-    public required IgbGridLiteSortingExpression Expression { get; set; }
+    public required IgbGridLiteSortingExpression Expression { get; init; }
 
     /// <summary>
-    /// Set to true to cancel the operation.
+    /// Not used yet; see the cancellation TODO in igc-grid-lite-entry.js.
     /// </summary>
     [JsonPropertyName("cancel")]
     internal bool Cancel { get; set; }

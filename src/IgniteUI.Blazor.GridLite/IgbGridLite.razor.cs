@@ -32,15 +32,6 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     public RenderFragment? ChildContent { get; set; }
 
     /// <summary>
-    /// The options to customize the grid with
-    /// </summary>
-    /// <remarks>
-    /// Each instance of this component should have its own options object
-    /// </remarks>
-    //[Parameter]
-    internal IgbGridLiteOptions Options { get; set; } = new();
-
-    /// <summary>
     /// Whether the grid will try to "resolve" its column configuration based on the passed data source.
     /// This is usually executed on initial rendering in the DOM.
     /// </summary>
@@ -83,10 +74,6 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// Fires when sorting is initiated through the UI.
     /// Returns the sort expression which will be used for the operation.
     /// </summary>
-    /// <remarks>
-    /// The event is cancellable which prevents the operation from being applied.
-    /// The expression can be modified prior to the operation running.
-    /// </remarks>
     [Parameter]
     public EventCallback<IgbGridLiteSortingEventArgs> Sorting { get; set; }
 
@@ -100,10 +87,6 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// <summary>
     /// Fires when filtering is initiated through the UI.
     /// </summary>
-    /// <remarks>
-    /// The event is cancellable which prevents the operation from being applied.
-    /// The expression can be modified prior to the operation running.
-    /// </remarks>
     [Parameter]
     public EventCallback<IgbGridLiteFilteringEventArgs> Filtering { get; set; }
 
@@ -115,7 +98,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     public EventCallback<IgbGridLiteFilteredEventArgs> Filtered { get; set; }
 
     /// <summary>
-    /// Fires when <see cref="RenderAsync"/> completes
+    /// Fires once, when the grid has rendered on the client for the first time.
     /// </summary>
     [Parameter]
     public EventCallback Rendered { get; set; }
@@ -126,25 +109,20 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     private readonly string gridId = Guid.NewGuid().ToString("N");
     private bool isInitialized;
     private bool forceRender = true;
+    private bool renderedOnClient;
 
     /// <summary>
     /// The unique identifier for this grid instance
     /// </summary>
+    [Obsolete("The grid's internal id is not needed to use it. It will be removed in a future release.")]
     public string GridId => gridId;
-
-    /// <inheritdoc/>
-    protected override void OnInitialized()
-    {
-        Options ??= new IgbGridLiteOptions();
-        base.OnInitialized();
-    }
 
     /// <inheritdoc/>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && !isInitialized)
         {
-            blazorIgbGridLite = await JSLoader.LoadAsync(JSRuntime, Options?.JavascriptPath);
+            blazorIgbGridLite = await JSLoader.LoadAsync(JSRuntime);
             isInitialized = true;
             jsHandler = new JSHandler<TItem>(this);
         }
@@ -210,10 +188,10 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     }
 
     /// <summary>
-    /// The render() method is responsible for drawing the grid on the page.
-    /// It is the primary method that has to be called after configuring the options.
+    /// Re-renders the grid on the client with the current data and configuration.
     /// </summary>
-    public virtual async Task RenderAsync()
+    [Obsolete("The grid renders on its own and updates from its parameters; assign a new collection instead of changing one in place. It will be removed in a future release.")]
+    public async Task RenderAsync()
     {
         await RenderGridAsync();
     }
@@ -250,7 +228,11 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
 
         await InvokeVoidJsAsync("blazor_igc_grid_lite.renderGrid", jsHandler.ObjectReference, grid, json);
 
-        await Rendered.InvokeAsync();
+        if (!renderedOnClient)
+        {
+            renderedOnClient = true;
+            await Rendered.InvokeAsync();
+        }
     }
 
     private static GridLiteDataPayload CreateDataPayload(IEnumerable<TItem>? data)
@@ -262,7 +244,8 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// <summary>
     /// Refreshes the grid by re-rendering it with the current data and configuration.
     /// </summary>
-    public virtual async Task RefreshAsync()
+    [Obsolete("The grid renders on its own and updates from its parameters; assign a new collection instead of changing one in place. It will be removed in a future release.")]
+    public async Task RefreshAsync()
     {
         forceRender = true;
         await RenderGridAsync();
@@ -272,7 +255,8 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// Updates the data source for the grid.
     /// </summary>
     /// <param name="newData">The new data to display in the grid</param>
-    public virtual async Task UpdateDataAsync(IEnumerable<TItem> newData)
+    [Obsolete("Assign a new collection to the Data parameter instead. It will be removed in a future release.")]
+    public async Task UpdateDataAsync(IEnumerable<TItem> newData)
     {
         ArgumentNullException.ThrowIfNull(newData);
         Data = newData;
@@ -284,7 +268,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// Performs a sort operation in the grid based on the passed expression(s).
     /// </summary>
     /// <param name="expressions">The sort expression(s) to apply</param>
-    public virtual async Task SortAsync(IgbGridLiteSortingExpression expressions)
+    public async Task SortAsync(IgbGridLiteSortingExpression expressions)
     {
         ArgumentNullException.ThrowIfNull(expressions);
         var json = JsonSerializer.Serialize(expressions, GridLiteJsonContext.Default.IgbGridLiteSortingExpression);
@@ -295,10 +279,10 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// Performs a sort operation in the grid based on the passed expression(s).
     /// </summary>
     /// <param name="expressions">The sort expression(s) to apply</param>
-    public virtual async Task SortAsync(List<IgbGridLiteSortingExpression> expressions)
+    public async Task SortAsync(IEnumerable<IgbGridLiteSortingExpression> expressions)
     {
         ArgumentNullException.ThrowIfNull(expressions);
-        var json = JsonSerializer.Serialize(expressions, GridLiteJsonContext.Default.ListIgbGridLiteSortingExpression);
+        var json = JsonSerializer.Serialize(expressions, GridLiteJsonContext.Default.IEnumerableIgbGridLiteSortingExpression);
         await InvokeVoidJsAsync("blazor_igc_grid_lite.sort", gridId, json);
     }
 
@@ -307,7 +291,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// </summary>
     /// <param name="key">Optional column field. If provided, only clears sort for that column.
     /// If null, clears all sorting.</param>
-    public virtual async Task ClearSortAsync(string? key = null)
+    public async Task ClearSortAsync(string? key = null)
     {
         await InvokeVoidJsAsync("blazor_igc_grid_lite.clearSort", gridId, key);
     }
@@ -316,7 +300,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// Performs a filter operation in the grid based on the passed expression(s).
     /// </summary>
     /// <param name="expression">The filter expression to apply</param>
-    public virtual async Task FilterAsync(IgbGridLiteFilterExpression expression)
+    public async Task FilterAsync(IgbGridLiteFilterExpression expression)
     {
         ArgumentNullException.ThrowIfNull(expression);
         var json = JsonSerializer.Serialize(expression, GridLiteJsonContext.Default.IgbGridLiteFilterExpression);
@@ -327,10 +311,10 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// Performs a filter operation in the grid based on the passed expression(s).
     /// </summary>
     /// <param name="expressions">The filter expression(s) to apply</param>
-    public virtual async Task FilterAsync(List<IgbGridLiteFilterExpression> expressions)
+    public async Task FilterAsync(IEnumerable<IgbGridLiteFilterExpression> expressions)
     {
         ArgumentNullException.ThrowIfNull(expressions);
-        var json = JsonSerializer.Serialize(expressions, GridLiteJsonContext.Default.ListIgbGridLiteFilterExpression);
+        var json = JsonSerializer.Serialize(expressions, GridLiteJsonContext.Default.IEnumerableIgbGridLiteFilterExpression);
         await InvokeVoidJsAsync("blazor_igc_grid_lite.filter", gridId, json);
     }
 
@@ -339,7 +323,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// </summary>
     /// <param name="key">Optional column field. If provided, only clears filter for that column.
     /// If null, clears all filtering.</param>
-    public virtual async Task ClearFilterAsync(string? key = null)
+    public async Task ClearFilterAsync(string? key = null)
     {
         await InvokeVoidJsAsync("blazor_igc_grid_lite.clearFilter", gridId, key);
     }
@@ -362,7 +346,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// <param name="row">The row index to navigate to</param>
     /// <param name="field">The column field to navigate to, if any</param>
     /// <param name="activate">Optionally also activate the navigated cell</param>
-    public virtual async Task NavigateToAsync(long row, string? field = null, bool activate = false)
+    public async Task NavigateToAsync(long row, string? field = null, bool activate = false)
     {
         await InvokeVoidJsAsync("blazor_igc_grid_lite.navigateTo", gridId, row, field, activate);
     }
@@ -410,7 +394,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     }
 
     /// <inheritdoc/>
-    public virtual void Dispose()
+    public void Dispose()
     {
         GC.SuppressFinalize(this);
 
