@@ -1,7 +1,5 @@
 # Build outputs
-wwwroot/js/blazor-igc-grid-lite.js
-wwwroot/js/blazor-igc-grid-lite.js.map
-wwwroot/css/themes/
+wwwroot/
 
 # Written by the npm build (vite build.license), packed with the library
 THIRD-PARTY-LICENSES.md
