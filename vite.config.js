@@ -1,9 +1,10 @@
 ﻿import { defineConfig } from 'vite';
 import { resolve } from 'path';
-import { copyFileSync, mkdirSync, existsSync, renameSync } from 'fs';
+import { copyFileSync, mkdirSync, existsSync, renameSync, rmSync, writeFileSync } from 'fs';
 
 const projectDir = './src/IgniteUI.Blazor.GridLite';
 const outDir = `${projectDir}/wwwroot/js`;
+const emptyOutDir = true;
 const licenseManifest = 'THIRD-PARTY-LICENSES.md';
 
 export default defineConfig(({ mode }) => {
@@ -16,7 +17,7 @@ export default defineConfig(({ mode }) => {
         formats: ['es'],
       },
       outDir,
-      emptyOutDir: true,
+      emptyOutDir,
       // One manifest of every bundled dependency's license, packed with the library (see the csproj).
       license: { fileName: licenseManifest },
       rolldownOptions: {
@@ -45,7 +46,13 @@ export default defineConfig(({ mode }) => {
         name: 'copy-igniteui-themes',
         writeBundle() {
           const themesSourceDir = resolve(import.meta.dirname, 'node_modules/igniteui-webcomponents/themes');
-          const themesDestDir = resolve(import.meta.dirname, './src/IgniteUI.Blazor.GridLite/wwwroot/css/themes');
+          const themesDestDir = resolve(import.meta.dirname, './src/IgniteUI.Blazor.GridLite/wwwroot/themes');
+          // The previous theme location: stubs that @import the themes, so links to the deprecated path keep working.
+          const legacyThemesDestDir = resolve(import.meta.dirname, './src/IgniteUI.Blazor.GridLite/wwwroot/css/themes');
+          if (emptyOutDir) {
+            rmSync(themesDestDir, { recursive: true, force: true });
+            rmSync(legacyThemesDestDir, { recursive: true, force: true });
+          }
 
           // Create destination directory structure
           const variants = ['light', 'dark'];
@@ -66,13 +73,22 @@ export default defineConfig(({ mode }) => {
               if (existsSync(sourceFile)) {
                 copyFileSync(sourceFile, destFile);
                 console.log(`✓ Copied ${variant}/${theme}.css`);
+
+                // Relative, so it resolves under any <base href> and from the stub's fingerprinted URL alike.
+                const legacyDir = resolve(legacyThemesDestDir, variant);
+                mkdirSync(legacyDir, { recursive: true });
+                writeFileSync(
+                  resolve(legacyDir, `${theme}.css`),
+                  `/* Deprecated: use _content/IgniteUI.Blazor.GridLite/themes/${variant}/${theme}.css instead. */\n` +
+                    `@import url("../../../themes/${variant}/${theme}.css");\n`,
+                );
               } else {
                 console.warn(`⚠ Theme file not found: ${sourceFile}`);
               }
             });
           });
 
-          console.log('✓ All theme files copied to wwwroot/css/themes');
+          console.log('✓ All theme files copied to wwwroot/themes, with deprecated stubs in wwwroot/css/themes');
         },
       },
     ],

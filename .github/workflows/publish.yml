@@ -103,8 +103,7 @@ jobs:
           path: |
             src/IgniteUI.Blazor.GridLite/bin/**
             src/IgniteUI.Blazor.GridLite/obj/**
-            src/IgniteUI.Blazor.GridLite/wwwroot/js/**
-            src/IgniteUI.Blazor.GridLite/wwwroot/css/themes/**
+            src/IgniteUI.Blazor.GridLite/wwwroot/**
             src/IgniteUI.Blazor.GridLite/THIRD-PARTY-LICENSES.md
           include-hidden-files: true
           retention-days: 1
@@ -172,8 +171,7 @@ jobs:
           path: |
             src/IgniteUI.Blazor.GridLite/bin/**
             src/IgniteUI.Blazor.GridLite/obj/**
-            src/IgniteUI.Blazor.GridLite/wwwroot/js/**
-            src/IgniteUI.Blazor.GridLite/wwwroot/css/themes/**
+            src/IgniteUI.Blazor.GridLite/wwwroot/**
             src/IgniteUI.Blazor.GridLite/THIRD-PARTY-LICENSES.md
           include-hidden-files: true
           retention-days: 1

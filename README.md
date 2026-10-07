@@ -55,7 +55,7 @@ dotnet add package IgniteUI.Blazor.GridLite
 
 ```razor
 <head>
-       <link href="_content/IgniteUI.Blazor.GridLite/css/themes/light/bootstrap.css" rel="stylesheet" />
+       <link href="_content/IgniteUI.Blazor.GridLite/themes/light/bootstrap.css" rel="stylesheet" />
 </head>
 ```
 
@@ -82,15 +82,15 @@ Add one theme to your `App.razor`, `_Layout.cshtml`, or main layout file. Each t
 ```html
 <!-- Light themes -->
 
-<link href="_content/IgniteUI.Blazor.GridLite/css/themes/light/material.css" rel="stylesheet" />
+<link href="_content/IgniteUI.Blazor.GridLite/themes/light/material.css" rel="stylesheet" />
 
 <!-- Or one of: -->
-<link href="_content/IgniteUI.Blazor.GridLite/css/themes/light/bootstrap.css" rel="stylesheet" />
-<link href="_content/IgniteUI.Blazor.GridLite/css/themes/light/fluent.css" rel="stylesheet" />
+<link href="_content/IgniteUI.Blazor.GridLite/themes/light/bootstrap.css" rel="stylesheet" />
+<link href="_content/IgniteUI.Blazor.GridLite/themes/light/fluent.css" rel="stylesheet" />
 
-<link href="_content/IgniteUI.Blazor.GridLite/css/themes/light/indigo.css" rel="stylesheet" />
+<link href="_content/IgniteUI.Blazor.GridLite/themes/light/indigo.css" rel="stylesheet" />
 
-<!-- Dark variants are available under css/themes/dark/ with the same names -->
+<!-- Dark variants are available under themes/dark/ with the same names -->
 ```
 
 ### JavaScript Module

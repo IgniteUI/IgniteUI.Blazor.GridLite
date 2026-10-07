@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- **DEPRECATED**: The bundled theme stylesheets moved from
+  ```text
+  _content/IgniteUI.Blazor.GridLite/css/themes/
+  ```
+  to
+  ```text
+  _content/IgniteUI.Blazor.GridLite/themes/
+  ```
+  matching the layout the `IgniteUI.Blazor` and `IgniteUI.Blazor.Lite` packages use. The old paths still work, through a stylesheet that imports the theme from its new location, and will be removed in a future release.
+
 ## 0.10.0 - 2026-09-29
 
 This release updates to `igniteui-grid-lite` version `0.11.0` ([see changelog](https://github.com/IgniteUI/igniteui-grid-lite/blob/master/CHANGELOG.md)), which includes 0.10.0. Its changes are marked "grid-lite" below.
