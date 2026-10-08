@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING**: Renamed `IgbColumnConfiguration` → `IgbGridLiteColumnConfiguration`, the only public type without `GridLite` in its name.
 - **BREAKING**: `GetColumnsAsync` returns `Task<IgbGridLiteColumnConfiguration[]>` instead of a `ValueTask`, like the grid's other methods.
 - **BREAKING**: The single-expression overload of `SortAsync` names its parameter `expression` instead of `expressions`. Only calls that name the argument are affected.
+- **BREAKING**: `NavigateToAsync` takes its `row` index as an `int` instead of a `long`, like collection indexers and other grids' row-index APIs. Calls passing a `long` need a cast.
 
 ## 0.10.0 - 2026-09-29
 

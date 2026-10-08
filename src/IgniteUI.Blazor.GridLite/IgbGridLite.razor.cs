@@ -377,7 +377,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// <param name="row">The row index to navigate to</param>
     /// <param name="field">The column field to navigate to, if any</param>
     /// <param name="activate">Optionally also activate the navigated cell</param>
-    public async Task NavigateToAsync(long row, string? field = null, bool activate = false)
+    public async Task NavigateToAsync(int row, string? field = null, bool activate = false)
     {
         await InvokeGridAsync("blazor_igc_grid_lite.navigateTo", gridId, row, field, activate);
     }

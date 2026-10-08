@@ -398,7 +398,7 @@ public class GridLiteJsInteropTests : GridLiteTestBase
 
         var invocation = GridApi.VerifyInvoke($"{Api}.navigateTo");
         Assert.Equal(cut.Find("igc-grid-lite").GetAttribute("id"), invocation.Arguments[0]);
-        Assert.Equal(5L, invocation.Arguments[1]);
+        Assert.Equal(5, invocation.Arguments[1]);
         Assert.Equal("Price", invocation.Arguments[2]);
         Assert.True(Assert.IsType<bool>(invocation.Arguments[3]));
     }
