@@ -89,7 +89,7 @@
         {
             cols = [
                 .. cols,
-                new IgbColumnConfiguration {
+                new IgbGridLiteColumnConfiguration {
                     Field = nameof(NwindDataItem.QuantityPerUnit),
                     Header="Quantity Per Unit",
                     DataType = GridLiteColumnDataType.String,
@@ -97,7 +97,7 @@
                     Filterable = true,
                     Resizable = true
                 },
-                new IgbColumnConfiguration {
+                new IgbGridLiteColumnConfiguration {
                     Field = nameof(NwindDataItem.UnitPrice),
                     Header="Unit Price",
                     DataType = GridLiteColumnDataType.Number,
@@ -155,8 +155,8 @@
 
     }
 
-    public List<IgbColumnConfiguration> cols = new List<IgbColumnConfiguration> {
-        new IgbColumnConfiguration {
+    public List<IgbGridLiteColumnConfiguration> cols = new List<IgbGridLiteColumnConfiguration> {
+        new IgbGridLiteColumnConfiguration {
             Field = nameof(NwindDataItem.ProductID),
             Header="Product ID",
             DataType = GridLiteColumnDataType.Number,
@@ -165,7 +165,7 @@
             Filterable = true,
             Resizable = false
         },
-        new IgbColumnConfiguration {
+        new IgbGridLiteColumnConfiguration {
             Field = nameof(NwindDataItem.ProductName),
             Header="Product Name",
             DataType = GridLiteColumnDataType.String,

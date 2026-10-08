@@ -22,6 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING**: In the `Filtering` and `Filtered` events, `IgbGridLiteFilterExpression.SearchTerm` holds a `string`, `double` or `bool` instead of a `JsonElement`. Numbers are always `double`, as JavaScript has one number type, so a search term set as an `int` comes back as a `double`.
 - **BREAKING**: `IgbGridLiteFilterExpression.Criteria` is a `GridLiteFilterCriteria?` (`And`, `Or`) instead of a `string?`, and `IgbGridLiteFilteringEventArgs.Type` is a `GridLiteFilteringType` (`Add`, `Modify`, `Remove`) instead of a `string`.
 - **BREAKING**: `IgbGridLiteFilteringEventArgs.Expressions` and `IgbGridLiteFilteredEventArgs.State` are `IReadOnlyList<IgbGridLiteFilterExpression>` instead of `List<IgbGridLiteFilterExpression>`.
+- **BREAKING**: Renamed `IgbColumnConfiguration` → `IgbGridLiteColumnConfiguration`, the only public type without `GridLite` in its name.
+- **BREAKING**: `GetColumnsAsync` returns `Task<IgbGridLiteColumnConfiguration[]>` instead of a `ValueTask`, like the grid's other methods.
+- **BREAKING**: The single-expression overload of `SortAsync` names its parameter `expression` instead of `expressions`. Only calls that name the argument are affected.
+- **BREAKING**: `NavigateToAsync` takes its `row` index as an `int` instead of a `long`, like collection indexers and other grids' row-index APIs. Calls passing a `long` need a cast.
 
 ## 0.10.0 - 2026-09-29
 

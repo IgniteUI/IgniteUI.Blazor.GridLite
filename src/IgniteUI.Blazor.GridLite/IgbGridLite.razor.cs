@@ -293,11 +293,11 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// <summary>
     /// Performs a sort operation in the grid based on the passed expression(s).
     /// </summary>
-    /// <param name="expressions">The sort expression(s) to apply</param>
-    public async Task SortAsync(IgbGridLiteSortingExpression expressions)
+    /// <param name="expression">The sort expression to apply</param>
+    public async Task SortAsync(IgbGridLiteSortingExpression expression)
     {
-        ArgumentNullException.ThrowIfNull(expressions);
-        var json = JsonSerializer.Serialize(expressions, GridLiteJsonContext.Default.IgbGridLiteSortingExpression);
+        ArgumentNullException.ThrowIfNull(expression);
+        var json = JsonSerializer.Serialize(expression, GridLiteJsonContext.Default.IgbGridLiteSortingExpression);
         await InvokeGridAsync("blazor_igc_grid_lite.sort", gridId, json);
     }
 
@@ -358,7 +358,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// Returns the current column configuration list.
     /// </summary>
     /// <returns>The column configurations</returns>
-    public async ValueTask<IgbColumnConfiguration[]> GetColumnsAsync()
+    public async Task<IgbGridLiteColumnConfiguration[]> GetColumnsAsync()
     {
         if (!await clientRender.Task)
         {
@@ -367,7 +367,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
 
         var columns = await InvokeJsAsync("blazor_igc_grid_lite.getColumns", gridId);
         return columns is { ValueKind: JsonValueKind.Array } array
-            ? array.Deserialize(GridLiteJsonContext.Default.IgbColumnConfigurationArray) ?? []
+            ? array.Deserialize(GridLiteJsonContext.Default.IgbGridLiteColumnConfigurationArray) ?? []
             : [];
     }
 
@@ -377,7 +377,7 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     /// <param name="row">The row index to navigate to</param>
     /// <param name="field">The column field to navigate to, if any</param>
     /// <param name="activate">Optionally also activate the navigated cell</param>
-    public async Task NavigateToAsync(long row, string? field = null, bool activate = false)
+    public async Task NavigateToAsync(int row, string? field = null, bool activate = false)
     {
         await InvokeGridAsync("blazor_igc_grid_lite.navigateTo", gridId, row, field, activate);
     }

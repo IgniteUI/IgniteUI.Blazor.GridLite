@@ -16,7 +16,7 @@ namespace IgniteUI.Blazor.Controls.Internal;
 [JsonSerializable(typeof(IEnumerable<IgbGridLiteSortingExpression>))]
 [JsonSerializable(typeof(IgbGridLiteFilterExpression))]
 [JsonSerializable(typeof(IEnumerable<IgbGridLiteFilterExpression>))]
-[JsonSerializable(typeof(IgbColumnConfiguration[]))]
+[JsonSerializable(typeof(IgbGridLiteColumnConfiguration[]))]
 [JsonSerializable(typeof(IgbGridLiteFilteringEventArgs))]
 [JsonSerializable(typeof(IgbGridLiteFilteredEventArgs))]
 internal partial class GridLiteJsonContext : JsonSerializerContext

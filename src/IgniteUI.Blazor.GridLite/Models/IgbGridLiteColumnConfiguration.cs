@@ -6,7 +6,7 @@ namespace IgniteUI.Blazor.Controls;
 /// <summary>
 /// A column's configuration as the grid reports it, returned by <see cref="IgbGridLite{TItem}.GetColumnsAsync"/>.
 /// </summary>
-public class IgbColumnConfiguration
+public class IgbGridLiteColumnConfiguration
 {
     /// <summary>
     /// The field from the data that the column references.
