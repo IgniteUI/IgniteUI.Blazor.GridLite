@@ -113,12 +113,6 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     // True once the grid has rendered on the client; false if the first render fails or disposal comes first.
     private readonly TaskCompletionSource<bool> clientRender = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-    /// <summary>
-    /// The unique identifier for this grid instance
-    /// </summary>
-    [Obsolete("The grid's internal id is not needed to use it. It will be removed in a future release.")]
-    public string GridId => gridId;
-
     /// <inheritdoc/>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -208,15 +202,6 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
         }
     }
 
-    /// <summary>
-    /// Re-renders the grid on the client with the current data and configuration.
-    /// </summary>
-    [Obsolete("The grid renders on its own and updates from its parameters; assign a new collection instead of changing one in place. It will be removed in a future release.")]
-    public async Task RenderAsync()
-    {
-        await RenderGridAsync();
-    }
-
     private async Task RenderGridAsync()
     {
         if (jsHandler is null)
@@ -266,28 +251,6 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
     {
         // The web component spreads `data`, so it cannot take null; a null parameter means "no rows".
         return new GridLiteDataPayload(data ?? Array.Empty<TItem>(), AppValueSerializer.GetDataTypeInfo<TItem>());
-    }
-
-    /// <summary>
-    /// Refreshes the grid by re-rendering it with the current data and configuration.
-    /// </summary>
-    [Obsolete("The grid renders on its own and updates from its parameters; assign a new collection instead of changing one in place. It will be removed in a future release.")]
-    public async Task RefreshAsync()
-    {
-        await RenderGridAsync();
-    }
-
-    /// <summary>
-    /// Updates the data source for the grid.
-    /// </summary>
-    /// <param name="newData">The new data to display in the grid</param>
-    [Obsolete("Assign a new collection to the Data parameter instead. It will be removed in a future release.")]
-    public async Task UpdateDataAsync(IEnumerable<TItem> newData)
-    {
-        ArgumentNullException.ThrowIfNull(newData);
-        Data = newData;
-        var json = JsonSerializer.Serialize(newData, AppValueSerializer.GetDataTypeInfo<TItem>());
-        await InvokeVoidJsAsync("blazor_igc_grid_lite.updateData", gridId, json);
     }
 
     /// <summary>

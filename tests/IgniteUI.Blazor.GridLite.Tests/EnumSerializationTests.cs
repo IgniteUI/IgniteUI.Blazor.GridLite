@@ -26,9 +26,6 @@ public class EnumSerializationTests
     [InlineData(GridLiteColumnDataType.String, "string")]
     [InlineData(GridLiteColumnDataType.Number, "number")]
     [InlineData(GridLiteColumnDataType.Boolean, "boolean")]
-#pragma warning disable CS0618 // Deprecated but still shipped: its wire value has to hold until it is removed.
-    [InlineData(GridLiteColumnDataType.Date, "date")]
-#pragma warning restore CS0618
     public void ColumnDataType_SerializesToCamelCase(GridLiteColumnDataType value, string expected)
     {
         Assert.Equal($"\"{expected}\"", JsonSerializer.Serialize(value));

@@ -92,11 +92,4 @@ public enum GridLiteColumnDataType
 
     /// <summary><see langword="true"/>/<see langword="false"/> values.</summary>
     Boolean,
-
-    /// <summary>
-    /// The grid-lite web component has no date data type; this value behaves like <see cref="String"/>.
-    /// It will be removed in a future release.
-    /// </summary>
-    [Obsolete("The grid-lite web component has no date data type; this value behaves like String. It will be removed in a future release.")]
-    Date
 }

@@ -18,27 +18,6 @@ public class GridLiteTests : BlazorPageTest<Program>
         await Expect(grid.GetByText("Chai", new() { Exact = true })).ToBeVisibleAsync();
     }
 
-    // Without it, each re-render adds another set of listeners and every event reaches .NET once more.
-    [Test]
-    public async Task Refresh_DoesNotDuplicateEventCallbacks()
-    {
-        await Page.GotoAsync(Host.ServerAddress);
-        var grid = Page.Locator("igc-grid-lite");
-        await Expect(grid.GetByText("Chai", new() { Exact = true })).ToBeVisibleAsync();
-
-        await Page.Locator("#refresh-button").ClickAsync();
-        await Expect(Page.Locator("#refresh-count")).ToHaveTextAsync("1");
-
-        // grid-lite sorts from the header's sort action, not from its title.
-        await grid.Locator("igc-grid-lite-header", new() { HasText = "Product Name" }).Locator("[part~='action']").ClickAsync();
-        await Expect(Page.Locator("#sorted-count")).ToHaveTextAsync("1");
-
-        // The circuit handles this click after any duplicate callback the sort click sent before it.
-        await Page.Locator("#refresh-button").ClickAsync();
-        await Expect(Page.Locator("#refresh-count")).ToHaveTextAsync("2");
-        await Expect(Page.Locator("#sorted-count")).ToHaveTextAsync("1");
-    }
-
     // TODO: grid-lite 0.11.0's client mapping a condition object to its name, remove after it's updated.
     [Test]
     public async Task FilteringEvent_WithConditionObject_ReachesDotNetAsItsName()
