@@ -46,8 +46,8 @@ internal static class AppValueSerializer
 /// </summary>
 internal sealed class FilterValueConverter : JsonConverter<object>
 {
-    // JSON has one number type OOB, so every number reads as a double. An array or object can only be a value
-    // the app set itself; it stays a JsonElement.
+    // A JSON number doesn't record whether it was an integer, so every number reads as a double. An array or object
+    // can only be a value the app set itself; it stays a JsonElement.
     public override object Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         => reader.TokenType switch
         {

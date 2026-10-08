@@ -48,9 +48,10 @@ public class IgbGridLiteFilterExpression
     /// Optional for unary conditions.
     /// </summary>
     /// <remarks>
-    /// Typically matches the <see cref="IgbGridLiteColumn.DataType"/> holding a <see cref="string"/>,
-    /// a <see cref="double"/> (any number, including one set as an <see cref="int"/>) or a <see cref="bool"/>;
-    /// falls back to <see cref="System.Text.Json.JsonElement"/> for other unrecognized/app-provided types.
+    /// Typically matches the <see cref="IgbGridLiteColumn.DataType"/> holding a <see cref="string"/> or
+    /// a <see cref="double"/> (any number, including one set as an <see cref="int"/>). While boolean conditions
+    /// are unary, a <see cref="bool"/> is preserved as well.
+    /// Falls back to <see cref="System.Text.Json.JsonElement"/> for other app-provided values.
     /// </remarks>
     [JsonPropertyName("searchTerm")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
