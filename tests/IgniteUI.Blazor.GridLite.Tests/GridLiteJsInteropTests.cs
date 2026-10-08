@@ -428,7 +428,7 @@ public class GridLiteJsInteropTests : GridLiteTestBase
     {
         var cut = RenderGrid();
 
-        var columns = await cut.InvokeAsync(() => cut.Instance.GetColumnsAsync().AsTask());
+        var columns = await cut.InvokeAsync(() => cut.Instance.GetColumnsAsync());
 
         Assert.Empty(columns);
     }
@@ -439,12 +439,12 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         var cut = RenderGrid();
         var expected = new[]
         {
-            new IgbColumnConfiguration { Field = "Name", Sortable = true },
-            new IgbColumnConfiguration { Field = "Price", DataType = GridLiteColumnDataType.Number },
+            new IgbGridLiteColumnConfiguration { Field = "Name", Sortable = true },
+            new IgbGridLiteColumnConfiguration { Field = "Price", DataType = GridLiteColumnDataType.Number },
         };
         GridApi.Setup<JsonElement>($"{Api}.getColumns", _ => true).SetResult(JsonSerializer.SerializeToElement(expected));
 
-        var columns = await cut.InvokeAsync(() => cut.Instance.GetColumnsAsync().AsTask());
+        var columns = await cut.InvokeAsync(() => cut.Instance.GetColumnsAsync());
 
         var invocation = GridApi.VerifyInvoke($"{Api}.getColumns");
         Assert.Equal(cut.Find("igc-grid-lite").GetAttribute("id"), invocation.Arguments[0]);

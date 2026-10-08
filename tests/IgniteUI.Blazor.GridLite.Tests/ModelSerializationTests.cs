@@ -169,13 +169,13 @@ public class ModelSerializationTests
     [Fact]
     public void ColumnConfiguration_SerializesWithCamelCaseKeys_OmittingDefaults()
     {
-        var json = SerializeToElement(new IgbColumnConfiguration
+        var json = SerializeToElement(new IgbGridLiteColumnConfiguration
         {
             Field = "Price",
             DataType = GridLiteColumnDataType.Number,
             Header = "Unit Price",
             Sortable = true,
-        }, Context.IgbColumnConfiguration);
+        }, Context.IgbGridLiteColumnConfiguration);
 
         Assert.Equal("Price", json.GetProperty("field").GetString());
         Assert.Equal("number", json.GetProperty("dataType").GetString());
@@ -198,7 +198,7 @@ public class ModelSerializationTests
              "filterable":true,"filteringCaseSensitive":false}
             """;
 
-        var column = JsonSerializer.Deserialize(payload, Context.IgbColumnConfiguration);
+        var column = JsonSerializer.Deserialize(payload, Context.IgbGridLiteColumnConfiguration);
 
         Assert.NotNull(column);
         Assert.Equal("ProductName", column.Field);
