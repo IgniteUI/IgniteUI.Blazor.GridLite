@@ -367,7 +367,7 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         await cut.InvokeAsync(() => cut.Instance.FilterAsync(
         [
             new IgbGridLiteFilterExpression { Key = "Name", Condition = "contains", SearchTerm = "a" },
-            new IgbGridLiteFilterExpression { Key = "Name", Condition = "contains", SearchTerm = "b", Criteria = "or" },
+            new IgbGridLiteFilterExpression { Key = "Name", Condition = "contains", SearchTerm = "b", Criteria = GridLiteFilterCriteria.Or },
         ]));
 
         var expressions = ParseJsonArgument(GridApi.VerifyInvoke($"{Api}.filter").Arguments[1]);

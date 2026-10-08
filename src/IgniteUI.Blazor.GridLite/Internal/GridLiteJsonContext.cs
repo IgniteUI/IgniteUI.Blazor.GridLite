@@ -5,7 +5,7 @@ namespace IgniteUI.Blazor.Controls.Internal;
 /// <summary>
 /// Source-generated serializer metadata for every payload the library owns. The app-owned values inside
 /// them go through <see cref="AppValueSerializer"/>: <c>Data</c> through <see cref="GridLiteDataPayload"/>,
-/// the object-typed filter values through <see cref="FilterValueConverter"/>.
+/// the filter expressions' <c>SearchTerm</c> through <see cref="FilterValueConverter"/>.
 /// </summary>
 [JsonSourceGenerationOptions(
     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,

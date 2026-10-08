@@ -58,21 +58,21 @@ public class ModelSerializationTests
     }
 
     [Fact]
-    public void FilterExpression_SerializesWithCamelCaseKeys()
+    public void FilterExpression_SerializesWithCamelCaseKeys_AndPlainStringConditionAndCriteria()
     {
         var json = SerializeToElement(new IgbGridLiteFilterExpression
         {
             Key = "ProductName",
             Condition = "contains",
             SearchTerm = "Cha",
-            Criteria = "and",
+            Criteria = GridLiteFilterCriteria.Or,
             CaseSensitive = false,
         }, Context.IgbGridLiteFilterExpression);
 
         Assert.Equal("ProductName", json.GetProperty("key").GetString());
-        Assert.Equal("contains", json.GetProperty("condition").GetString());
+        Assert.Equal("\"contains\"", json.GetProperty("condition").GetRawText());
         Assert.Equal("Cha", json.GetProperty("searchTerm").GetString());
-        Assert.Equal("and", json.GetProperty("criteria").GetString());
+        Assert.Equal("\"or\"", json.GetProperty("criteria").GetRawText());
         Assert.False(json.GetProperty("caseSensitive").GetBoolean());
     }
 
@@ -91,17 +91,69 @@ public class ModelSerializationTests
         Assert.False(json.TryGetProperty("caseSensitive", out _));
     }
 
-    // The filtering events hand these back to app code, which reads them as JsonElement.
-    [Fact]
-    public void FilterExpression_ReadsObjectValuesFromJsPayload_AsJsonElement()
+    [Theory]
+    [InlineData("\"Ch\"", "Ch")]
+    [InlineData("10", 10.0)]
+    [InlineData("10.5", 10.5)]
+    [InlineData("true", true)]
+    [InlineData("false", false)]
+    public void FilterExpression_ReadsSearchTermFromJsPayload_AsPrimitive(string searchTerm, object expected)
     {
-        const string payload = """{"key":"Price","condition":"greaterThan","searchTerm":10}""";
+        var payload = $$"""{"key":"Price","condition":"greaterThan","searchTerm":{{searchTerm}}}""";
 
         var expression = JsonSerializer.Deserialize(payload, Context.IgbGridLiteFilterExpression);
 
         Assert.NotNull(expression);
-        Assert.Equal("greaterThan", Assert.IsType<JsonElement>(expression.Condition).GetString());
-        Assert.Equal(10, Assert.IsType<JsonElement>(expression.SearchTerm).GetInt32());
+        Assert.Equal("greaterThan", expression.Condition);
+        Assert.Equal(expected, expression.SearchTerm);
+        Assert.IsType(expected.GetType(), expression.SearchTerm);
+    }
+
+    [Fact]
+    public void FilterExpression_ReadsNullOrStructuredSearchTerm()
+    {
+        var withNull = JsonSerializer.Deserialize("""{"key":"Name","condition":"empty","searchTerm":null}""", Context.IgbGridLiteFilterExpression);
+        var withArray = JsonSerializer.Deserialize("""{"key":"Price","condition":"equals","searchTerm":[1,2]}""", Context.IgbGridLiteFilterExpression);
+
+        Assert.Null(withNull!.SearchTerm);
+        Assert.Equal(JsonValueKind.Array, Assert.IsType<JsonElement>(withArray!.SearchTerm).ValueKind);
+    }
+
+    [Theory]
+    [InlineData("add", GridLiteFilteringType.Add)]
+    [InlineData("modify", GridLiteFilteringType.Modify)]
+    [InlineData("remove", GridLiteFilteringType.Remove)]
+    public void FilteringEventArgs_DeserializeFromJsPayload(string type, GridLiteFilteringType expected)
+    {
+        var payload = $$"""
+            {"key":"Name","type":"{{type}}","expressions":[
+              {"key":"Name","condition":"contains","searchTerm":"a"},
+              {"key":"Name","condition":"startsWith","searchTerm":"b","criteria":"or"}]}
+            """;
+
+        var args = JsonSerializer.Deserialize(payload, Context.IgbGridLiteFilteringEventArgs);
+
+        Assert.NotNull(args);
+        Assert.Equal(expected, args.Type);
+        Assert.Equal(2, args.Expressions.Count);
+        Assert.Null(args.Expressions[0].Criteria);
+        Assert.Equal("startsWith", args.Expressions[1].Condition);
+        Assert.Equal(GridLiteFilterCriteria.Or, args.Expressions[1].Criteria);
+    }
+
+    [Fact]
+    public void FilteredEventArgs_DeserializeFromJsPayload()
+    {
+        const string payload = """
+            {"key":"Name","state":[{"key":"Name","condition":"contains","searchTerm":"a","criteria":"and"}]}
+            """;
+
+        var args = JsonSerializer.Deserialize(payload, Context.IgbGridLiteFilteredEventArgs);
+
+        Assert.NotNull(args);
+        var expression = Assert.Single(args.State);
+        Assert.Equal("contains", expression.Condition);
+        Assert.Equal(GridLiteFilterCriteria.And, expression.Criteria);
     }
 
     [Theory]

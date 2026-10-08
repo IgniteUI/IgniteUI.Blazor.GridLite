@@ -44,12 +44,35 @@ public class EnumSerializationTests
         Assert.Equal(value, JsonSerializer.Deserialize<GridLiteSortingMode>($"\"{expected}\""));
     }
 
+    // Without the converter, the criteria reach grid-lite as numbers, which it does not read as 'and' / 'or'.
+    [Theory]
+    [InlineData(GridLiteFilterCriteria.And, "and")]
+    [InlineData(GridLiteFilterCriteria.Or, "or")]
+    public void FilterCriteria_SerializesToCamelCase(GridLiteFilterCriteria value, string expected)
+    {
+        Assert.Equal($"\"{expected}\"", JsonSerializer.Serialize(value));
+        Assert.Equal(value, JsonSerializer.Deserialize<GridLiteFilterCriteria>($"\"{expected}\""));
+    }
+
+    // Without the converter, grid-lite's 'add' / 'modify' / 'remove' fail to deserialize and Filtering never runs.
+    [Theory]
+    [InlineData(GridLiteFilteringType.Add, "add")]
+    [InlineData(GridLiteFilteringType.Modify, "modify")]
+    [InlineData(GridLiteFilteringType.Remove, "remove")]
+    public void FilteringType_SerializesToCamelCase(GridLiteFilteringType value, string expected)
+    {
+        Assert.Equal($"\"{expected}\"", JsonSerializer.Serialize(value));
+        Assert.Equal(value, JsonSerializer.Deserialize<GridLiteFilteringType>($"\"{expected}\""));
+    }
+
     [Fact]
     public void Enums_RejectIntegerValues()
     {
         Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GridLiteSortingDirection>("0"));
         Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GridLiteColumnDataType>("1"));
         Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GridLiteSortingMode>("0"));
+        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GridLiteFilterCriteria>("1"));
+        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GridLiteFilteringType>("0"));
     }
 
     [Fact]

@@ -39,6 +39,30 @@ public class GridLiteTests : BlazorPageTest<Program>
         await Expect(Page.Locator("#sorted-count")).ToHaveTextAsync("1");
     }
 
+    // TODO: grid-lite 0.11.0's client mapping a condition object to its name, remove after it's updated.
+    [Test]
+    public async Task FilteringEvent_WithConditionObject_ReachesDotNetAsItsName()
+    {
+        await Page.GotoAsync(Host.ServerAddress);
+        var grid = Page.Locator("igc-grid-lite");
+        await Expect(grid.GetByText("Chai", new() { Exact = true })).ToBeVisibleAsync();
+
+        await grid.EvaluateAsync(
+            @"grid => grid.dispatchEvent(new CustomEvent('filtering', {
+                  detail: {
+                      key: 'ProductName',
+                      expressions: [{
+                          key: 'ProductName',
+                          condition: { name: 'contains', label: 'Contains', unary: false },
+                          searchTerm: 'Ch'
+                      }],
+                      type: 'add'
+                  }
+              }))");
+
+        await Expect(Page.Locator("#last-filtering")).ToHaveTextAsync("Add contains");
+    }
+
     // Without it, a callback bound after the first render has no listener on the client and never fires.
     [Test]
     public async Task CallbackBoundAfterRender_Fires()
