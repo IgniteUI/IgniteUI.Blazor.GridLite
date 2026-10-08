@@ -93,47 +93,6 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         cut.WaitForAssertion(() => Assert.Equal(1, renderedCount));
     }
 
-#pragma warning disable CS0618 // Deprecated but still shipped, so its behavior has to hold until it is removed.
-    // Without it, a re-render would signal readiness again to handlers that expect it once.
-    [Fact]
-    public async Task RefreshAsync_DoesNotFireRenderedAgain()
-    {
-        var renderedCount = 0;
-        var cut = RenderGrid(ps => ps.Add(x => x.Rendered, () => renderedCount++));
-        cut.WaitForAssertion(() => Assert.Equal(1, renderedCount));
-
-        await cut.InvokeAsync(() => cut.Instance.RefreshAsync());
-
-        GridApi.VerifyInvoke($"{Api}.renderGrid", calledTimes: 2);
-        Assert.Equal(1, renderedCount);
-    }
-
-    [Fact]
-    public async Task RefreshAsync_InvokesRenderGridAgain()
-    {
-        var cut = RenderGrid();
-
-        await cut.InvokeAsync(() => cut.Instance.RefreshAsync());
-
-        GridApi.VerifyInvoke($"{Api}.renderGrid", calledTimes: 2);
-    }
-
-    [Fact]
-    public async Task UpdateDataAsync_InvokesUpdateData_WithSerializedData()
-    {
-        var cut = RenderGrid();
-        var newData = new List<TestItem> { new() { Id = 42, Name = "Ipoh Coffee", Price = 46.0 } };
-
-        await cut.InvokeAsync(() => cut.Instance.UpdateDataAsync(newData));
-
-        var invocation = GridApi.VerifyInvoke($"{Api}.updateData");
-        Assert.Equal(cut.Find("igc-grid-lite").GetAttribute("id"), invocation.Arguments[0]);
-        var data = ParseJsonArgument(invocation.Arguments[1]);
-        Assert.Equal(1, data.GetArrayLength());
-        Assert.Same(newData, cut.Instance.Data);
-    }
-#pragma warning restore CS0618
-
     // bUnit cannot hold back a call that returns an IJSObjectReference, so this swaps in a runtime whose import waits.
     private sealed class HeldScriptLoad
     {
@@ -201,18 +160,20 @@ public class GridLiteJsInteropTests : GridLiteTestBase
     // Without the check, a render that resumes after disposal registers the grid on the client again
     // after destroyGrid removed it.
     [Fact]
-    public async Task RenderAfterDisposal_DoesNotInvokeRenderGrid()
+    public async Task DisposingWhileRenderYields_DoesNotRenderAfterwards()
     {
-        var cut = RenderGrid();
-        var grid = cut.Instance;
-        await DisposeComponentsAsync();
+        var load = new HeldScriptLoad(Services);
+        var cut = Render<IgbGridLite<TestItem>>(ps => ps.Add(x => x.Data, Items));
 
-#pragma warning disable CS0618 // Deprecated but still shipped.
-        await cut.InvokeAsync(() => grid.RefreshAsync());
-#pragma warning restore CS0618
+        // Completing the load runs the first render inline up to its yield, so the disposal lands in that yield.
+        await cut.InvokeAsync(async () =>
+        {
+            load.Complete();
+            await DisposeComponentsAsync();
+        });
 
-        GridApi.VerifyInvoke($"{Api}.destroyGrid");
-        GridApi.VerifyInvoke($"{Api}.renderGrid", calledTimes: 1);
+        cut.WaitForAssertion(() => load.GridApi.Verify(x => x.DisposeAsync(), Times.Once));
+        Assert.Equal([$"{Api}.destroyGrid", nameof(IJSObjectReference.DisposeAsync)], load.GridApiCalls);
     }
 
     // Without it, a failed destroyGrid leaves the .NET reference registered with the client, which keeps the grid alive.
@@ -409,15 +370,11 @@ public class GridLiteJsInteropTests : GridLiteTestBase
         var cut = RenderGrid();
 
         // Deliberate nulls: the guards exist for callers with nullable analysis off.
-#pragma warning disable CS0618 // Deprecated but still shipped.
-        await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.UpdateDataAsync(null!)));
-#pragma warning restore CS0618
         await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.SortAsync((IgbGridLiteSortingExpression)null!)));
         await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.SortAsync((IEnumerable<IgbGridLiteSortingExpression>)null!)));
         await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.FilterAsync((IgbGridLiteFilterExpression)null!)));
         await Assert.ThrowsAsync<ArgumentNullException>(() => cut.InvokeAsync(() => cut.Instance.FilterAsync((IEnumerable<IgbGridLiteFilterExpression>)null!)));
 
-        GridApi.VerifyNotInvoke($"{Api}.updateData");
         GridApi.VerifyNotInvoke($"{Api}.sort");
         GridApi.VerifyNotInvoke($"{Api}.filter");
     }

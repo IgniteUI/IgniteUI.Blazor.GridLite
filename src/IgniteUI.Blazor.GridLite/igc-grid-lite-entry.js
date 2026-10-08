@@ -129,13 +129,6 @@ export const blazor_igc_grid_lite = {
     }
   },
 
-  updateData(id, data) {
-    const grid = this.grids.get(id);
-    if (grid) {
-      grid.data = JSON.parse(data);
-    }
-  },
-
   sort(id, expressions) {
     const grid = this.grids.get(id);
     if (grid) {

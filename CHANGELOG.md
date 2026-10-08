@@ -27,6 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING**: The single-expression overload of `SortAsync` names its parameter `expression` instead of `expressions`. Only calls that name the argument are affected.
 - **BREAKING**: `NavigateToAsync` takes its `row` index as an `int` instead of a `long`, like collection indexers and other grids' row-index APIs. Calls passing a `long` need a cast.
 
+### Removed
+
+- **BREAKING**: The members deprecated in 0.10.0: `GridLiteColumnDataType.Date`, `RenderAsync`, `RefreshAsync`, `UpdateDataAsync` and `GridId`.
+
 ## 0.10.0 - 2026-09-29
 
 This release updates to `igniteui-grid-lite` version `0.11.0` ([see changelog](https://github.com/IgniteUI/igniteui-grid-lite/blob/master/CHANGELOG.md)), which includes 0.10.0. Its changes are marked "grid-lite" below.
