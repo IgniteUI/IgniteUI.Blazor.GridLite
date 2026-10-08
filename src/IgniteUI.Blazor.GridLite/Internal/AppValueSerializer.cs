@@ -6,8 +6,8 @@ using System.Text.Json.Serialization.Metadata;
 namespace IgniteUI.Blazor.Controls.Internal;
 
 /// <summary>
-/// Reflection-based metadata for the values whose types belong to the app: the <c>Data</c> items and the
-/// object-typed filter values, which are compared against them. Everything else goes through
+/// Reflection-based metadata for the values whose types belong to the app: the <c>Data</c> items and the filter
+/// expressions' <c>SearchTerm</c>, which is compared against them. Everything else goes through
 /// <see cref="GridLiteJsonContext"/>.
 /// </summary>
 internal static class AppValueSerializer
@@ -21,9 +21,9 @@ internal static class AppValueSerializer
 
     [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
         Justification = "The grid's DynamicallyAccessedMembers(PublicProperties) annotation on TItem keeps the "
-            + "item type's public properties in trimmed apps, and filter values of built-in types need no "
+            + "item type's public properties in trimmed apps, and filter search terms of built-in types need no "
             + "preserved members. Any other type reached here (a complex type nested in TItem, an app-defined "
-            + "filter value) belongs to the consuming app, and the trimming docs make preserving it the app's "
+            + "filter search term) belongs to the consuming app, and the trimming docs make preserving it the app's "
             + "responsibility.")]
     private static JsonSerializerOptions CreateOptions()
     {
@@ -41,14 +41,22 @@ internal static class AppValueSerializer
 }
 
 /// <summary>
-/// Writes an <see cref="object"/>-typed payload member (the filter <c>Condition</c> and <c>SearchTerm</c>) by
-/// its runtime type, the way the <c>Data</c> items are written, and reads it back as a
-/// <see cref="JsonElement"/>.
+/// Writes the filter expressions' <c>SearchTerm</c>, the only <see cref="object"/>-typed payload member, by
+/// its runtime type, the way the <c>Data</c> items are written, and reads it back as the primitive it is.
 /// </summary>
 internal sealed class FilterValueConverter : JsonConverter<object>
 {
+    // JSON has one number type OOB, so every number reads as a double. An array or object can only be a value
+    // the app set itself; it stays a JsonElement.
     public override object Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        => JsonElement.ParseValue(ref reader);
+        => reader.TokenType switch
+        {
+            JsonTokenType.String => reader.GetString()!,
+            JsonTokenType.Number => reader.GetDouble(),
+            JsonTokenType.True => true,
+            JsonTokenType.False => false,
+            _ => JsonElement.ParseValue(ref reader),
+        };
 
     public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
         => JsonSerializer.Serialize(writer, value, AppValueSerializer.GetValueTypeInfo(value));

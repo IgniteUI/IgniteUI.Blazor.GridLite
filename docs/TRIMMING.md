@@ -1,6 +1,6 @@
 # Trimming support
 
-`IgniteUI.Blazor.GridLite` is trim-compatible (`IsTrimmable=true`): the library builds warning-free under the .NET trim analyzer, and its own interop payloads serialize through source-generated `System.Text.Json` metadata. The only values it serializes with reflection are your app's own: the grid's `Data` items and the filter expressions' `Condition`/`SearchTerm`.
+`IgniteUI.Blazor.GridLite` is trim-compatible (`IsTrimmable=true`): the library builds warning-free under the .NET trim analyzer, and its own interop payloads serialize through source-generated `System.Text.Json` metadata. The only values it serializes with reflection are your app's own: the grid's `Data` items and the filter expressions' `SearchTerm`.
 
 ## Are your types trimmed at all?
 
@@ -28,7 +28,7 @@ public partial class ProductGrid<[DynamicallyAccessedMembers(DynamicallyAccessed
 
 - **Complex types reachable from the item type.** If `Product` has a `Supplier` property whose members a column shows (`Field="Supplier.Name"`), `Supplier` needs its public properties preserved as well, and so does every complex type below it. The annotation on `TItem` covers the item type itself, not the types of its properties.
 - **Members outside the public properties.** A public field opted into serialization with `[JsonInclude]`, or a non-public `[JsonInclude]` member, is not covered by the annotation.
-- **App-defined filter values.** A `Condition` or `SearchTerm` of a built-in type (string, number, date, `Guid`, enum) needs nothing. A value of an app-defined type needs its public properties preserved.
+- **App-defined filter search terms.** A `SearchTerm` of a built-in type (string, number, date, `Guid`, enum) needs nothing. A value of an app-defined type needs its public properties preserved.
 
 Preserve such types with a `DynamicDependency` attribute on any method that is kept, such as your root component or `Program.Main`:
 
@@ -47,7 +47,7 @@ or with a [trimmer root descriptor](https://learn.microsoft.com/dotnet/core/depl
 
 ## Native AOT
 
-Not claimed. The library builds warning-free under the [AOT analyzer](https://learn.microsoft.com/dotnet/core/deploying/native-aot/) (`EnableAotAnalyzer`, errors via `.editorconfig`), but the `Data` items and the filter values are serialized with reflection, which Native AOT does not guarantee, and Blazor itself is not AOT-compatible yet (`Microsoft.AspNetCore.Components` ships `IsTrimmable` only; [dotnet/aspnetcore#51598](https://github.com/dotnet/aspnetcore/issues/51598) tracks it). What this means per deployment model:
+Not claimed. The library builds warning-free under the [AOT analyzer](https://learn.microsoft.com/dotnet/core/deploying/native-aot/) (`EnableAotAnalyzer`, errors via `.editorconfig`), but the `Data` items and the filter search terms are serialized with reflection, which Native AOT does not guarantee, and Blazor itself is not AOT-compatible yet (`Microsoft.AspNetCore.Components` ships `IsTrimmable` only; [dotnet/aspnetcore#51598](https://github.com/dotnet/aspnetcore/issues/51598) tracks it). What this means per deployment model:
 
 - **Blazor WebAssembly**: unaffected. Both the default interpreter and `RunAOTCompilation=true` publishes run on Mono with the interpreter retained, so no Native AOT semantics apply. The manual `Wasm AOT Smoke` workflow runs the trimmed-publish browser checks against a `RunAOTCompilation` publish.
 - **Blazor Server**: unaffected; it runs on CoreCLR.

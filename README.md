@@ -153,6 +153,16 @@ Configure pre-applied sorting and filtering when the grid first renders:
 }
 ```
 
+`Condition` is a grid-lite condition name. The names a column accepts depend on its `DataType`; a column without one counts as `String`:
+
+| `DataType` | Condition names                                                                                                   |
+| :--------- | :---------------------------------------------------------------------------------------------------------------- |
+| `String`   | `contains`, `doesNotContain`, `startsWith`, `endsWith`, `equals`, `doesNotEqual`, `empty`, `notEmpty`             |
+| `Number`   | `equals`, `doesNotEqual`, `greaterThan`, `lessThan`, `greaterThanOrEqual`, `lessThanOrEqual`, `empty`, `notEmpty` |
+| `Boolean`  | `all`, `true`, `false`, `empty`, `notEmpty`                                                                       |
+
+The `Boolean` conditions, `empty` and `notEmpty` take no `SearchTerm`.
+
 ### Sorting
 
 Enable sorting on individual columns and optionally make sorting case-sensitive:

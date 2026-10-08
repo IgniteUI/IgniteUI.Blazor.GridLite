@@ -54,11 +54,22 @@ export const blazor_igc_grid_lite = {
     this.listeners.set(id, controller);
 
     // The returned promise is left to the browser, so a failed .NET handler shows as an unhandled rejection.
-    const listen = (type, method) => {
-      gridElement.addEventListener(type, (e) => dotNetObject.invokeMethodAsync(method, e.detail), {
+    const listen = (type, method, transformDetail = (detail) => detail) => {
+      gridElement.addEventListener(type, (e) => dotNetObject.invokeMethodAsync(method, transformDetail(e.detail)), {
         signal: controller.signal,
       });
     };
+
+    /**
+     * Transform conditions as names only to match .NET model. grid-lite 0.11.0 still reports
+     * a condition as either that name or operation object `({ name, label, unary, logic })`.
+     * Safely support both. TODO: Remove once grid-lite updates condition handling.
+     */
+    const withConditionsAsNames = (expressions) =>
+      expressions.map((expression) => {
+        const { condition } = expression;
+        return { ...expression, condition: typeof condition === 'string' ? condition : condition?.name };
+      });
 
     // TODO: the sorting and filtering handlers cannot cancel: grid-lite reads dispatchEvent's result synchronously,
     // so a preventDefault after the .NET call would come too late. Cancelling needs a client-side script parameter
@@ -72,11 +83,14 @@ export const blazor_igc_grid_lite = {
     }
 
     if (events.hasFiltering) {
-      listen('filtering', 'JSFiltering');
+      listen('filtering', 'JSFiltering', (detail) => ({
+        ...detail,
+        expressions: withConditionsAsNames(detail.expressions),
+      }));
     }
 
     if (events.hasFiltered) {
-      listen('filtered', 'JSFiltered');
+      listen('filtered', 'JSFiltered', (detail) => ({ ...detail, state: withConditionsAsNames(detail.state) }));
     }
   },
 

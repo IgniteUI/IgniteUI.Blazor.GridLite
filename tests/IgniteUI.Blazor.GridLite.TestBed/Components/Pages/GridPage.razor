@@ -3,7 +3,7 @@
 
 <h1>GridLite TestBed</h1>
 
-<IgbGridLite @ref="grid" TItem="NwindDataItem" Data="data" Sorted="OnSorted" Filtered="filtered" data-testid="test-grid">
+<IgbGridLite @ref="grid" TItem="NwindDataItem" Data="data" Sorted="OnSorted" Filtering="OnFiltering" Filtered="filtered" data-testid="test-grid">
     <IgbGridLiteColumn Field="@nameof(NwindDataItem.ProductID)"
                        Header="ID"
                        DataType="GridLiteColumnDataType.Number" />
@@ -22,6 +22,7 @@
 <button id="refresh-button" @onclick="RefreshAsync">Refresh</button>
 <p id="refresh-count">@refreshCount</p>
 <p id="sorted-count">@sortedCount</p>
+<p id="last-filtering">@lastFiltering</p>
 
 <button id="navigate-button" @onclick="@(() => grid.NavigateToAsync(3, activate: true))">Navigate</button>
 
@@ -35,6 +36,7 @@
     private EventCallback<IgbGridLiteFilteredEventArgs> filtered;
     private int refreshCount;
     private int sortedCount;
+    private string lastFiltering = "none";
     private int filteredCount;
 
     private void BindFiltered() => filtered = EventCallback.Factory.Create<IgbGridLiteFilteredEventArgs>(this, OnFiltered);
@@ -50,4 +52,7 @@
     }
 
     private void OnSorted(IgbGridLiteSortedEventArgs args) => sortedCount++;
+
+    private void OnFiltering(IgbGridLiteFilteringEventArgs args)
+        => lastFiltering = $"{args.Type} {string.Join(", ", args.Expressions.Select(e => e.Condition))}";
 }

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using IgniteUI.Blazor.Controls.Internal;
 
 namespace IgniteUI.Blazor.Controls;
 
@@ -17,14 +18,27 @@ public class IgbGridLiteFilteringEventArgs
     /// The filter expression(s) to apply.
     /// </summary>
     [JsonPropertyName("expressions")]
-    public required List<IgbGridLiteFilterExpression> Expressions { get; init; }
+    public required IReadOnlyList<IgbGridLiteFilterExpression> Expressions { get; init; }
 
     /// <summary>
     /// The type of modification which will be applied to the filter state of the column.
-    /// 'add' - a new filter expression will be added to the state of the column.
-    /// 'modify' - an existing filter expression will be modified.
-    /// 'remove' - the expression(s) will be removed from the state of the column.
     /// </summary>
     [JsonPropertyName("type")]
-    public required string Type { get; init; } // TODO: "add", "modify", or "remove"
+    public required GridLiteFilteringType Type { get; init; }
+}
+
+/// <summary>
+/// The type of modification a filter operation applies to the filter state of a column.
+/// </summary>
+[JsonConverter(typeof(CamelCaseEnumConverter<GridLiteFilteringType>))]
+public enum GridLiteFilteringType
+{
+    /// <summary>A new filter expression will be added to the state of the column.</summary>
+    Add,
+
+    /// <summary>An existing filter expression will be modified.</summary>
+    Modify,
+
+    /// <summary>The expression(s) will be removed from the state of the column.</summary>
+    Remove,
 }
