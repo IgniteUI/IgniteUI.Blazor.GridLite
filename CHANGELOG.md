@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.11.0 - 2026-10-08
+
 ### Changed
 
 - **DEPRECATED**: The bundled theme stylesheets moved from
@@ -19,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ```
   matching the layout the `IgniteUI.Blazor` and `IgniteUI.Blazor.Lite` packages use. The old paths still work, through a stylesheet that imports the theme from its new location, and will be removed in a future release.
 - **BREAKING**: `IgbGridLiteFilterExpression.Condition` is a `string`, the name of a grid-lite filter condition, instead of `object`. Its documentation and the README list the names for each column data type. In the `Filtering` and `Filtered` events it holds the condition's name; before, it held grid-lite's condition object as a `JsonElement`.
-- **BREAKING**: In the `Filtering` and `Filtered` events, `IgbGridLiteFilterExpression.SearchTerm` holds a `string`, `double` or `bool` instead of a `JsonElement`. Numbers are always `double`, as JavaScript has one number type, so a search term set as an `int` comes back as a `double`.
+- **BREAKING**: In the `Filtering` and `Filtered` events, `IgbGridLiteFilterExpression.SearchTerm` holds a `string` or a `double`. Numbers are always `double`: they arrive as JSON numbers, which don't record whether a value was an integer, so a search term set as an `int` comes back as a `double`. While boolean conditions are unary, a `bool` is preserved as well. Only unrecognized values provided by the app stay a `JsonElement` as fallback.
 - **BREAKING**: `IgbGridLiteFilterExpression.Criteria` is a `GridLiteFilterCriteria?` (`And`, `Or`) instead of a `string?`, and `IgbGridLiteFilteringEventArgs.Type` is a `GridLiteFilteringType` (`Add`, `Modify`, `Remove`) instead of a `string`.
 - **BREAKING**: `IgbGridLiteFilteringEventArgs.Expressions` and `IgbGridLiteFilteredEventArgs.State` are `IReadOnlyList<IgbGridLiteFilterExpression>` instead of `List<IgbGridLiteFilterExpression>`.
 - **BREAKING**: Renamed `IgbColumnConfiguration` → `IgbGridLiteColumnConfiguration`, the only public type without `GridLite` in its name.
