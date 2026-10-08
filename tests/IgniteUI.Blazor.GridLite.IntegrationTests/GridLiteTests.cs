@@ -39,7 +39,7 @@ public class GridLiteTests : BlazorPageTest<Program>
         await Expect(Page.Locator("#sorted-count")).ToHaveTextAsync("1");
     }
 
-    // TODO: grid-lite 0.11.0's client mapping a condition object to its name, remove after its updated
+    // TODO: grid-lite 0.11.0's client mapping a condition object to its name, remove after it's updated.
     [Test]
     public async Task FilteringEvent_WithConditionObject_ReachesDotNetAsItsName()
     {
