@@ -10,6 +10,7 @@
     <RootNamespace>IgniteUI.Blazor.Controls</RootNamespace>
 
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>nupkg-icon.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://www.infragistics.com/products/ignite-ui-blazor</PackageProjectUrl>
     <RepositoryUrl>https://github.com/IgniteUI/IgniteUI.Blazor.GridLite</RepositoryUrl>
@@ -40,6 +41,11 @@
     <None Include="..\..\LICENSE">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
+    </None>
+    <None Remove="nupkg-icon.png" />
+    <None Include="nupkg-icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
     </None>
     <!-- Written by `npm run build` (vite build.license): every bundled JS dependency's license. Pack runs in the
          outer multi-target build, where the SDK's default None glob is not evaluated, so the file is added explicitly. -->
