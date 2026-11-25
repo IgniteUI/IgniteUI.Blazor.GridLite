@@ -1,0 +1,9 @@
+@page "/initial-state"
+@using IgniteUI.Blazor.GridLite.TestBed.Components.Models
+
+<IgbGridLite TItem="NwindDataItem" Data="data" SortingExpressions="sortingExpressions" FilterExpressions="filterExpressions" Rendered="OnRendered">
+    <IgbGridLiteColumn Field="@nameof(NwindDataItem.ProductID)" DataType="GridLiteColumnDataType.Number" Sortable />
+    <IgbGridLiteColumn Field="@nameof(NwindDataItem.ProductName)" Sortable Filterable />
+</IgbGridLite>
+
+<p id="grid-rendered">@rendered</p>
