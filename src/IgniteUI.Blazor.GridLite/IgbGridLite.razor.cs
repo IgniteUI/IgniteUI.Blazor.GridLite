@@ -123,6 +123,9 @@ public partial class IgbGridLite<[DynamicallyAccessedMembers(DynamicallyAccessed
         {
             blazorIgbGridLite = await JSLoader.LoadAsync(JSRuntime);
 
+            if (blazorIgbGridLite is null)
+                return;
+
             if (disposed)
             {
                 // Disposal ran while the script was loading, before there was anything to release.

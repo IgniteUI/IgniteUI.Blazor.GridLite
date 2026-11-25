@@ -16,11 +16,11 @@ A control run shows the gate working. With the app's `DynamicDependency` for `Sm
 
 ```bash
 # 1. Publish trimmed (from the repo root). The app multi-targets the library's TFMs;
-#    publish requires picking one, so check all three after linker-sensitive changes.
-dotnet publish tests/IgniteUI.Blazor.GridLite.PublishSmoke -c Release -f net10.0
+#    publish requires picking one, so check both after linker-sensitive changes.
+dotnet publish tests/IgniteUI.Blazor.GridLite.PublishSmoke -c Release -f net11.0
 
 # 2. Serve the publish output (any static file server works; npx needs no install, since Node is a repo prerequisite):
-npx http-server tests/IgniteUI.Blazor.GridLite.PublishSmoke/bin/Release/net10.0/publish/wwwroot -p 5620
+npx http-server tests/IgniteUI.Blazor.GridLite.PublishSmoke/bin/Release/net11.0/publish/wwwroot -p 5620
 
 # 3. Open http://localhost:5620/ and check the page against the table below.
 ```
@@ -41,7 +41,7 @@ Three gates, in order of what they can see:
 | Click `Price greater than 10`       | two rows remain                                  | the numeric search term no longer serializes through the library's reflection-based path                                    |
 | Browser console                     | no errors (a stray `favicon` 404 is fine)        | anything else: investigate                                                                                                  |
 
-The checklist is automated as `TrimmedPublishSmokeTest` in `IgniteUI.Blazor.GridLite.IntegrationTests` (`Category=TrimmedPublish`, runs in CI after the publish step). The automation also covers the `filtered` event payload, which the page only receives from grid-lite's filter row. It serves the net10.0 publish output, publishing it on demand if missing, so locally it's just:
+The checklist is automated as `TrimmedPublishSmokeTest` in `IgniteUI.Blazor.GridLite.IntegrationTests` (`Category=TrimmedPublish`, runs in CI after the publish step). The automation also covers the `filtered` event payload, which the page only receives from grid-lite's filter row. It serves the net11.0 publish output, publishing it on demand if missing, so locally it's just:
 
 ```bash
 dotnet test tests/IgniteUI.Blazor.GridLite.IntegrationTests --filter Category=TrimmedPublish --settings .runsettings
@@ -51,13 +51,13 @@ The manual browser pass above remains useful for the other TFMs and for linker e
 
 ## Wasm AOT
 
-The manual **`Wasm AOT Smoke`** workflow (`workflow_dispatch`) publishes this app with `-p:RunAOTCompilation=true` (net10.0, a slow multi-minute compile) and runs the same browser checks against that output. Locally, with the `wasm-tools` workload installed (`dotnet workload install wasm-tools`):
+The manual **`Wasm AOT Smoke`** workflow (`workflow_dispatch`) publishes this app with `-p:RunAOTCompilation=true` (net11.0, a slow multi-minute compile) and runs the same browser checks against that output. Locally, with the `wasm-tools` workload installed (`dotnet workload install wasm-tools`):
 
 ```bash
 # The browser checks serve whatever publish output exists, so clear the previous one and stop if the AOT publish fails.
-# Restore ignores -f, and restoring net8/net9 with AOT on needs wasm-tools-net8/-net9; -p:TargetFrameworks limits restore to net10.
-rm -rf tests/IgniteUI.Blazor.GridLite.PublishSmoke/bin/Release/net10.0/publish &&
-dotnet publish tests/IgniteUI.Blazor.GridLite.PublishSmoke -c Release -f net10.0 -p:TargetFrameworks=net10.0 -p:RunAOTCompilation=true &&
+# Restore ignores -f, and restoring net10.0 with AOT on needs wasm-tools-net10; -p:TargetFrameworks limits restore to net11.0.
+rm -rf tests/IgniteUI.Blazor.GridLite.PublishSmoke/bin/Release/net11.0/publish &&
+dotnet publish tests/IgniteUI.Blazor.GridLite.PublishSmoke -c Release -f net11.0 -p:TargetFrameworks=net11.0 -p:RunAOTCompilation=true &&
 dotnet test tests/IgniteUI.Blazor.GridLite.IntegrationTests --filter Category=TrimmedPublish --settings .runsettings
 ```
 

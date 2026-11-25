@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Discord](https://img.shields.io/discord/836634487483269200?logo=discord&logoColor=ffffff)](https://discord.gg/39MjrTRqds)
 
-`IgniteUI.Blazor.GridLite` is a Blazor wrapper from Infragistics around the [Ignite UI Grid Lite](https://github.com/IgniteUI/igniteui-grid-lite) web component. It provides a lightweight, MIT-licensed data grid for Blazor Server and Blazor WebAssembly applications, with column configuration via Razor components, sorting and filtering support, and four built-in themes (Material, Bootstrap, Fluent, Indigo) in light and dark variants. It targets .NET 8, .NET 9, and .NET 10.
+`IgniteUI.Blazor.GridLite` is a Blazor wrapper from Infragistics around the [Ignite UI Grid Lite](https://github.com/IgniteUI/igniteui-grid-lite) web component. It provides a lightweight, MIT-licensed data grid for Blazor Server and Blazor WebAssembly applications, with column configuration via Razor components, sorting and filtering support, and four built-in themes (Material, Bootstrap, Fluent, Indigo) in light and dark variants. It targets .NET 10 and .NET 11.
 
 This package is the Blazor wrapper for Grid Lite only. It does not include cell editing, grouping, aggregation, paging, advanced filtering, or Excel/PDF export. For those features, use the commercial [`IgniteUI.Blazor`](https://www.nuget.org/packages/IgniteUI.Blazor) package, which includes the full [Ignite UI for Blazor Data Grid](https://www.infragistics.com/products/ignite-ui-blazor/blazor/components/grids/data-grid). For the underlying web component used in non-Blazor frameworks, see [`igniteui-grid-lite`](https://github.com/IgniteUI/igniteui-grid-lite).
 
@@ -33,7 +33,7 @@ This package is the Blazor wrapper for Grid Lite only. It does not include cell 
 - 🔄 Sorting and filtering support
 - 🎨 Multiple built-in themes (Bootstrap, Material, Fluent, Indigo) with light/dark variants
 - 🔌 Easy integration with existing Blazor Server and Blazor WebAssembly applications
-- 🎯 Multi-framework support (.NET 8, 9, and 10)
+- 🎯 Multi-framework support (.NET 10 and 11)
 
 ## Installation
 
@@ -42,6 +42,8 @@ Install the NuGet package:
 ```bash
 dotnet add package IgniteUI.Blazor.GridLite
 ```
+
+Apps on .NET 8 or .NET 9 should use the 1.x package.
 
 ## Setup
 
@@ -288,7 +290,7 @@ For the full setup guide and configuration options, see the [Ignite UI Theming M
 
 ### Prerequisites
 
-- .NET SDK 10.0.100 or later in the 10.0.x band (pinned by `global.json`; it builds all three target frameworks and the .NET 8/9 runtimes are only needed to run the tests on those).
+- .NET SDK 11.0.100 or later in the 11.0.x band (pinned by `global.json`; it builds both target frameworks, and the .NET 10 runtime is only needed to run the tests on `net10.0`).
 - Node.js 22.12 or later (required by the Vite build of the JavaScript bundle).
 
 ### Build
@@ -305,12 +307,12 @@ For debugging, `npm run build:dev` builds the bundle unminified and with a sourc
 
 ### Tests
 
-Unit tests (xUnit + bUnit, run against net8.0, net9.0 and net10.0) and browser integration tests (NUnit + Playwright against the `tests/IgniteUI.Blazor.GridLite.TestBed` app):
+Unit tests (xUnit + bUnit, run against net10.0 and net11.0) and browser integration tests (NUnit + Playwright against the `tests/IgniteUI.Blazor.GridLite.TestBed` app):
 
 ```bash
 dotnet build -c Release
 dotnet test tests/IgniteUI.Blazor.GridLite.Tests --settings .runsettings --no-build -c Release
-pwsh tests/IgniteUI.Blazor.GridLite.IntegrationTests/bin/Release/net10.0/playwright.ps1 install
+pwsh tests/IgniteUI.Blazor.GridLite.IntegrationTests/bin/Release/net11.0/playwright.ps1 install
 dotnet test tests/IgniteUI.Blazor.GridLite.IntegrationTests --settings .runsettings --no-build -c Release
 ```
 

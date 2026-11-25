@@ -6,9 +6,16 @@ internal static class JSLoader
 {
     private const string ModulePath = "./_content/IgniteUI.Blazor.GridLite/js/blazor-igc-grid-lite.js";
 
-    public static async Task<IJSObjectReference> LoadAsync(IJSRuntime jsRuntime)
+    public static async Task<IJSObjectReference?> LoadAsync(IJSRuntime jsRuntime)
     {
-        return await jsRuntime.InvokeAsync<IJSObjectReference>(
-            "import", ModulePath);
+        try
+        {
+            return await jsRuntime.InvokeAsync<IJSObjectReference>(
+                "import", ModulePath);
+        }
+        catch (JSDisconnectedException)
+        {
+            return null;
+        }
     }
 }
