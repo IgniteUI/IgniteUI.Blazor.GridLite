@@ -61,7 +61,7 @@ export const blazor_igc_grid_lite = {
     };
 
     /**
-     * Transform conditions as names only to match .NET model. grid-lite 0.11.0 still reports
+     * Transform conditions as names only to match .NET model. grid-lite 0.12.0 still reports
      * a condition as either that name or operation object `({ name, label, unary, logic })`.
      * Safely support both. TODO: Remove once grid-lite updates condition handling.
      */

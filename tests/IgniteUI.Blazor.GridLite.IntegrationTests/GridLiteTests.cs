@@ -18,6 +18,31 @@ public class GridLiteTests : BlazorPageTest<Program>
         await Expect(grid.GetByText("Chai", new() { Exact = true })).ToBeVisibleAsync();
     }
 
+    [Test]
+    public async Task InitialSortingExpressions_NoneIsNotStoredAsActiveSort()
+    {
+        await Page.GotoAsync("/initial-state");
+        await Expect(Page.Locator("#grid-rendered")).ToHaveTextAsync("True");
+
+        var grid = Page.Locator("igc-grid-lite");
+        var expressions = await grid.EvaluateAsync<string>(
+            "grid => JSON.stringify(grid.sortingExpressions.map(({ key, direction }) => ({ key, direction })))");
+
+        Assert.That(expressions, Is.EqualTo("[{\"key\":\"ProductID\",\"direction\":\"descending\"}]"));
+    }
+
+    [Test]
+    public async Task InitialFilterExpressions_FilterRenderedRows()
+    {
+        await Page.GotoAsync("/initial-state");
+        await Expect(Page.Locator("#grid-rendered")).ToHaveTextAsync("True");
+
+        var grid = Page.Locator("igc-grid-lite");
+        await Expect(grid.GetByText("Chai", new() { Exact = true })).ToBeVisibleAsync();
+        await Expect(grid.GetByText("Chang", new() { Exact = true })).ToHaveCountAsync(0);
+        Assert.That(await grid.EvaluateAsync<int>("grid => grid.totalItems"), Is.EqualTo(1));
+    }
+
     // TODO: grid-lite 0.11.0's client mapping a condition object to its name, remove after it's updated.
     [Test]
     public async Task FilteringEvent_WithConditionObject_ReachesDotNetAsItsName()

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+This release updates to `igniteui-grid-lite` version `0.12.0` ([see changelog](https://github.com/IgniteUI/igniteui-grid-lite/blob/master/CHANGELOG.md)). Its changes are marked "grid-lite" below.
+
+### Changed
+
+- grid-lite: `igniteui-webcomponents` is updated to 7.5.0. Components now use `--ig-surface-base` and the surface roles (`--ig-surface-raised`, `--ig-surface-overlay`, `--ig-surface-sunken` and `--ig-surface-container`) instead of `--ig-surface-500`; apps overriding the numbered surface shades should migrate to the roles. Component styles read `--ig-theme` and `--ig-theme-variant` from the document root only.
+- grid-lite: browser support is now the last two major versions of Chrome, Edge, Firefox, Opera and Safari; fallbacks and vendor prefixes for older browsers have been removed.
+
+### Fixed
+
+- grid-lite: initial `SortingExpressions` respect column comparers and case sensitivity, and an expression with direction `None` is no longer stored as an active sort.
+- grid-lite: initial `FilterExpressions` are applied when columns are already configured.
+
 ## 1.0.0 - 2026-10-12
 
 📢 The first stable release: from here on, a breaking change to the public API comes with a major version.
