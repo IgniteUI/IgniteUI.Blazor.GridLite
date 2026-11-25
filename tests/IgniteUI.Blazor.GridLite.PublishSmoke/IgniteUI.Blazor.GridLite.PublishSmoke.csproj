@@ -5,7 +5,7 @@
        exercising its reflection-based and interop paths in the browser. See docs/TRIMMING.md. -->
   <PropertyGroup>
     <!-- Match the library's TFMs so each gets a real ILLink pass. -->
-    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
     <!-- Blazor WebAssembly defaults to partial, which trims only assemblies marked trimmable: the library,
          but never the app's own types. The library's contract for app types (the Data item type) only
          matters, and is only exercised, under full trimming. -->

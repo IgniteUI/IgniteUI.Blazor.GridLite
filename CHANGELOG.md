@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+📢 A major release: the package targets .NET 10 and .NET 11. Apps on .NET 8 or .NET 9 can stay on 1.x.
+
+### Added
+
+- The package targets .NET 11 (`net11.0`).
+
+### Removed
+
+- **BREAKING**: The `net8.0` and `net9.0` targets. .NET 8 and .NET 9 reached end of support on 2026-11-10. Apps on those versions can stay on 1.x.
+
 ## 1.0.0 - 2026-10-12
 
 📢 The first stable release: from here on, a breaking change to the public API comes with a major version.

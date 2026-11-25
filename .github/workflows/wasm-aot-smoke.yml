@@ -18,11 +18,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      # Only net10.0 is published and tested here.
+      # Only net11.0 is published and tested here.
       - name: Setup .NET
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 11.0.x
 
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -39,17 +39,17 @@ jobs:
       - name: Install wasm-tools workload
         run: dotnet workload install wasm-tools
 
-      # Restore ignores --framework, and restoring net8/net9 with AOT on needs wasm-tools-net8/-net9.
-      # TargetFrameworks limits restore to net10.
+      # Restore ignores --framework, and restoring net10.0 with AOT on needs wasm-tools-net10.
+      # TargetFrameworks limits restore to net11.0.
       - name: Publish smoke app with AOT compilation
-        run: dotnet publish tests/IgniteUI.Blazor.GridLite.PublishSmoke --configuration Release --framework net10.0 -p:TargetFrameworks=net10.0 -p:RunAOTCompilation=true
+        run: dotnet publish tests/IgniteUI.Blazor.GridLite.PublishSmoke --configuration Release --framework net11.0 -p:TargetFrameworks=net11.0 -p:RunAOTCompilation=true
 
       - name: Build integration tests
         run: dotnet build tests/IgniteUI.Blazor.GridLite.IntegrationTests --configuration Release
 
       - name: Install Playwright
         shell: pwsh
-        run: ./tests/IgniteUI.Blazor.GridLite.IntegrationTests/bin/Release/net10.0/playwright.ps1 install
+        run: ./tests/IgniteUI.Blazor.GridLite.IntegrationTests/bin/Release/net11.0/playwright.ps1 install
 
       # The TrimmedPublish fixture serves whatever publish output exists — here, the AOT-compiled one.
       - name: Run browser checks against the AOT publish

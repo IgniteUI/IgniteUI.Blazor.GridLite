@@ -342,3 +342,7 @@ dotnet_analyzer_diagnostic.category-AOT.severity = error
 [{tests,demo}/**.{cs,razor}]
 # IDE0005 analyzer can't run on build w/o `GenerateDocumentationFile` (not on for test and demo projects)
 dotnet_diagnostic.IDE0005.severity = suggestion
+
+[tests/IgniteUI.Blazor.GridLite.Tests/GridLiteJsInteropTests.cs]
+# The only IJSRuntime invocation here is a Moq setup expression, not an actual interop call.
+dotnet_diagnostic.BL0016.severity = none
