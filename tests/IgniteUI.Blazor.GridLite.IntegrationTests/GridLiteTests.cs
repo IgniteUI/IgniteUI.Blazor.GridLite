@@ -24,11 +24,22 @@ public class GridLiteTests : BlazorPageTest<Program>
         await Page.GotoAsync("/initial-state");
         await Expect(Page.Locator("#grid-rendered")).ToHaveTextAsync("True");
 
-        var grid = Page.Locator("igc-grid-lite");
-        var expressions = await grid.EvaluateAsync<string>(
-            "grid => JSON.stringify(grid.sortingExpressions.map(({ key, direction }) => ({ key, direction })))");
+        const string expected = "[{\"key\":\"ProductID\",\"direction\":\"descending\"}]";
+        const string readExpressions =
+            "JSON.stringify(document.querySelector('igc-grid-lite').sortingExpressions.map(({ key, direction }) => ({ key, direction })))";
 
-        Assert.That(expressions, Is.EqualTo("[{\"key\":\"ProductID\",\"direction\":\"descending\"}]"));
+        // grid-lite applies initial expressions only after the column comparers are configured,
+        // which can land in a later update than the one that fires Rendered, so poll for it.
+        try
+        {
+            await Page.WaitForFunctionAsync($"expected => {readExpressions} === expected", expected);
+        }
+        catch (TimeoutException)
+        {
+            // Fall through so the assertion below reports the actual value.
+        }
+
+        Assert.That(await Page.EvaluateAsync<string>(readExpressions), Is.EqualTo(expected));
     }
 
     [Test]
@@ -43,7 +54,7 @@ public class GridLiteTests : BlazorPageTest<Program>
         Assert.That(await grid.EvaluateAsync<int>("grid => grid.totalItems"), Is.EqualTo(1));
     }
 
-    // TODO: grid-lite 0.11.0's client mapping a condition object to its name, remove after it's updated.
+    // TODO: grid-lite 0.12.0's client mapping a condition object to its name, remove after it's updated.
     [Test]
     public async Task FilteringEvent_WithConditionObject_ReachesDotNetAsItsName()
     {
